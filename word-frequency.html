@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>词频统计工具 - Amazon 运营工具箱</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #1890ff; --bg: #f5f7fa; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .back-btn { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        
+        .main-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        
+        textarea { width: 100%; height: 500px; padding: 15px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box; resize: none; font-size: 14px; line-height: 1.6; }
+        
+        .toolbar { margin-bottom: 15px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; background: #fafafa; padding: 12px; border-radius: 8px; font-size: 13px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #fafafa; position: sticky; top: 0; padding: 12px; text-align: left; border-bottom: 2px solid #f0f0f0; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .count-badge { background: #e6f7ff; color: #1890ff; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-export { background: #52c41a; color: white; }
+        .btn-clear { background: #ff4d4f; color: white; }
+        
+        .tips { margin-top: 15px; font-size: 12px; color: #8c8c8c; border-top: 1px solid #eee; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-header">
+        <a href="index.html" class="back-btn"><span>🏠</span> 返回首页</a>
+        <div style="font-weight: bold;">词频统计工具 (N-Gram 分析)</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="card">
+            <div class="toolbar">
+                <label><input type="checkbox" id="ignoreCase" checked onchange="analyze()"> 忽略大小写</label>
+                <label><input type="checkbox" id="excludeCommon" checked onchange="analyze()"> 排除语法虚词</label>
+                <button class="btn btn-clear" onclick="clearAll()">🗑️ 清空文本</button>
+            </div>
+            <textarea id="inputText" placeholder="请在此粘贴竞品的标题、描述或评论内容..." oninput="analyze()"></textarea>
+            <div class="tips">
+                温馨提示：亚马逊 Search Terms 建议将高频词放在前面，且不重复使用词根。
+            </div>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin:0; font-size: 16px;">统计结果</h3>
+                <button class="btn btn-export" onclick="exportData()">📥 结果导出</button>
+            </div>
+
+            <div class="toolbar">
+                <span>词组长度：</span>
+                <label><input type="radio" name="ngram" value="1" checked onchange="analyze()"> 1个单词</label>
+                <label><input type="radio" name="ngram" value="2" onchange="analyze()"> 2个单词</label>
+                <label><input type="radio" name="ngram" value="3" onchange="analyze()"> 3个单词</label>
+            </div>
+
+            <div style="overflow-y: auto; max-height: 480px;">
+                <table id="resultTable">
+                    <thead>
+                        <tr>
+                            <th>单词/词组</th>
+                            <th style="width: 80px;">出现次数</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultBody">
+                        <tr><td colspan="2" style="text-align:center; color:#999;">暂无数据</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 常见的语法虚词（Stop Words）
+    const stopWords = new Set(['the','and','of','a','to','in','is','for','with','on','as','it','at','by','this','that','from','are','be','or','an','your','you','can','will','its','was','if','my','but','not']);
+
+    function analyze() {
+        const text = document.getElementById('inputText').value;
+        if (!text.trim()) {
+            document.getElementById('resultBody').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#999;">暂无数据</td></tr>';
+            return;
+        }
+
+        const ignoreCase = document.getElementById('ignoreCase').checked;
+        const excludeCommon = document.getElementById('excludeCommon').checked;
+        const n = parseInt(document.querySelector('input[name="ngram"]:checked').value);
+
+        // 1. 清理并拆分单词
+        let words = text.replace(/[.,/#!$%^&*;:{}=\-_`~()?"']/g, " ").split(/\s+/);
+        if (ignoreCase) words = words.map(w => w.toLowerCase());
+        words = words.filter(w => w.length > 1); // 过滤单字母
+
+        // 2. 生成 N-Gram 并统计
+        const freqMap = {};
+        for (let i = 0; i <= words.length - n; i++) {
+            const gramArray = words.slice(i, i + n);
+            
+            // 过滤掉包含虚词的 1-gram
+            if (excludeCommon && n === 1 && stopWords.has(gramArray[0])) continue;
+            
+            const gram = gramArray.join(" ");
+            freqMap[gram] = (freqMap[gram] || 0) + 1;
+        }
+
+        // 3. 排序并显示
+        const sorted = Object.entries(freqMap).sort((a, b) => b[1] - a[1]);
+        const tbody = document.getElementById('resultBody');
+        tbody.innerHTML = sorted.map(([word, count]) => `
+            <tr>
+                <td>${word}</td>
+                <td><span class="count-badge">${count}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    function clearAll() {
+        document.getElementById('inputText').value = '';
+        analyze();
+    }
+
+    function exportData() {
+        const table = document.getElementById('resultTable');
+        if (table.rows.length <= 1 || table.innerText.includes('暂无数据')) return alert('没有可导出的结果');
+        const wb = XLSX.utils.table_to_book(table, {sheet: "词频统计"});
+        XLSX.writeFile(wb, `词频统计_${new Date().toLocaleDateString()}.xlsx`);
+    }
+</script>
+
+</body>
+</html>
