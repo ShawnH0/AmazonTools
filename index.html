@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>SEO Data Parser Pro - 字符合规版</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'PingFang SC', system-ui, sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin-top: 0; color: #1890ff; font-size: 1.2rem; }
+        
+        textarea { width: 100%; height: 200px; padding: 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-family: inherit; margin-bottom: 15px; }
+        .btn-group { display: flex; gap: 10px; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #1890ff; color: white; }
+        .btn-success { background: #52c41a; color: white; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1500px; }
+        th { background: #fafafa; padding: 12px; border: 1px solid #f0f0f0; text-align: left; font-size: 14px; }
+        td { padding: 10px; border: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; word-break: break-word; }
+        
+        /* 状态样式 */
+        .warning { background-color: #fff1f0 !important; color: #cf1322 !important; font-weight: bold; }
+        .char-count { display: block; font-size: 11px; color: #8c8c8c; margin-top: 4px; font-weight: normal; }
+        .limit-label { color: #bfbfbf; font-weight: normal; margin-left: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>📥 原始数据输入</h2>
+        <textarea id="rawInput" placeholder="在此粘贴产品 SEO 内容..."></textarea>
+        <div class="btn-group">
+            <button class="btn-primary" onclick="parseContent()">⚡ 解析并检查</button>
+            <button class="btn-success" onclick="exportToExcel()">📊 导出合规 Excel</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🔍 数据预览 & 合规性检查</h2>
+        <div class="table-wrapper">
+            <table id="seoTable">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">产品名称</th>
+                        <th style="width: 250px;">标题 (Max:200)</th>
+                        <th style="width: 200px;">关键词 (Max:250)</th>
+                        <th>五点 1 (Max:500)</th>
+                        <th>五点 2 (Max:500)</th>
+                        <th>五点 3 (Max:500)</th>
+                        <th>五点 4 (Max:500)</th>
+                        <th>五点 5 (Max:500)</th>
+                        <th style="width: 300px;">描述 (Max:2000)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// 限制配置
+const LIMITS = {
+    title: 200,
+    terms: 250,
+    bullet: 500,
+    desc: 2000
+};
+
+function checkLength(element, limit) {
+    const len = element.innerText.length;
+    const countSpan = element.querySelector('.char-count');
+    
+    if (len > limit) {
+        element.classList.add('warning');
+    } else {
+        element.classList.remove('warning');
+    }
+    // 更新计数器（如果存在）
+    if(countSpan) countSpan.innerHTML = `${len} <span class="limit-label">/ ${limit}</span>`;
+}
+
+function createCell(content, limit) {
+    const td = document.createElement('td');
+    td.contentEditable = "true";
+    td.innerHTML = content;
+    
+    // 添加计数器
+    const countDiv = document.createElement('span');
+    countDiv.className = 'char-count';
+    countDiv.contentEditable = "false";
+    td.appendChild(countDiv);
+
+    // 监听输入事件
+    td.addEventListener('input', () => checkLength(td, limit));
+    
+    // 初始化检查
+    setTimeout(() => checkLength(td, limit), 0);
+    return td;
+}
+
+function parseContent() {
+    const text = document.getElementById('rawInput').value;
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = ''; 
+
+    const productSections = text.split(/\n\d+\.\s+/).filter(s => s.trim() !== "");
+
+    productSections.forEach(section => {
+        const lines = section.split('\n');
+        const productName = lines[0].trim();
+        const title = (section.match(/Title:\s*(.*)/) || ["", ""])[1];
+        const terms = (section.match(/Search Terms:\s*(.*)/) || ["", ""])[1];
+        
+        const bulletRegex = /\[(.*?)\](.*?)(?=\n\[|\n\n|Product Description:|$)/gs;
+        let bullets = [];
+        let match;
+        while ((match = bulletRegex.exec(section)) !== null && bullets.length < 5) {
+            bullets.push(`[${match[1]}] ${match[2].trim()}`);
+        }
+        while(bullets.length < 5) bullets.push("");
+
+        const desc = (section.split(/Product Description:\s*/)[1] || "").trim();
+
+        const tr = document.createElement('tr');
+        tr.appendChild(createCell(productName, 9999)); // 名称不限
+        tr.appendChild(createCell(title, LIMITS.title));
+        tr.appendChild(createCell(terms, LIMITS.terms));
+        tr.appendChild(createCell(bullets[0], LIMITS.bullet));
+        tr.appendChild(createCell(bullets[1], LIMITS.bullet));
+        tr.appendChild(createCell(bullets[2], LIMITS.bullet));
+        tr.appendChild(createCell(bullets[3], LIMITS.bullet));
+        tr.appendChild(createCell(bullets[4], LIMITS.bullet));
+        tr.appendChild(createCell(desc, LIMITS.desc));
+        
+        tbody.appendChild(tr);
+    });
+}
+
+function exportToExcel() {
+    const table = document.getElementById('seoTable');
+    if (table.rows.length <= 1) return alert("请先解析数据");
+    
+    // 克隆表格以去除计数器文字，保证导出的 Excel 干净
+    const cloneTable = table.cloneNode(true);
+    cloneTable.querySelectorAll('.char-count').forEach(el => el.remove());
+    
+    const wb = XLSX.utils.table_to_book(cloneTable, {sheet: "SEO_Check"});
+    XLSX.writeFile(wb, `SEO_Export_Checked.xlsx`);
+}
+</script>
+
+</body>
+</html>
