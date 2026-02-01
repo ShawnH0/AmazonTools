@@ -6,8 +6,8 @@
     <title>图片批量缩放 - Amazon 运营工具箱</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        :root { --primary: #1890ff; --bg: #f5f7fa; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        :root { --primary: #1890ff; --success: #52c41a; --info: #722ed1; --bg: #f5f7fa; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
         
         .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -17,16 +17,17 @@
         .upload-area { border: 2px dashed #d9d9d9; padding: 40px; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-bottom: 20px; }
         .upload-area:hover { border-color: var(--primary); background: #f0f7ff; }
         
-        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-top: 20px; }
-        .preview-item { position: relative; border: 1px solid #eee; border-radius: 4px; padding: 5px; }
-        .preview-item img { width: 100%; height: 120px; object-fit: contain; }
-        .preview-item .size-tag { font-size: 10px; color: #8c8c8c; }
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; }
+        .preview-item { background: #fff; border: 1px solid #eee; border-radius: 6px; padding: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .preview-item img { width: 100%; height: 120px; object-fit: contain; background: #fafafa; border-radius: 4px; }
+        .preview-item .size-tag { font-size: 11px; color: #8c8c8c; margin-top: 5px; display: block; }
 
-        .btn-group { margin-top: 20px; display: flex; justify-content: center; gap: 15px; }
-        .btn { padding: 12px 30px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-group { margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: #52c41a; color: white; }
-        .btn:disabled { background: #bfbfbf; cursor: not-allowed; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn:disabled { background: #bfbfbf; cursor: not-allowed; opacity: 0.6; }
     </style>
 </head>
 <body>
@@ -34,22 +35,23 @@
 <div class="container">
     <div class="nav-header">
         <a href="index.html" class="back-btn"><span>🏠</span> 返回首页</a>
-        <div style="font-weight: bold;">亚马逊主图批量缩放 (1600 × 1600)</div>
+        <div style="font-weight: bold; color: #262626;">亚马逊主图批量缩放 (1600 × 1600)</div>
     </div>
 
     <div class="card">
         <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-            <div style="font-size: 40px;">📁</div>
-            <p>点击或拖拽图片到这里批量上传</p>
-            <p style="font-size: 12px; color: #8c8c8c;">支持 JPG, PNG, WebP 格式</p>
+            <div style="font-size: 40px;">📸</div>
+            <p style="margin: 10px 0; font-weight: 500;">点击或拖拽图片批量上传</p>
+            <p style="font-size: 12px; color: #8c8c8c;">自动转换为 1600x1600 .jpg 格式</p>
             <input type="file" id="fileInput" hidden multiple accept="image/*">
         </div>
 
-        <div id="statusText" style="margin: 10px 0; color: #595959;">未选择文件</div>
+        <div id="statusText" style="margin: 10px 0; color: #595959; font-size: 14px;">等待选择文件...</div>
 
         <div class="btn-group">
-            <button class="btn btn-primary" id="processBtn" disabled onclick="processImages()">⚡ 开始转换</button>
-            <button class="btn btn-success" id="downloadBtn" disabled onclick="downloadAll()">📥 导出全部 (ZIP)</button>
+            <button class="btn btn-primary" id="processBtn" disabled onclick="processImages()">⚡ 开始转换尺寸</button>
+            <button class="btn btn-info" id="downloadJpgBtn" disabled onclick="downloadIndividualJpgs()">🖼️ 导出为单个 .jpg</button>
+            <button class="btn btn-success" id="downloadZipBtn" disabled onclick="downloadZip()">📦 导出为 .zip 包</button>
         </div>
 
         <div class="preview-grid" id="previewGrid"></div>
@@ -60,19 +62,22 @@
 
 <script>
     let rawFiles = [];
-    let processedImages = []; // 存储 base64 数据
+    let processedImages = []; 
 
     const fileInput = document.getElementById('fileInput');
     const previewGrid = document.getElementById('previewGrid');
     const processBtn = document.getElementById('processBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadZipBtn = document.getElementById('downloadZipBtn');
+    const downloadJpgBtn = document.getElementById('downloadJpgBtn');
     const statusText = document.getElementById('statusText');
 
     fileInput.onchange = (e) => {
         rawFiles = Array.from(e.target.files);
         if(rawFiles.length > 0) {
-            statusText.innerText = `已选中 ${rawFiles.length} 张图片`;
+            statusText.innerText = `已选中 ${rawFiles.length} 张图片，请点击“开始转换”`;
             processBtn.disabled = false;
+            downloadZipBtn.disabled = true;
+            downloadJpgBtn.disabled = true;
             renderPreviews();
         }
     };
@@ -80,14 +85,11 @@
     function renderPreviews() {
         previewGrid.innerHTML = '';
         rawFiles.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-                div.innerHTML = `<img src="${e.target.result}"><div class="size-tag">等待转换</div>`;
-                previewGrid.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            const url = URL.createObjectURL(file);
+            div.innerHTML = `<img src="${url}"><span class="size-tag">等待处理</span>`;
+            previewGrid.appendChild(div);
         });
     }
 
@@ -95,53 +97,70 @@
         processedImages = [];
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        statusText.innerText = "转换中，请稍候...";
+        statusText.innerText = "正在智能缩放并填充背景...";
+        processBtn.disabled = true;
 
         for (let i = 0; i < rawFiles.length; i++) {
             const img = await loadImage(rawFiles[i]);
             
-            // 绘制逻辑：白色背景填充
+            // 1. 设置 1600x1600 画布并填充纯白背景
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, 1600, 1600);
 
-            // 计算比例，确保图片居中且不拉伸变形
-            let width, height, x, y;
+            // 2. 计算缩放比例 (保持等比，不拉伸)
             const ratio = Math.min(1600 / img.width, 1600 / img.height);
-            width = img.width * ratio;
-            height = img.height * ratio;
-            x = (1600 - width) / 2;
-            y = (1600 - height) / 2;
+            const nw = img.width * ratio;
+            const nh = img.height * ratio;
+            const nx = (1600 - nw) / 2;
+            const ny = (1600 - nh) / 2;
 
-            ctx.drawImage(img, x, y, width, height);
+            // 3. 绘制图片
+            ctx.drawImage(img, nx, ny, nw, nh);
             
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            processedImages.push({ name: rawFiles[i].name.split('.')[0] + '_1600.jpg', data: dataUrl });
+            // 4. 转为 JPG
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            const fileName = rawFiles[i].name.replace(/\.[^/.]+$/, "") + "_1600.jpg";
+            processedImages.push({ name: fileName, data: dataUrl });
             
-            // 更新预览状态
-            previewGrid.children[i].querySelector('.size-tag').innerText = "✅ 1600×1600";
-            previewGrid.children[i].querySelector('.size-tag').style.color = "#52c41a";
+            // 更新预览
+            const tag = previewGrid.children[i].querySelector('.size-tag');
+            tag.innerText = "✅ 1600×1600";
+            tag.style.color = "#52c41a";
         }
 
-        statusText.innerText = "转换完成！";
-        downloadBtn.disabled = false;
+        statusText.innerText = `处理完成！共 ${processedImages.length} 张图。`;
+        downloadZipBtn.disabled = false;
+        downloadJpgBtn.disabled = false;
+        processBtn.disabled = false;
     }
 
     function loadImage(file) {
         return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.src = URL.createObjectURL(file);
         });
     }
 
-    async function downloadAll() {
+    // 核心新功能：导出为单个 JPG 文件
+    function downloadIndividualJpgs() {
+        processedImages.forEach((item, index) => {
+            // 使用延时触发，防止浏览器拦截多个下载请求
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = item.data;
+                link.download = item.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, index * 200); 
+        });
+    }
+
+    async function downloadZip() {
+        statusText.innerText = "正在打包 ZIP...";
         const zip = new JSZip();
         processedImages.forEach(item => {
-            // 去掉 base64 前缀
             const imgData = item.data.split(',')[1];
             zip.file(item.name, imgData, {base64: true});
         });
@@ -149,8 +168,9 @@
         const content = await zip.generateAsync({type:"blob"});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
-        link.download = `Amazon_Images_1600_${new Date().getTime()}.zip`;
+        link.download = `Amazon_Main_Images_${new Date().getTime()}.zip`;
         link.click();
+        statusText.innerText = "ZIP 下载已启动！";
     }
 </script>
 
