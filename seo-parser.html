@@ -3,41 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon SEO Pro - 云端助手</title>
+    <title>SEO 解析 & 校验 - Amazon 运营工具箱</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #1890ff; --success: #52c41a; --danger: #ff4d4f; --bg: #f5f7fa; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1600px; margin: 0 auto; }
+        
+        /* 导航头部样式 */
+        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .back-btn { text-decoration: none; color: var(--primary); display: flex; align-items: center; gap: 8px; font-weight: bold; transition: 0.3s; }
+        .back-btn:hover { transform: translateX(-5px); color: #40a9ff; }
+
         .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; }
         h2 { margin-top: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; color: #262626; }
         
         /* 输入区 */
-        textarea { width: 100%; height: 180px; padding: 15px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.3s; }
+        textarea { width: 100%; height: 180px; padding: 15px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.3s; margin-bottom: 10px; }
         textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
         
-        /* 按钮 */
-        .btn-group { display: flex; gap: 12px; margin: 15px 0; flex-wrap: wrap; }
+        /* 按钮组 */
+        .btn-group { display: flex; gap: 12px; margin-bottom: 5px; flex-wrap: wrap; }
         button { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: #fff; color: var(--danger); border: 1px solid var(--danger); }
         button:hover { opacity: 0.85; transform: translateY(-1px); }
-        button:active { transform: translateY(0); }
 
-        /* 表格 */
+        /* 表格样式 */
         .table-wrapper { overflow-x: auto; border: 1px solid #f0f0f0; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; min-width: 1400px; table-layout: fixed; }
         th { background: #fafafa; padding: 15px; text-align: left; font-size: 14px; border-bottom: 2px solid #f0f0f0; }
         td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; word-break: break-all; position: relative; }
         
-        /* 状态标记 */
+        /* 警告与计数器 */
         .warning { background-color: #fff1f0 !important; color: #cf1322 !important; outline: 1px solid #ffa39e; }
-        .char-count { display: block; font-size: 11px; color: #8c8c8c; margin-top: 6px; }
+        .char-count { display: block; font-size: 11px; color: #8c8c8c; margin-top: 6px; pointer-events: none; }
         .warning .char-count { color: #cf1322; font-weight: bold; }
-        
+
         @media (max-width: 768px) {
-            body { padding: 10px; }
             .btn-group button { width: 100%; justify-content: center; }
         }
     </style>
@@ -45,18 +49,25 @@
 <body>
 
 <div class="container">
+    <div class="nav-header">
+        <a href="index.html" class="back-btn">
+            <span>🏠</span> 返回工具箱首页
+        </a>
+        <div style="font-size: 14px; color: #595959; font-weight: 500;">SEO 解析 & 长度校验工具</div>
+    </div>
+
     <div class="card">
-        <h2>📝 输入 SEO 文案</h2>
-        <textarea id="rawInput" placeholder="在此粘贴 1. 玫瑰金洒水壶... 2. 纤维灯... 等原始文本"></textarea>
+        <h2>📝 输入文案内容</h2>
+        <textarea id="rawInput" placeholder="在此粘贴 1. 产品名称... Title: ... Search Terms: ..."></textarea>
         <div class="btn-group">
-            <button class="btn-primary" onclick="parseContent()">⚡ 解析遍历内容</button>
+            <button class="btn-primary" onclick="parseContent()">⚡ 解析并自动存档</button>
             <button class="btn-success" onclick="exportToExcel()">📊 导出 Excel</button>
-            <button class="btn-danger" onclick="clearData()">🗑️ 清空所有</button>
+            <button class="btn-danger" onclick="clearData()">🗑️ 清空所有数据</button>
         </div>
     </div>
 
     <div class="card">
-        <h2>🔍 实时预览与长度校验</h2>
+        <h2>🔍 实时预览与校验 (双击可直接修改)</h2>
         <div class="table-wrapper">
             <table id="seoTable">
                 <thead>
@@ -69,7 +80,7 @@
                         <th>五点 3 (500)</th>
                         <th>五点 4 (500)</th>
                         <th>五点 5 (500)</th>
-                        <th style="width: 280px;">描述 (2000)</th>
+                        <th style="width: 300px;">描述 (2000)</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -81,19 +92,21 @@
 <script>
 const LIMITS = { title: 200, terms: 250, bullet: 500, desc: 2000 };
 
-// 页面加载时自动回显
 window.onload = () => {
+    // 恢复原始文本
     const savedInput = localStorage.getItem('raw_seo_text');
     if (savedInput) document.getElementById('rawInput').value = savedInput;
+    // 恢复表格内容
     const savedTable = localStorage.getItem('table_html');
     if (savedTable) {
         document.getElementById('tableBody').innerHTML = savedTable;
-        bindCellEvents(); // 重新绑定事件
+        bindCellEvents();
     }
 };
 
 function checkLength(td, limit) {
-    const text = td.innerText.replace(/\n\d+\s*\/.*$/, "").trim(); // 排除计数器文字
+    // 移除计数器显示的干扰，计算纯文字长度
+    const text = td.innerText.replace(/\n?\d+\s*\/.*$/, "").trim();
     const len = text.length;
     const countSpan = td.querySelector('.char-count');
     
@@ -101,14 +114,13 @@ function checkLength(td, limit) {
     else td.classList.remove('warning');
     
     if (countSpan) countSpan.innerText = `${len} / ${limit}`;
-    saveTableState(); // 每次修改自动保存
+    saveTableState();
 }
 
 function bindCellEvents() {
     document.querySelectorAll('#tableBody td').forEach(td => {
         const limit = td.dataset.limit || 9999;
-        td.addEventListener('input', () => checkLength(td, limit));
-        // 初次加载检查
+        td.oninput = () => checkLength(td, limit);
         checkLength(td, limit);
     });
 }
@@ -117,9 +129,7 @@ function createCell(content, limit) {
     const td = document.createElement('td');
     td.contentEditable = "true";
     td.dataset.limit = limit;
-    // 过滤掉内容里的 HTML 标签
-    const pureText = content.replace(/<\/?[^>]+(>|$)/g, ""); 
-    td.innerText = pureText;
+    td.innerText = content.replace(/<\/?[^>]+(>|$)/g, "").trim();
     
     const countDiv = document.createElement('span');
     countDiv.className = 'char-count';
@@ -130,13 +140,14 @@ function createCell(content, limit) {
 
 function parseContent() {
     const text = document.getElementById('rawInput').value;
-    localStorage.setItem('raw_seo_text', text); // 保存原始文本
+    if (!text.trim()) return alert("请输入内容");
     
+    localStorage.setItem('raw_seo_text', text);
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = ''; 
 
-    // 改良正则：更精准识别数字标题
-    const productSections = text.split(/(?=\d+\.\s+[\u4e00-\u9fa5a-zA-Z])/).filter(s => s.trim().length > 10);
+    // 正则匹配产品区块
+    const productSections = text.split(/(?=\d+\.\s+[\u4e00-\u9fa5a-zA-Z])/).filter(s => s.trim().length > 5);
 
     productSections.forEach(section => {
         const lines = section.split('\n');
@@ -152,11 +163,10 @@ function parseContent() {
         }
         while(bullets.length < 5) bullets.push("");
 
-        const descSplit = section.split(/Product Description:\s*/);
-        const desc = (descSplit.length > 1) ? descSplit[1].trim() : "";
+        const descPart = section.split(/Product Description:\s*/)[1] || "";
 
         const tr = document.createElement('tr');
-        tr.appendChild(createCell(productName, 999));
+        tr.appendChild(createCell(productName, 9999));
         tr.appendChild(createCell(title, LIMITS.title));
         tr.appendChild(createCell(terms, LIMITS.terms));
         tr.appendChild(createCell(bullets[0], LIMITS.bullet));
@@ -164,7 +174,7 @@ function parseContent() {
         tr.appendChild(createCell(bullets[2], LIMITS.bullet));
         tr.appendChild(createCell(bullets[3], LIMITS.bullet));
         tr.appendChild(createCell(bullets[4], LIMITS.bullet));
-        tr.appendChild(createCell(desc, LIMITS.desc));
+        tr.appendChild(createCell(descPart, LIMITS.desc));
         
         tbody.appendChild(tr);
     });
@@ -177,219 +187,22 @@ function saveTableState() {
 }
 
 function clearData() {
-    if(confirm("确定要清空所有内容吗？")) {
+    if(confirm("确定要清空当前所有工作数据吗？")) {
         localStorage.clear();
-        location.reload();
+        document.getElementById('rawInput').value = '';
+        document.getElementById('tableBody').innerHTML = '';
     }
 }
 
 function exportToExcel() {
     const table = document.getElementById('seoTable');
-    if (table.rows.length <= 1) return alert("空数据无法导出");
+    if (table.rows.length <= 1) return alert("没有可导出的数据");
     
     const cloneTable = table.cloneNode(true);
     cloneTable.querySelectorAll('.char-count').forEach(el => el.remove());
     
-    const wb = XLSX.utils.table_to_book(cloneTable, {sheet: "Batch_SEO"});
-    XLSX.writeFile(wb, `SEO_Export_${new Date().toLocaleDateString()}.xlsx`);
-}
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon SEO Pro - 云端助手</title>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-    <style>
-        :root { --primary: #1890ff; --success: #52c41a; --danger: #ff4d4f; --bg: #f5f7fa; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1600px; margin: 0 auto; }
-        .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; }
-        h2 { margin-top: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; color: #262626; }
-        
-        /* 输入区 */
-        textarea { width: 100%; height: 180px; padding: 15px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.3s; }
-        textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
-        
-        /* 按钮 */
-        .btn-group { display: flex; gap: 12px; margin: 15px 0; flex-wrap: wrap; }
-        button { padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: #fff; color: var(--danger); border: 1px solid var(--danger); }
-        button:hover { opacity: 0.85; transform: translateY(-1px); }
-        button:active { transform: translateY(0); }
-
-        /* 表格 */
-        .table-wrapper { overflow-x: auto; border: 1px solid #f0f0f0; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1400px; table-layout: fixed; }
-        th { background: #fafafa; padding: 15px; text-align: left; font-size: 14px; border-bottom: 2px solid #f0f0f0; }
-        td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; word-break: break-all; position: relative; }
-        
-        /* 状态标记 */
-        .warning { background-color: #fff1f0 !important; color: #cf1322 !important; outline: 1px solid #ffa39e; }
-        .char-count { display: block; font-size: 11px; color: #8c8c8c; margin-top: 6px; }
-        .warning .char-count { color: #cf1322; font-weight: bold; }
-        
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .btn-group button { width: 100%; justify-content: center; }
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="card">
-        <h2>📝 输入 SEO 文案</h2>
-        <textarea id="rawInput" placeholder="在此粘贴 1. 玫瑰金洒水壶... 2. 纤维灯... 等原始文本"></textarea>
-        <div class="btn-group">
-            <button class="btn-primary" onclick="parseContent()">⚡ 解析遍历内容</button>
-            <button class="btn-success" onclick="exportToExcel()">📊 导出 Excel</button>
-            <button class="btn-danger" onclick="clearData()">🗑️ 清空所有</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <h2>🔍 实时预览与长度校验</h2>
-        <div class="table-wrapper">
-            <table id="seoTable">
-                <thead>
-                    <tr>
-                        <th style="width: 120px;">产品名称</th>
-                        <th style="width: 250px;">标题 (200)</th>
-                        <th style="width: 200px;">关键词 (250)</th>
-                        <th>五点 1 (500)</th>
-                        <th>五点 2 (500)</th>
-                        <th>五点 3 (500)</th>
-                        <th>五点 4 (500)</th>
-                        <th>五点 5 (500)</th>
-                        <th style="width: 280px;">描述 (2000)</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-const LIMITS = { title: 200, terms: 250, bullet: 500, desc: 2000 };
-
-// 页面加载时自动回显
-window.onload = () => {
-    const savedInput = localStorage.getItem('raw_seo_text');
-    if (savedInput) document.getElementById('rawInput').value = savedInput;
-    const savedTable = localStorage.getItem('table_html');
-    if (savedTable) {
-        document.getElementById('tableBody').innerHTML = savedTable;
-        bindCellEvents(); // 重新绑定事件
-    }
-};
-
-function checkLength(td, limit) {
-    const text = td.innerText.replace(/\n\d+\s*\/.*$/, "").trim(); // 排除计数器文字
-    const len = text.length;
-    const countSpan = td.querySelector('.char-count');
-    
-    if (len > limit) td.classList.add('warning');
-    else td.classList.remove('warning');
-    
-    if (countSpan) countSpan.innerText = `${len} / ${limit}`;
-    saveTableState(); // 每次修改自动保存
-}
-
-function bindCellEvents() {
-    document.querySelectorAll('#tableBody td').forEach(td => {
-        const limit = td.dataset.limit || 9999;
-        td.addEventListener('input', () => checkLength(td, limit));
-        // 初次加载检查
-        checkLength(td, limit);
-    });
-}
-
-function createCell(content, limit) {
-    const td = document.createElement('td');
-    td.contentEditable = "true";
-    td.dataset.limit = limit;
-    // 过滤掉内容里的 HTML 标签
-    const pureText = content.replace(/<\/?[^>]+(>|$)/g, ""); 
-    td.innerText = pureText;
-    
-    const countDiv = document.createElement('span');
-    countDiv.className = 'char-count';
-    countDiv.contentEditable = "false";
-    td.appendChild(countDiv);
-    return td;
-}
-
-function parseContent() {
-    const text = document.getElementById('rawInput').value;
-    localStorage.setItem('raw_seo_text', text); // 保存原始文本
-    
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = ''; 
-
-    // 改良正则：更精准识别数字标题
-    const productSections = text.split(/(?=\d+\.\s+[\u4e00-\u9fa5a-zA-Z])/).filter(s => s.trim().length > 10);
-
-    productSections.forEach(section => {
-        const lines = section.split('\n');
-        const productName = (lines[0].match(/\d+\.\s*(.*)/) || ["", lines[0]])[1].trim();
-        const title = (section.match(/Title:\s*(.*)/) || ["", ""])[1];
-        const terms = (section.match(/Search Terms:\s*(.*)/) || ["", ""])[1];
-        
-        const bulletRegex = /\[(.*?)\](.*?)(?=\n\[|\n\n|Product Description:|$)/gs;
-        let bullets = [];
-        let match;
-        while ((match = bulletRegex.exec(section)) !== null && bullets.length < 5) {
-            bullets.push(`[${match[1]}] ${match[2].trim()}`);
-        }
-        while(bullets.length < 5) bullets.push("");
-
-        const descSplit = section.split(/Product Description:\s*/);
-        const desc = (descSplit.length > 1) ? descSplit[1].trim() : "";
-
-        const tr = document.createElement('tr');
-        tr.appendChild(createCell(productName, 999));
-        tr.appendChild(createCell(title, LIMITS.title));
-        tr.appendChild(createCell(terms, LIMITS.terms));
-        tr.appendChild(createCell(bullets[0], LIMITS.bullet));
-        tr.appendChild(createCell(bullets[1], LIMITS.bullet));
-        tr.appendChild(createCell(bullets[2], LIMITS.bullet));
-        tr.appendChild(createCell(bullets[3], LIMITS.bullet));
-        tr.appendChild(createCell(bullets[4], LIMITS.bullet));
-        tr.appendChild(createCell(desc, LIMITS.desc));
-        
-        tbody.appendChild(tr);
-    });
-    bindCellEvents();
-    saveTableState();
-}
-
-function saveTableState() {
-    localStorage.setItem('table_html', document.getElementById('tableBody').innerHTML);
-}
-
-function clearData() {
-    if(confirm("确定要清空所有内容吗？")) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-function exportToExcel() {
-    const table = document.getElementById('seoTable');
-    if (table.rows.length <= 1) return alert("空数据无法导出");
-    
-    const cloneTable = table.cloneNode(true);
-    cloneTable.querySelectorAll('.char-count').forEach(el => el.remove());
-    
-    const wb = XLSX.utils.table_to_book(cloneTable, {sheet: "Batch_SEO"});
-    XLSX.writeFile(wb, `SEO_Export_${new Date().toLocaleDateString()}.xlsx`);
+    const wb = XLSX.utils.table_to_book(cloneTable, {sheet: "SEO_Batch_Work"});
+    XLSX.writeFile(wb, `Amazon_SEO_Export_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 </script>
 
