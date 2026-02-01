@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本去重工具 - Amazon 运营工具箱</title>
+    <style>
+        :root { --primary: #1890ff; --bg: #f5f7fa; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .back-btn { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h3 { margin-top: 0; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        textarea { width: 100%; height: 400px; padding: 12px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box; resize: none; font-family: monospace; font-size: 14px; }
+        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; background: #fafafa; padding: 15px; border-radius: 8px; }
+        .option-row { display: flex; align-items: center; gap: 15px; font-size: 14px; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: #52c41a; color: white; }
+        .btn-clear { background: #fff; color: #ff4d4f; border: 1px solid #ff4d4f; }
+        button:hover { opacity: 0.8; }
+
+        .stat { font-size: 12px; color: #8c8c8c; font-weight: normal; }
+        
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-header">
+        <a href="index.html" class="back-btn"><span>🏠</span> 返回首页</a>
+        <div style="font-weight: bold;">文本/关键词去重工具</div>
+    </div>
+
+    <div class="controls card" style="margin-bottom: 20px; flex-direction: row; justify-content: space-around;">
+        <div class="option-row">
+            <label>分隔符：</label>
+            <select id="separator" onchange="handleProcess()">
+                <option value="auto">自动识别 (空格/逗号/换行)</option>
+                <option value="space">仅空格</option>
+                <option value="line">仅换行</option>
+                <option value="comma">仅逗号</option>
+            </select>
+        </div>
+        <div class="option-row">
+            <input type="checkbox" id="ignoreCase" checked onchange="handleProcess()">
+            <label for="ignoreCase" style="cursor:pointer">忽略大小写</label>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div class="card">
+            <h3>原始文本 <span class="stat" id="beforeStat">数量: 0</span></h3>
+            <textarea id="inputText" placeholder="请在此粘贴需要去重的文案或关键词..." oninput="handleProcess()"></textarea>
+            <div class="btn-group">
+                <button class="btn-clear" onclick="clearAll()">🗑️ 清空内容</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>去重结果 <span class="stat" id="afterStat">数量: 0</span></h3>
+            <textarea id="outputText" readonly placeholder="处理结果将显示在这里..."></textarea>
+            <div class="btn-group">
+                <button class="btn-success" onclick="copyResult()">📋 复制结果</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleProcess() {
+        const input = document.getElementById('inputText').value;
+        const separatorType = document.getElementById('separator').value;
+        const ignoreCase = document.getElementById('ignoreCase').checked;
+        
+        if (!input.trim()) {
+            updateResult("", 0, 0);
+            return;
+        }
+
+        // 1. 根据模式拆分单词
+        let regex;
+        if (separatorType === "space") regex = /[ ]+/;
+        else if (separatorType === "line") regex = /[\n\r]+/;
+        else if (separatorType === "comma") regex = /[,，]+/;
+        else regex = /[ \n\r,，]+/; // 自动模式：匹配空格、回车、中英文逗号
+
+        const words = input.split(regex).filter(w => w.trim() !== "");
+        document.getElementById('beforeStat').innerText = `单词数: ${words.length}`;
+
+        // 2. 去重逻辑
+        const seen = new Set();
+        const result = [];
+
+        words.forEach(word => {
+            const compareWord = ignoreCase ? word.toLowerCase() : word;
+            if (!seen.has(compareWord)) {
+                seen.add(compareWord);
+                result.push(word); // 保留原始样式
+            }
+        });
+
+        // 3. 输出 (默认以空格重新连接，符合 Amazon ST 格式)
+        const output = result.join(" ");
+        updateResult(output, result.length);
+    }
+
+    function updateResult(text, count) {
+        document.getElementById('outputText').value = text;
+        document.getElementById('afterStat').innerText = `数量: ${count} | 字符: ${text.length}`;
+    }
+
+    function copyResult() {
+        const output = document.getElementById('outputText');
+        output.select();
+        document.execCommand('copy');
+        
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已复制";
+        setTimeout(() => btn.innerText = originalText, 1500);
+    }
+
+    function clearAll() {
+        document.getElementById('inputText').value = "";
+        handleProcess();
+    }
+</script>
+
+</body>
+</html>
