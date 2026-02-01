@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKU 销量聚合 - Amazon 运营工具箱</title>
+    <title>SKU 销量聚合 - Amazon 卖家工具箱</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #1890ff; --bg: #f0f2f5; --purple: #722ed1; --success: #52c41a; }
         body { font-family: -apple-system, system-ui, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1000px; margin: 0 auto; }
         
-        /* 统一的导航头部 */
+        /* 导航头部 */
         .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .back-btn { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        .back-btn:hover { opacity: 0.8; }
+        .back-btn { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .page-title { font-weight: bold; color: #595959; font-size: 15px; }
 
         /* 卡片容器 */
@@ -24,21 +23,20 @@
         .upload-area.drag-over { border-color: var(--primary); background: #f0f7ff; transform: scale(1.01); }
         .upload-icon { width: 80px; height: 80px; margin-bottom: 15px; }
         
-        /* 状态与统计 */
-        .status-bar { margin: 15px 0; font-weight: 600; font-size: 15px; color: #666; min-height: 22px; }
-        .summary-info { display: none; justify-content: center; gap: 30px; margin-bottom: 20px; padding: 10px; background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; }
+        .status-bar { margin: 15px 0; font-weight: 600; font-size: 15px; color: #666; }
+        .summary-info { display: none; justify-content: center; gap: 30px; margin-bottom: 20px; padding: 12px; background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; }
 
         /* 按钮组 */
         .btn-group { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
-        .btn { padding: 12px 30px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: 0.2s; color: white; }
+        .btn { padding: 12px 30px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; color: white; }
         .btn-purple { background: var(--purple); }
         .btn-green { background: var(--success); }
         .btn:disabled { background: #bfbfbf; cursor: not-allowed; opacity: 0.7; }
 
         /* 表格样式 */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; }
-        th { background: #fafafa; padding: 12px; border-bottom: 2px solid #f0f0f0; color: #8c8c8c; font-size: 13px; text-transform: uppercase; }
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #fafafa; padding: 12px; border-bottom: 2px solid #f0f0f0; color: #8c8c8c; font-size: 13px; }
         td { padding: 14px 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .sku-tag { font-family: 'Consolas', monospace; color: var(--primary); font-weight: 600; background: #e6f7ff; padding: 3px 8px; border-radius: 4px; }
         .qty-badge { font-weight: 800; color: #cf1322; font-size: 16px; }
@@ -49,27 +47,28 @@
 <div class="container">
     <div class="nav-header">
         <a href="index.html" class="back-btn"><span>🏠</span> 返回工具箱首页</a>
-        <div class="page-title">📊 订单 SKU 销量聚合 (支持文件夹拖拽)</div>
+        <div class="page-title">📊 订单 SKU 销量聚合 (精准父体识别)</div>
     </div>
 
     <div class="card">
         <div id="dropZone" class="upload-area">
-            <img src="https://img.icons8.com/color/96/data-configuration.png" class="upload-icon" alt="folder-icon">
-            <div style="font-size: 18px; font-weight: bold; color: #262626;">第一步：上传订单报告</div>
-            <div id="file-desc" style="color: #8c8c8c; margin-top: 10px;">将单个文件或整个文件夹拖到这里，或点击此处选择</div>
+            <img src="https://img.icons8.com/color/96/data-configuration.png" class="upload-icon">
+            <div style="font-size: 18px; font-weight: bold; color: #262626;">第一步：上传/拖拽订单报告</div>
+            <div id="file-desc" style="color: #8c8c8c; margin-top: 10px;">支持单个文件、多个选择或整个文件夹拖入</div>
             <input type="file" id="fileInput" hidden multiple accept=".xlsx, .xls, .csv">
         </div>
 
         <div id="summaryBar" class="summary-info">
-            <div>总记录数: <span id="countRaw" style="color:var(--primary)">0</span></div>
-            <div>父体 SKU 数: <span id="countParent" style="color:var(--purple)">0</span></div>
+            <div>原始记录: <span id="countRaw" style="color:var(--primary)">0</span></div>
+            <div>聚合后父体数: <span id="countParent" style="color:var(--purple)">0</span></div>
+            <div>销量总计: <span id="countTotalQty" style="color:var(--success)">0</span></div>
         </div>
 
-        <div id="status" class="status-bar">就绪：等待导入数据</div>
+        <div id="status" class="status-bar">准备就绪</div>
 
         <div class="btn-group">
             <button class="btn btn-purple" id="runBtn" onclick="doAggregating()" disabled>⚙️ 开始处理聚合</button>
-            <button class="btn btn-green" id="exportBtn" onclick="exportExcel()" disabled>📊 导出 Excel 结果</button>
+            <button class="btn btn-green" id="exportBtn" onclick="exportExcel()" disabled>📊 导出聚合结果</button>
         </div>
 
         <div class="table-container">
@@ -77,9 +76,9 @@
                 <thead>
                     <tr>
                         <th width="70">排名</th>
-                        <th>聚合后的父体 SKU</th>
-                        <th width="150">总订单行数</th>
-                        <th width="150">累计销售数量</th>
+                        <th>父体 SKU (已去后缀)</th>
+                        <th width="150">订单行数累加</th>
+                        <th width="150">销售数量总计</th>
                     </tr>
                 </thead>
                 <tbody id="resBody"></tbody>
@@ -95,26 +94,21 @@
     const statusText = document.getElementById('status');
     const fileInput = document.getElementById('fileInput');
 
-    // 点击上传触发
     dropZone.onclick = () => fileInput.click();
     fileInput.onchange = (e) => handleFiles(e.target.files);
 
-    // 拖拽逻辑支持
     dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); };
     dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
     dropZone.ondrop = async (e) => {
         e.preventDefault();
         dropZone.classList.remove('drag-over');
-        rawRows = []; // 清空旧数据
-        
+        rawRows = [];
         const items = e.dataTransfer.items;
-        statusText.innerText = "🔍 正在扫描文件夹/文件...";
-
+        statusText.innerText = "🔍 正在扫描数据...";
         for (let item of items) {
             const entry = item.webkitGetAsEntry();
             if (entry) await scanEntry(entry);
         }
-        
         finishLoading();
     };
 
@@ -145,30 +139,35 @@
 
     function handleFiles(files) {
         rawRows = [];
-        statusText.innerText = "⏳ 正在读取文件...";
         const promises = Array.from(files).map(f => readExcel(f));
         Promise.all(promises).then(() => finishLoading());
     }
 
     function finishLoading() {
-        statusText.innerText = `✅ 加载完成：已读取 ${rawRows.length} 条原始订单数据`;
+        statusText.innerText = `已加载 ${rawRows.length} 条记录`;
         document.getElementById('runBtn').disabled = rawRows.length === 0;
-        document.getElementById('countRaw').innerText = rawRows.length;
     }
 
-    // --- 核心聚合逻辑 ---
+    // --- 核心聚合逻辑（正则精准版） ---
     function doAggregating() {
         const aggregator = new Map();
+        let grandTotalQty = 0;
 
         rawRows.forEach(row => {
             const sku = (row['sku'] || row['SKU'] || "").toString().trim();
             const qty = parseInt(row['quantity-purchased'] || row['quantity'] || 0);
             if (!sku) return;
 
-            // 处理逻辑：取最后一次出现 '-' 之前的内容作为父体
+            // 正则匹配：提取前两段。例如 YJC7.25-WGT240723509BK43
+            // 我们寻找第一个 '-'，然后寻找第二个 '-' 后紧跟的一串数字
             let parent = sku;
-            if (sku.includes('-')) {
-                parent = sku.split('-').slice(0, -1).join('-');
+            const skuPattern = /^([^-]+)-([A-Z0-9]*?\d+)/; 
+            const match = sku.match(skuPattern);
+            
+            if (match) {
+                // match[1] 是第一段 (YJC7.25)
+                // match[2] 是第二段直到最后一个数字为止 (WGT240723509)
+                parent = `${match[1]}-${match[2]}`;
             }
 
             if (!aggregator.has(parent)) {
@@ -177,43 +176,42 @@
             const item = aggregator.get(parent);
             item.rowCount++;
             item.totalQty += qty;
+            grandTotalQty += qty;
         });
 
-        // 排序：按总销量降序
         processedData = Array.from(aggregator.values()).sort((a, b) => b.totalQty - a.totalQty);
         
-        renderResults();
-    }
-
-    function renderResults() {
+        // UI 更新
         const tbody = document.getElementById('resBody');
         tbody.innerHTML = processedData.map((item, i) => `
             <tr>
                 <td>${i + 1}</td>
                 <td><span class="sku-tag">${item.parentSku}</span></td>
-                <td>${item.rowCount} 笔记录</td>
+                <td>${item.rowCount}</td>
                 <td><span class="qty-badge">${item.totalQty}</span></td>
             </tr>
         `).join('');
 
         document.getElementById('resTable').style.display = 'table';
         document.getElementById('summaryBar').style.display = 'flex';
+        document.getElementById('countRaw').innerText = rawRows.length;
         document.getElementById('countParent').innerText = processedData.length;
+        document.getElementById('countTotalQty').innerText = grandTotalQty;
         document.getElementById('exportBtn').disabled = false;
-        statusText.innerText = "✨ 聚合统计已完成！";
+        statusText.innerText = "✨ 处理完成";
     }
 
     function exportExcel() {
         const exportData = processedData.map((item, i) => ({
-            "销量排名": i + 1,
+            "排名": i + 1,
             "父体 SKU": item.parentSku,
-            "原始订单记录数": item.rowCount,
-            "累计销量合计": item.totalQty
+            "订单行数": item.rowCount,
+            "销量总计": item.totalQty
         }));
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "聚合销量报表");
-        XLSX.writeFile(wb, `Amazon_Summary_Report_${new Date().getTime()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "销量汇总");
+        XLSX.writeFile(wb, `Amazon_Aggregated_Report.xlsx`);
     }
 </script>
 </body>
