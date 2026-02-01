@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大小写转换 - Amazon 运营工具箱</title>
+    <style>
+        :root { --primary: #1890ff; --bg: #f5f7fa; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .back-btn { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .main-layout { display: grid; grid-template-columns: 1fr 120px 1fr; gap: 15px; align-items: center; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; }
+        h3 { margin-top: 0; font-size: 16px; display: flex; justify-content: space-between; }
+        
+        textarea { width: 100%; height: 450px; padding: 12px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box; resize: none; font-size: 14px; line-height: 1.6; }
+        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+
+        .action-column { display: flex; flex-direction: column; gap: 15px; }
+        button { padding: 10px 5px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 13px; }
+        .btn-action { background: #f0f7ff; color: var(--primary); border: 1px solid #bae7ff; }
+        .btn-action:hover { background: var(--primary); color: white; }
+        .btn-success { background: #52c41a; color: white; }
+        .btn-clear { background: #fff; color: #ff4d4f; border: 1px solid #ff4d4f; }
+        
+        .stat { font-size: 12px; color: #8c8c8c; font-weight: normal; }
+
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .action-column { flex-direction: row; justify-content: center; }
+            .action-column button { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-header">
+        <a href="index.html" class="back-btn"><span>🏠</span> 返回首页</a>
+        <div style="font-weight: bold;">英文大小写转换工具</div>
+    </div>
+
+    <div class="main-layout">
+        <div class="card">
+            <h3>输入原文 <span class="stat" id="inputStat">字符: 0</span></h3>
+            <textarea id="inputText" placeholder="请输入要转换的英文内容..." oninput="updateStats('inputText', 'inputStat')"></textarea>
+            <button class="btn-clear" style="width: 100%; margin-top: 10px;" onclick="clearAll()">🗑️ 一键清空</button>
+        </div>
+
+        <div class="action-column">
+            <button class="btn-action" onclick="convert('upper')">>> 全部大写</button>
+            <button class="btn-action" onclick="convert('lower')">>> 全部小写</button>
+            <button class="btn-action" onclick="convert('title')">>> 首字母大写</button>
+        </div>
+
+        <div class="card">
+            <h3>转换结果 <span class="stat" id="outputStat">字符: 0</span></h3>
+            <textarea id="outputText" readonly placeholder="转换后的结果将显示在这里..."></textarea>
+            <button class="btn-success" style="width: 100%; margin-top: 10px;" onclick="copyResult()">📋 一键复制</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateStats(id, statId) {
+        const text = document.getElementById(id).value;
+        document.getElementById(statId).innerText = `字符: ${text.length} | 单词: ${text.trim() === "" ? 0 : text.trim().split(/\s+/).length}`;
+    }
+
+    function convert(type) {
+        const input = document.getElementById('inputText').value;
+        let result = "";
+
+        if (type === 'upper') {
+            result = input.toUpperCase();
+        } else if (type === 'lower') {
+            result = input.toLowerCase();
+        } else if (type === 'title') {
+            // 首字母大写逻辑：每个单词首字母大写
+            result = input.toLowerCase().replace(/(?<=^|\s)\S/g, l => l.toUpperCase());
+        }
+
+        document.getElementById('outputText').value = result;
+        updateStats('outputText', 'outputStat');
+    }
+
+    function copyResult() {
+        const output = document.getElementById('outputText');
+        if (!output.value) return;
+        output.select();
+        document.execCommand('copy');
+        
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已复制到剪贴板";
+        setTimeout(() => btn.innerText = originalText, 1500);
+    }
+
+    function clearAll() {
+        document.getElementById('inputText').value = "";
+        document.getElementById('outputText').value = "";
+        updateStats('inputText', 'inputStat');
+        updateStats('outputText', 'outputStat');
+    }
+</script>
+
+</body>
+</html>
