@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>亚马逊订单聚合工具 - Amazon 运营工具箱</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root { --primary: #1890ff; --bg: #f0f2f5; --purple: #722ed1; --success: #52c41a; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center; }
+        .upload-zone { border: 2px dashed #d9d9d9; border-radius: 8px; padding: 40px; background: #fafafa; cursor: pointer; margin-bottom: 20px; }
+        .upload-zone:hover { border-color: var(--primary); background: #f0f7ff; }
+        .upload-icon { width: 50px; margin-bottom: 10px; opacity: 0.7; }
+        .btn-group { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+        .btn { padding: 10px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; display: flex; align-items: center; gap: 5px; font-size: 14px; }
+        .btn-run { background: var(--purple); }
+        .btn-export { background: var(--success); }
+        .btn:disabled { background: #bfbfbf; cursor: not-allowed; }
+        #status { font-weight: bold; margin: 10px 0; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left; background: white; }
+        th { background: #fafafa; padding: 12px; border-bottom: 2px solid #f0f0f0; font-size: 14px; color: #333; }
+        td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #555; }
+        tr:hover { background: #fafafa; }
+        .summary-bar { display: flex; justify-content: space-around; background: #e6f7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #91d5ff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="margin-bottom: 20px;">
+        <span style="font-weight: bold; font-size: 18px;">📊 亚马逊 SKU 销量聚合工具</span>
+    </div>
+
+    <div class="card">
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <img src="https://img.icons8.com/color/96/microsoft-excel-2019.png" class="upload-icon">
+            <div style="font-weight: bold;">点击选择亚马逊订单报告 (Excel格式)</div>
+            <div id="file-info" style="font-size: 13px; color: var(--primary); margin-top: 5px;">支持包含 sku 和 quantity-purchased 列的文件</div>
+            <input type="file" id="fileInput" hidden accept=".xlsx, .xls, .csv" onchange="handleFileSelect()">
+        </div>
+
+        <div class="summary-bar" id="summaryBar" style="display: none;">
+            <div>原始订单行数: <span id="rawCount" style="color:var(--primary); font-weight:bold;">0</span></div>
+            <div>聚合后父体数量: <span id="parentCount" style="color:var(--purple); font-weight:bold;">0</span></div>
+            <div>总计销量: <span id="totalQty" style="color:var(--success); font-weight:bold;">0</span></div>
+        </div>
+
+        <div id="status">准备就绪</div>
+
+        <div class="btn-group">
+            <button class="btn btn-run" id="processBtn" onclick="processData()" disabled>⚙️ 开始聚合处理</button>
+            <button class="btn btn-export" id="exportBtn" onclick="exportExcel()" disabled>📊 导出 Excel 结果</button>
+        </div>
+
+        <table id="resTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>父体 SKU</th>
+                    <th>订单总数 (Rows)</th>
+                    <th>销量总计 (Quantity)</th>
+                </tr>
+            </thead>
+            <tbody id="resBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let rawData = [];
+    let processedData = [];
+
+    // 文件选择处理
+    function handleFileSelect() {
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) return;
+        
+        document.getElementById('file-info').innerText = `已选择: ${file.name}`;
+        document.getElementById('status').innerText = "读取文件中...";
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            rawData = XLSX.utils.sheet_to_json(firstSheet);
+            
+            document.getElementById('status').innerText = `加载成功，共 ${rawData.length} 行数据`;
+            document.getElementById('processBtn').disabled = false;
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // 核心处理逻辑
+    function processData() {
+        if (rawData.length === 0) return;
+
+        const skuMap = new Map();
+        let totalQuantity = 0;
+
+        rawData.forEach(row => {
+            // 兼容不同版本的列名 (sku 或 sku)
+            let originalSku = row['sku'] || row['SKU'] || "";
+            // 兼容销量列名 (quantity-purchased)
+            let qty = parseInt(row['quantity-purchased'] || row['quantity'] || 0);
+
+            if (!originalSku) return;
+
+            // --- SKU 父体化处理逻辑 ---
+            // 规则：假设 YJC7.25-WGT240812509BK44 的父体是去掉最后一部分
+            // 这里使用正则或 Split，通常亚马逊 SKU 规则以后缀区分，取前两段或去掉最后一段
+            // 示例处理：保留最后一次出现 "-" 之前的内容
+            let parentSku = originalSku;
+            if (originalSku.includes('-')) {
+                const parts = originalSku.split('-');
+                // 如果最后一段是明显的后缀（如 BK44），去掉最后一段
+                // 这里采用通用逻辑：保留前 N-1 段
+                parentSku = parts.slice(0, -1).join('-');
+            }
+
+            if (!skuMap.has(parentSku)) {
+                skuMap.set(parentSku, { parentSku: parentSku, orderCount: 0, totalQty: 0 });
+            }
+
+            let item = skuMap.get(parentSku);
+            item.orderCount += 1; // 订单行数累加
+            item.totalQty += qty; // 销量累加
+            totalQuantity += qty;
+        });
+
+        // 转换为数组并按【销量】从大到小排序
+        processedData = Array.from(skuMap.values()).sort((a, b) => b.totalQty - a.totalQty);
+
+        renderTable(totalQuantity);
+    }
+
+    // 渲染结果
+    function renderTable(totalQuantity) {
+        const tbody = document.getElementById('resBody');
+        tbody.innerHTML = "";
+        
+        processedData.forEach((item, index) => {
+            const row = `<tr>
+                <td>${index + 1}</td>
+                <td style="font-weight:bold; color:#1890ff">${item.parentSku}</td>
+                <td>${item.orderCount}</td>
+                <td style="font-size:16px; color:var(--purple); font-weight:bold;">${item.totalQty}</td>
+            </tr>`;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+
+        // 更新统计栏
+        document.getElementById('summaryBar').style.display = 'flex';
+        document.getElementById('rawCount').innerText = rawData.length;
+        document.getElementById('parentCount').innerText = processedData.length;
+        document.getElementById('totalQty').innerText = totalQuantity;
+        
+        document.getElementById('resTable').style.display = 'table';
+        document.getElementById('exportBtn').disabled = false;
+        document.getElementById('status').innerText = "聚合处理完成！";
+    }
+
+    // 导出 Excel
+    function exportExcel() {
+        const exportData = processedData.map((item, index) => ({
+            "排名": index + 1,
+            "父体 SKU": item.parentSku,
+            "订单行数累加": item.orderCount,
+            "销量总计": item.totalQty
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "聚合结果");
+        XLSX.writeFile(wb, `Amazon_Aggregated_SKU_${Date.now()}.xlsx`);
+    }
+</script>
+</body>
+</html>
