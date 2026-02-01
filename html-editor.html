@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可视化编辑器 - Amazon 运营工具箱</title>
+    <style>
+        :root { --primary: #1890ff; --bg: #f5f7fa; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        /* 导航 */
+        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .back-btn { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        
+        /* 编辑器工具栏 */
+        .toolbar { display: flex; gap: 10px; background: #fafafa; padding: 10px; border: 1px solid #d9d9d9; border-bottom: none; border-radius: 8px 8px 0 0; flex-wrap: wrap; }
+        .tool-btn { padding: 5px 12px; border: 1px solid #d9d9d9; background: white; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .tool-btn:hover { background: #e6f7ff; border-color: var(--primary); color: var(--primary); }
+
+        /* 编辑区域 */
+        #editor { width: 100%; min-height: 350px; padding: 20px; border: 1px solid #d9d9d9; border-radius: 0 0 8px 8px; box-sizing: border-box; overflow-y: auto; background: white; outline: none; line-height: 1.6; }
+        #htmlOutput { width: 100%; height: 150px; margin-top: 15px; padding: 10px; background: #2d2d2d; color: #ccc; border-radius: 8px; font-family: monospace; font-size: 13px; display: none; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+
+        /* 符号面板 */
+        .symbol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px; }
+        .symbol-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #f0f0f0; border-radius: 6px; background: #fff; transition: 0.2s; }
+        .symbol-item:hover { border-color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .symbol-char { font-size: 18px; font-weight: bold; }
+        .copy-tag { font-size: 11px; background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+
+        .footer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-view { background: #52c41a; color: white; }
+        .stat-info { font-size: 13px; color: #8c8c8c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-header">
+        <a href="index.html" class="back-btn"><span>🏠</span> 返回首页</a>
+        <div style="font-weight: bold;">Amazon 可视化 HTML 编辑器</div>
+    </div>
+
+    <div class="card">
+        <div style="font-size: 13px; color: #8c8c8c; margin-bottom: 10px;">
+            提示：亚马逊仅支持基础 HTML 标签（如 &lt;b&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;br&gt;）。
+        </div>
+        
+        <div class="toolbar">
+            <button class="tool-btn" onclick="execCmd('bold')">B</button>
+            <button class="tool-btn" onclick="execCmd('italic')">I</button>
+            <button class="tool-btn" onclick="execCmd('insertUnorderedList')">• 列表</button>
+            <button class="tool-btn" onclick="execCmd('insertOrderedList')">1. 列表</button>
+            <button class="tool-btn" onclick="execCmd('removeFormat')">清除格式</button>
+        </div>
+        
+        <div id="editor" contenteditable="true" oninput="updateStats()">这里输入描述内容...</div>
+        
+        <div id="htmlOutput"></div>
+
+        <div class="footer-actions">
+            <div class="stat-info">字符数：<span id="charCount">0</span> / 2000</div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-view" onclick="toggleHtml()">查看/复制 HTML 代码</button>
+                <button class="btn btn-primary" onclick="copyHtml()">一键复制代码</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; font-size: 16px;">常用符号 (点击复制)</h3>
+        <div class="symbol-grid" id="symbolGrid"></div>
+    </div>
+</div>
+
+<script>
+    const symbols = ['✓', '™', '★', '⚠️', '↑', '↓', '←', '→', '😊', '@', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '©', '®', '☑', '✚', '♦', '♥', '●', '▲', '▼', '□'];
+
+    // 初始化符号面板
+    const grid = document.getElementById('symbolGrid');
+    symbols.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'symbol-item';
+        div.innerHTML = `<span class="symbol-char">${s}</span><span class="copy-tag" onclick="copyText('${s}')">复制</span>`;
+        grid.appendChild(div);
+    });
+
+    function execCmd(cmd) {
+        document.execCommand(cmd, false, null);
+        updateStats();
+    }
+
+    function updateStats() {
+        const content = document.getElementById('editor').innerHTML;
+        document.getElementById('charCount').innerText = content.length;
+        if (document.getElementById('htmlOutput').style.display === 'block') {
+            document.getElementById('htmlOutput').innerText = content;
+        }
+    }
+
+    function toggleHtml() {
+        const output = document.getElementById('htmlOutput');
+        const editor = document.getElementById('editor');
+        if (output.style.display === 'none' || !output.style.display) {
+            output.innerText = editor.innerHTML;
+            output.style.display = 'block';
+        } else {
+            output.style.display = 'none';
+        }
+    }
+
+    function copyHtml() {
+        const content = document.getElementById('editor').innerHTML;
+        const tempInput = document.createElement('textarea');
+        tempInput.value = content;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        alert('HTML代码已复制！可以直接粘贴到亚马逊后台。');
+    }
+
+    function copyText(txt) {
+        navigator.clipboard.writeText(txt);
+        // 自动插入到编辑器光标处
+        document.execCommand('insertText', false, txt);
+    }
+</script>
+
+</body>
+</html>
