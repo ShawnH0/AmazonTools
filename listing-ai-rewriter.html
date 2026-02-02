@@ -2,24 +2,28 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Listing AI 优化 Pro - Amazon 卖家工具箱</title>
+    <title>AI Listing 优化 Pro - Amazon 卖家工具箱</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #1890ff; --bg: #f0f2f5; --success: #52c41a; --error: #ff4d4f; --warning: #faad14; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; }
         .container { width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         
+        /* 导航与配置 */
         .nav-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .config-card { background: white; border-radius: 12px; padding: 15px 20px; margin-bottom: 15px; display: grid; grid-template-columns: 180px 1fr 1fr 150px auto; gap: 15px; align-items: end; }
+        .config-card { background: white; border-radius: 12px; padding: 15px 20px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .config-row { display: grid; grid-template-columns: 180px 180px 1fr 150px 120px; gap: 15px; align-items: end; }
+        .prompt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
         .config-item { display: flex; flex-direction: column; gap: 5px; }
         .config-item label { font-size: 12px; color: #8c8c8c; font-weight: bold; }
-        .config-item input, .config-item select { padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+        .config-item input, .config-item select, .config-item textarea { padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+        .config-item textarea { height: 60px; resize: none; font-size: 11px; }
 
+        /* 主体布局 */
         .workspace { display: flex; gap: 20px; flex: 1; overflow: hidden; }
         .main-panel { flex: 1.8; background: white; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
         .preview-panel { flex: 1.2; background: white; border-radius: 12px; padding: 20px; overflow-y: auto; border-left: 4px solid var(--primary); }
 
-        .upload-zone { border: 2px dashed #d9d9d9; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; margin-bottom: 15px; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
         .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .btn-blue { background: var(--primary); color: white; }
@@ -32,9 +36,12 @@
         td { padding: 10px; border-bottom: 1px solid #f0f0f0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         tr.selected { background: #e6f7ff !important; }
 
+        .status-ok { color: var(--success); font-weight: bold; }
+        .status-err { color: var(--error); font-weight: bold; }
         .char-tag { font-size: 10px; color: #bfbfbf; display: block; }
         .warning-text { color: var(--error) !important; font-weight: bold; }
-        .render-box { background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #eee; font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+        .render-box { background: #f9f9f9; padding: 12px; border-radius: 6px; border: 1px solid #eee; font-size: 13px; line-height: 1.5; margin-bottom: 10px; word-break: break-word; }
+        .preview-label { font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 4px; display: block; }
     </style>
 </head>
 <body>
@@ -42,81 +49,101 @@
 <div class="container">
     <div class="nav-header">
         <a href="index.html" style="text-decoration:none; color:var(--primary);">🏠 返回工具箱首页</a>
-        <div style="font-weight: bold;">Listing AI 优化 (下拉配置版)</div>
+        <div style="font-weight: bold;">Listing AI 优化 (多模型+自定义 Prompt 版)</div>
     </div>
 
     <div class="config-card">
-        <div class="config-item">
-            <label>AI 供应商 (API Host)</label>
-            <select id="apiHostSelect">
-                <option value="https://api.openai.com/v1">OpenAI</option>
-                <option value="https://api.deepseek.com">DeepSeek</option>
-            </select>
+        <div class="config-row">
+            <div class="config-item">
+                <label>AI 供应商</label>
+                <select id="apiHostSelect" onchange="handleProviderChange()">
+                    <option value="https://api.openai.com/v1">OpenAI</option>
+                    <option value="https://api.deepseek.com">DeepSeek</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>模型名称</label>
+                <select id="modelSelect"></select>
+            </div>
+            <div class="config-item">
+                <label>API Key</label>
+                <input type="password" id="apiKey" placeholder="sk-xxxx">
+            </div>
+            <div class="config-item">
+                <label>并发数 (1-5)</label>
+                <input type="range" id="concurrency" min="1" max="5" value="1" oninput="this.nextElementSibling.innerText = this.value">
+                <span style="text-align:center; font-size:12px; font-weight:bold;">1</span>
+            </div>
+            <button class="btn btn-outline" onclick="saveConfig()">💾 保存配置</button>
         </div>
-        <div class="config-item">
-            <label>API Key</label>
-            <input type="password" id="apiKey" placeholder="sk-xxxx">
+
+        <div class="prompt-grid">
+            <div class="config-item"><label>Title Prompt (选填)</label><textarea id="p_title" placeholder="默认：作为亚马逊专家优化标题..."></textarea></div>
+            <div class="config-item"><label>Description Prompt (选填)</label><textarea id="p_desc" placeholder="默认：优化产品描述并使用HTML..."></textarea></div>
+            <div class="config-item"><label>Bullet Points Prompt (选填)</label><textarea id="p_bp" placeholder="默认：优化五点描述..."></textarea></div>
+            <div class="config-item"><label>Search Terms Prompt (选填)</label><textarea id="p_st" placeholder="默认：提取核心搜索词..."></textarea></div>
         </div>
-        <div class="config-item">
-            <label>模型名称</label>
-            <input type="text" id="modelName" value="gpt-3.5-turbo">
-        </div>
-        <div class="config-item">
-            <label>并发数 (1-5)</label>
-            <input type="range" id="concurrency" min="1" max="5" value="1" oninput="this.nextElementSibling.innerText = this.value">
-            <span style="text-align:center; font-size:12px; font-weight:bold;">1</span>
-        </div>
-        <button class="btn btn-outline" onclick="saveConfig()">💾 保存配置</button>
     </div>
 
     <div class="workspace">
         <div class="main-panel">
-            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-                <strong>📤 上传数据表格 (.xlsx)</strong>
-                <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFileLoad(this.files[0])">
-            </div>
-
             <div class="btn-group">
-                <button class="btn btn-outline" onclick="downloadBlankTemplate()">📥 下载空白模板表格</button>
-                <button class="btn btn-blue" id="runBtn" onclick="startAIProcessing()" disabled>🚀 开始批量处理</button>
-                <button class="btn btn-green" id="exportBtn" onclick="exportFinalExcel()" disabled>📊 导出处理结果</button>
+                <button class="btn btn-outline" onclick="downloadBlankTemplate()">📥 下载模板</button>
+                <button class="btn btn-blue" id="runBtn" onclick="startAIProcessing()" disabled>🚀 开始处理</button>
+                <button class="btn btn-green" id="exportBtn" onclick="exportFinalExcel()" disabled>📊 导出结果</button>
+                <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFileLoad(this.files[0])">
+                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📤 上传表格</button>
             </div>
 
             <div id="progBar" style="display:none; margin-bottom:10px;">
-                <div style="height:6px; background:#eee; border-radius:3px; overflow:hidden;">
-                    <div id="progFill" style="width:0%; height:100%; background:var(--primary); transition:0.3s;"></div>
-                </div>
+                <div style="height:6px; background:#eee; border-radius:3px; overflow:hidden;"><div id="progFill" style="width:0%; height:100%; background:var(--primary); transition:0.3s;"></div></div>
             </div>
 
             <div class="table-wrap">
-                <table id="dataTable">
-                    <thead id="tHead"></thead>
-                    <tbody id="tBody"></tbody>
-                </table>
+                <table id="dataTable"><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
             </div>
         </div>
 
         <div class="preview-panel" id="previewArea">
-            <h3 style="margin-top:0;">🔍 Listing 实时预览</h3>
-            <div id="previewContent"><p style="color:#999; text-align:center; margin-top:50px;">选择行以预览</p></div>
+            <h3 style="margin-top:0;">🔍 全维度 Listing 预览</h3>
+            <div id="previewContent"><p style="color:#999; text-align:center; margin-top:50px;">选择行以预览优化结果</p></div>
         </div>
     </div>
 </div>
 
 <script>
+    const models = {
+        "https://api.openai.com/v1": ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
+        "https://api.deepseek.com": ["deepseek-chat", "deepseek-reasoner"]
+    };
+
     let rawData = [];
     let headers = [];
     
     window.onload = () => {
-        document.getElementById('apiHostSelect').value = localStorage.getItem('sh_ls_host') || 'https://api.openai.com/v1';
+        const savedHost = localStorage.getItem('sh_ls_host') || "https://api.openai.com/v1";
+        document.getElementById('apiHostSelect').value = savedHost;
+        handleProviderChange(localStorage.getItem('sh_ls_model'));
         document.getElementById('apiKey').value = localStorage.getItem('sh_ls_key') || '';
-        document.getElementById('modelName').value = localStorage.getItem('sh_ls_model') || 'gpt-3.5-turbo';
+        ['p_title','p_desc','p_bp','p_st'].forEach(id => {
+            document.getElementById(id).value = localStorage.getItem('sh_ls_' + id) || '';
+        });
     };
+
+    function handleProviderChange(savedModel = null) {
+        const host = document.getElementById('apiHostSelect').value;
+        const select = document.getElementById('modelSelect');
+        select.innerHTML = models[host].map(m => `<option value="${m}">${m}</option>`).join('');
+        if (savedModel && models[host].includes(savedModel)) select.value = savedModel;
+    }
 
     function saveConfig() {
         localStorage.setItem('sh_ls_host', document.getElementById('apiHostSelect').value);
+        localStorage.setItem('sh_ls_model', document.getElementById('modelSelect').value);
         localStorage.setItem('sh_ls_key', document.getElementById('apiKey').value);
-        localStorage.setItem('sh_ls_model', document.getElementById('modelName').value);
+        ['p_title','p_desc','p_bp','p_st'].forEach(id => {
+            localStorage.setItem('sh_ls_' + id, document.getElementById(id).value);
+        });
         alert('配置已保存');
     }
 
@@ -146,33 +173,45 @@
     function renderTable() {
         const thead = document.getElementById('tHead');
         const tbody = document.getElementById('tBody');
-        thead.innerHTML = `<tr><th>状态</th>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+        thead.innerHTML = `<tr><th width="80">状态</th>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
         tbody.innerHTML = rawData.map((row, i) => `
             <tr onclick="updatePreview(${i})" id="row-${i}">
-                <td id="status-${i}">待处理</td>
-                ${headers.map(h => `<td id="cell-${idxStr(i,h)}">${row[h]||''}<span class="char-tag" id="tag-${idxStr(i,h)}">${(row[h]||'').length}</span></td>`).join('')}
+                <td id="status-${i}" style="color:#999">待处理</td>
+                ${headers.map(h => `<td id="cell-${i}-${h.replace(/\s/g,'')}">${row[h]||''}<span class="char-tag" id="tag-${i}-${h.replace(/\s/g,'')}">${(row[h]||'').length}</span></td>`).join('')}
             </tr>
         `).join('');
     }
-
-    function idxStr(i, h) { return i + '-' + h.replace(/\s+/g, ''); }
 
     function updatePreview(i) {
         document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
         document.getElementById(`row-${i}`).classList.add('selected');
         const row = rawData[i];
-        document.getElementById('previewContent').innerHTML = `
-            <h4>📌 Title (${(row['Title']||'').length}/190)</h4>
-            <div class="render-box">${row['Title']||'-'}</div>
-            <h4>🌐 Description (${(row['Product Description']||'').length}/1500)</h4>
+        const content = document.getElementById('previewContent');
+        
+        let bpText = "";
+        for(let n=1; n<=5; n++) { bpText += `<li>${row['Bullet Point '+n] || ''}</li>`; }
+
+        content.innerHTML = `
+            <span class="preview-label">📌 Title (${(row['Title']||'').length}/190)</span>
+            <div class="render-box ${(row['Title']||'').length > 190 ? 'warning-text':''}">${row['Title']||'-'}</div>
+            
+            <span class="preview-label">🌐 Product Description (${(row['Product Description']||'').length}/1500)</span>
             <div class="render-box">${row['Product Description']||'-'}</div>
+
+            <span class="preview-label">📝 Bullet Points</span>
+            <div class="render-box"><ul style="padding-left:18px;margin:0;">${bpText}</ul></div>
+
+            <span class="preview-label">🔑 Search Terms</span>
+            <div class="render-box">${row['Search Terms']||'-'}</div>
         `;
     }
 
     async function startAIProcessing() {
         const key = document.getElementById('apiKey').value;
+        if(!key) return alert('请输入 API Key');
+        
         const host = document.getElementById('apiHostSelect').value;
-        const model = document.getElementById('modelName').value;
+        const model = document.getElementById('modelSelect').value;
         const concurrency = parseInt(document.getElementById('concurrency').value);
         
         document.getElementById('progBar').style.display = 'block';
@@ -182,17 +221,38 @@
         const workers = Array(concurrency).fill(null).map(() => (async () => {
             while (queue.length > 0) {
                 const idx = queue.shift();
-                document.getElementById(`status-${idx}`).innerText = "⏳...";
+                document.getElementById(`status-${idx}`).innerText = "⏳ 处理中";
+                let hasError = false;
+
                 for (let h of headers) {
                     if (rawData[idx][h]) {
-                        const res = await callAI(host, key, model, h, rawData[idx][h]);
-                        rawData[idx][h] = res;
-                        const cell = document.getElementById(`cell-${idxStr(idx,h)}`);
-                        cell.firstChild.textContent = res;
-                        document.getElementById(`tag-${idxStr(idx,h)}`).innerText = res.length;
+                        const customPrompt = getPrompt(h);
+                        const res = await callAI(host, key, model, h, rawData[idx][h], customPrompt);
+                        
+                        if (res.startsWith("Error")) {
+                            hasError = true;
+                            rawData[idx][h] = "API Error: 调用失败";
+                        } else {
+                            rawData[idx][h] = res;
+                        }
+                        
+                        // 更新 UI
+                        const cellId = `cell-${idx}-${h.replace(/\s/g,'')}`;
+                        const tagId = `tag-${idx}-${h.replace(/\s/g,'')}`;
+                        document.getElementById(cellId).firstChild.textContent = rawData[idx][h];
+                        document.getElementById(tagId).innerText = rawData[idx][h].length;
                     }
                 }
-                document.getElementById(`status-${idx}`).innerText = "✅";
+                
+                const statusCell = document.getElementById(`status-${idx}`);
+                if (hasError) {
+                    statusCell.innerText = "❌ 失败";
+                    statusCell.className = "status-err";
+                } else {
+                    statusCell.innerText = "✅ 完成";
+                    statusCell.className = "status-ok";
+                }
+
                 const per = Math.round(((rawData.length - queue.length) / rawData.length) * 100);
                 document.getElementById('progFill').style.width = per + '%';
             }
@@ -201,26 +261,39 @@
         document.getElementById('exportBtn').disabled = false;
     }
 
-    async function callAI(host, key, model, field, content) {
+    function getPrompt(field) {
+        if (field === 'Title') return document.getElementById('p_title').value;
+        if (field === 'Product Description') return document.getElementById('p_desc').value;
+        if (field.includes('Bullet Point')) return document.getElementById('p_bp').value;
+        if (field === 'Search Terms') return document.getElementById('p_st').value;
+        return "";
+    }
+
+    async function callAI(host, key, model, field, content, customPrompt) {
+        const defaultPrompt = `作为亚马逊SEO专家，优化以下${field}：${content}`;
+        const finalPrompt = customPrompt ? `${customPrompt}\n\n内容：${content}` : defaultPrompt;
+
         try {
             const res = await fetch(`${host}/chat/completions`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
                 body: JSON.stringify({
                     model: model,
-                    messages: [{role: "user", content: `优化亚马逊${field}：${content}`}]
+                    messages: [{role: "user", content: finalPrompt}],
+                    temperature: 0.7
                 })
             });
             const data = await res.json();
+            if (data.error) return "Error: " + data.error.message;
             return data.choices[0].message.content.trim();
-        } catch (e) { return "API Error"; }
+        } catch (e) { return "Error: Network Fail"; }
     }
 
     function exportFinalExcel() {
         const ws = XLSX.utils.json_to_sheet(rawData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Result");
-        XLSX.writeFile(wb, "Listing_AI_Result.xlsx");
+        XLSX.writeFile(wb, `Listing_Optimized_${Date.now()}.xlsx`);
     }
 </script>
 </body>
