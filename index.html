@@ -1,320 +1,256 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Shawn 的跨境工具箱 - Ultimate Pro</title>
+    <title>Shawn 的跨境工具箱 - Ultimate Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- 1. Apple 核心变量系统 (极致对齐版) --- */
         :root {
-            --f-body-background: #f5f5f7;
-            --f-text-primary: #1d1d1f;
-            --f-text-secondary: #86868b;
-            --f-accent-blue: #0071e3;
-            --f-accent-orange: #f56300;
-            --nav-height: 48px;
+            --apple-bg: #f5f5f7;
+            --apple-text: #1d1d1f;
+            --apple-subtext: #86868b;
+            --apple-blue: #0066cc;
+            --card-white: #ffffff;
             
-            /* 页面宽度控制：1100px 是视觉最舒适的黄金宽度 */
-            --site-width: 1100px; 
-            --card-width: 320px;
-            --card-gap: 20px;
-            
-            /* 绝对居中计算公式：应用于 padding-left 和 padding-right */
-            --screen-padding: max(22px, calc((100vw - var(--site-width)) / 2));
+            /* 核心对齐逻辑 */
+            --content-width: 1100px;
+            --side-gap: max(22px, calc((100vw - var(--content-width)) / 2));
+            --card-gap: 22px;
         }
 
-        /* --- 2. 基础样式 --- */
-        body, html {
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
             margin: 0; padding: 0;
-            background-color: var(--f-body-background);
-            color: var(--f-text-primary);
-            font-family: "SF Pro HK","SF Pro Display","PingFang HK","Helvetica Neue",sans-serif;
-            -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        a { text-decoration: none; color: inherit; }
-
-        /* --- 3. Global Nav (左右对称修复) --- */
-        .global-nav {
-            position: fixed; top: 0; width: 100%; height: var(--nav-height);
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
-            z-index: 9999; 
-            border-bottom: 1px solid rgba(0,0,0,0.08);
+        /* 导航栏 */
+        .nav {
+            position: fixed; top: 0; width: 100%; height: 48px;
+            background: rgba(251, 251, 253, 0.8);
+            backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+            z-index: 9999; display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        
-        .nav-content {
-            height: 100%; 
-            display: flex; align-items: center; justify-content: space-between;
-            font-size: 12px;
-            /* 关键修复：左右应用同样的变量 */
-            padding-left: var(--screen-padding);
-            padding-right: var(--screen-padding);
+        .nav-content { 
+            width: 100%; padding: 0 var(--side-gap); 
+            display: flex; justify-content: space-between; align-items: center;
+            box-sizing: border-box;
         }
-        
         .nav-logo { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
-        .nav-user { color: var(--f-text-primary); cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
+        .login-trigger { font-size: 12px; cursor: pointer; opacity: 0.7; transition: 0.3s; }
+        .login-trigger:hover { opacity: 1; color: var(--apple-blue); }
 
-        /* --- 4. Hero Section (居中对齐) --- */
-        .hero-section {
-            padding-top: 120px;
-            margin-bottom: 50px;
-            padding-left: var(--screen-padding);
-            padding-right: var(--screen-padding);
-        }
-        .hero-eyebrow { font-size: 21px; font-weight: 600; color: var(--f-accent-orange); margin-bottom: 6px; }
-        .hero-headline { font-size: 56px; line-height: 1.05; font-weight: 700; letter-spacing: -0.015em; margin: 0; }
+        /* Hero 区 */
+        .hero { padding: 120px var(--side-gap) 40px; box-sizing: border-box; }
+        .hero h2 { font-size: 21px; color: #f56300; margin-bottom: 8px; font-weight: 600; }
+        .hero h1 { font-size: 56px; font-weight: 700; margin: 0; letter-spacing: -0.02em; line-height: 1.07; }
 
-        /* --- 5. 货架系统 --- */
-        .rs-cardsshelf {
-            margin-bottom: 70px;
-            position: relative;
-        }
+        /* 货架标题 */
+        .section-header { padding: 60px var(--side-gap) 20px; box-sizing: border-box; }
+        .section-header h2 { font-size: 28px; font-weight: 600; margin: 0; }
+        .section-header h2 span { color: var(--apple-subtext); }
 
-        .rs-cards-shelf-header {
-            margin-left: var(--screen-padding);
-            margin-right: var(--screen-padding); /* 确保右侧也有边距 */
-            margin-bottom: 24px;
-        }
-        .rs-cards-shelf-title { font-size: 28px; line-height: 1.1; font-weight: 700; margin: 0; }
-        .rs-cards-shelf-title span { color: var(--f-text-secondary); margin-left: 8px; }
+        /* 终极货架系统 */
+        .shelf-container { position: relative; width: 100%; margin-bottom: 20px; }
 
-        /* 滚动容器 & 左右掩码 */
-        .rf-cards-scroller { position: relative; }
-        
-        .rf-cards-scroller-crop {
+        /* 渐隐蒙版：这是 Apple 风格的精髓 */
+        .scroll-mask {
             overflow: hidden;
-            /* 左右两侧都要有渐隐，实现内容居中的呼吸感 */
             -webkit-mask-image: linear-gradient(to right, 
                 transparent 0%, 
-                black var(--screen-padding), 
-                black calc(100% - var(--screen-padding)), 
+                black var(--side-gap), 
+                black calc(100% - var(--side-gap)), 
                 transparent 100%);
             mask-image: linear-gradient(to right, 
                 transparent 0%, 
-                black var(--screen-padding), 
-                black calc(100% - var(--screen-padding)), 
+                black var(--side-gap), 
+                black calc(100% - var(--side-gap)), 
                 transparent 100%);
         }
 
-        .rf-cards-scroller-content {
-            overflow-x: scroll;
-            overflow-y: hidden;
-            scrollbar-width: none;
+        .scroll-wrapper {
             display: flex;
-            padding-bottom: 50px;
+            overflow-x: auto;
+            padding: 20px var(--side-gap) 60px; 
             scroll-behavior: smooth;
+            scrollbar-width: none;
         }
-        .rf-cards-scroller-content::-webkit-scrollbar { display: none; }
+        .scroll-wrapper::-webkit-scrollbar { display: none; }
 
-        .rf-cards-scroller-platter {
-            display: flex;
-            padding-left: var(--screen-padding);
-            padding-right: var(--screen-padding);
-        }
-
-        /* --- 6. 卡片样式 --- */
-        .rf-ccard {
-            flex: 0 0 var(--card-width);
-            margin-right: var(--card-gap);
-            background: #fff;
-            border-radius: 24px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.25, 1), box-shadow 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        /* 卡片设计 */
+        .card {
+            flex: 0 0 310px;
             height: 380px;
-            overflow: hidden;
-        }
-
-        .rf-ccard:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
-        .rf-ccard-visual { width: 100%; height: 200px; background: #f0f0f2; display: flex; align-items: center; justify-content: center; font-size: 80px; }
-        .rf-ccard-info { padding: 24px; flex-grow: 1; }
-        .rf-ccard-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; color: var(--f-accent-orange); }
-        .rf-ccard-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #000; }
-        .rf-ccard-desc { font-size: 13px; color: var(--f-text-secondary); line-height: 1.4; }
-
-        /* --- 7. Paddle Nav (左右双箭头) --- */
-        .paddlenav {
-            position: absolute; width: 100%; 
-            top: 100px; /* 居中于图片区域 */
-            transform: translateY(-50%);
-            display: flex; justify-content: space-between; 
-            /* 箭头始终贴合屏幕内侧 padding 边缘 */
-            padding: 0 calc(var(--screen-padding) - 22px); 
+            margin-right: var(--card-gap);
+            background: var(--card-white); border-radius: 28px;
+            padding: 30px; text-decoration: none; color: inherit;
+            display: flex; flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
-            pointer-events: none; z-index: 10;
         }
-        
-        .paddlenav-arrow {
-            width: 44px; height: 44px; 
+        .card:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+        .card-tag { font-size: 11px; font-weight: 700; color: #f56300; margin-bottom: 8px; text-transform: uppercase; }
+        .ai-glow { background: linear-gradient(90deg, #0071e3, #9b51e0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-title { font-size: 24px; font-weight: 600; margin: 0; line-height: 1.1; }
+        .card-desc { font-size: 15px; color: var(--apple-subtext); margin-top: 12px; line-height: 1.4; }
+        .card-icon { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 80px; }
+
+        /* 交互箭头 */
+        .arrow-btn {
+            position: absolute; width: 44px; height: 44px;
+            top: 50%; transform: translateY(-50%);
             background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(0,0,0,0.05); 
-            border-radius: 50%; 
-            cursor: pointer;
-            pointer-events: auto; 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(0,0,0,0.05); border-radius: 50%; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            transition: all 0.3s; 
-            opacity: 0; 
+            z-index: 100; opacity: 0; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        .shelf-container:hover .arrow-btn { opacity: 1; }
+        .arrow-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+        .arrow-btn svg { width: 18px; height: 18px; fill: none; stroke: #333; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .arrow-left { left: calc(var(--side-gap) - 22px); }
+        .arrow-right { right: calc(var(--side-gap) - 22px); }
 
-        /* 鼠标移入货架显示左右箭头 */
-        .rs-cardsshelf:hover .paddlenav-arrow { opacity: 1; }
-        .paddlenav-arrow:hover { background: #fff; transform: scale(1.1); }
-        
-        .paddlenav-arrow svg { width: 14px; height: 14px; fill: none; stroke: #333; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-        /* --- Modal 弹窗 --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 10001; }
-        .modal { background: #fff; width: 320px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        .apple-input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #d2d2d7; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
-        .apple-btn { width: 100%; padding: 14px; background: var(--f-accent-blue); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(20px);
+            display: none; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .modal { background: #fff; width: 340px; padding: 40px; border-radius: 24px; position: relative; }
+        .apple-input { width: 100%; padding: 14px; border: 1px solid #d2d2d7; border-radius: 12px; background: #f5f5f7; box-sizing: border-box; font-size: 16px; margin-bottom: 15px; outline: none; }
+        .apple-btn-primary { width: 100%; padding: 14px; background: var(--apple-blue); color: #fff; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<nav class="global-nav">
+<div class="nav">
     <div class="nav-content">
         <span class="nav-logo">ShawnTools </span>
-        <span class="nav-user" id="userTag" onclick="toggleModal()">账户</span>
+        <span class="login-trigger" onclick="toggleModal()" id="userTag">账户</span>
     </div>
-</nav>
+</div>
 
-<main>
-    <section class="hero-section">
-        <div class="hero-eyebrow">Shawn's Operation OS</div>
-        <h1 class="hero-headline">工具利其事，<br>爆款旺龙年。</h1>
-    </section>
+<div class="hero">
+    <h2>Shawn's Operation OS</h2>
+    <h1>工具利其事，<br>爆款旺新春。</h1>
+</div>
 
-    <section class="rs-cardsshelf">
-        <div class="rs-cards-shelf-header">
-            <h2 class="rs-cards-shelf-title">AI 与 文本工具<span>。智能且高效。</span></h2>
+<div class="section-header"><h2>AI 与 文本工具<span>。智能且高效。</span></h2></div>
+<div class="shelf-container">
+    <button class="arrow-btn arrow-left" onclick="move('row1', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <button class="arrow-btn arrow-right" onclick="move('row1', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+    <div class="scroll-mask">
+        <div class="scroll-wrapper" id="row1">
+            <a href="listing-ai-rewriter.html" class="card">
+                <div class="card-tag ai-glow">Apple Intelligence</div>
+                <h3 class="card-title">AI Listing 优化</h3>
+                <p class="card-desc">基于大模型深度学习，批量重写标题、五点及描述。</p>
+                <div class="card-icon">💻</div>
+            </a>
+            <a href="baned-words-filter.html" class="card">
+                <div class="card-tag">Compliance</div>
+                <h3 class="card-title">违规词筛选器</h3>
+                <p class="card-desc">全自动检索敏感词汇，规避侵权与下架风险。</p>
+                <div class="card-icon">©️</div>
+            </a>
+            <a href="deduplicator.html" class="card">
+                <div class="card-tag">Efficiency</div>
+                <h3 class="card-title">文本去重工具</h3>
+                <p class="card-desc">自动识别空格换行，精简文案提升索引效率。</p>
+                <div class="card-icon">✂️</div>
+            </a>
+            <a href="case-converter.html" class="card">
+                <div class="card-tag">Writing</div>
+                <h3 class="card-title">大小写转换</h3>
+                <p class="card-desc">规范化输入，快速实现全大写或首字母大写转换。</p>
+                <div class="card-icon">📝</div>
+            </a>
         </div>
+    </div>
+</div>
 
-        <div class="rf-cards-scroller">
-            <div class="paddlenav">
-                <button class="paddlenav-arrow" onclick="scrollShelf('shelf-1', -1)">
-                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
-                <button class="paddlenav-arrow" onclick="scrollShelf('shelf-1', 1)">
-                    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </button>
-            </div>
-
-            <div class="rf-cards-scroller-crop">
-                <div class="rf-cards-scroller-content" id="shelf-1">
-                    <div class="rf-cards-scroller-platter">
-                        <a href="#" class="rf-ccard">
-                            <div class="rf-ccard-visual">💻</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Intelligence</div>
-                                <div class="rf-ccard-title">AI Listing 优化</div>
-                                <div class="rf-ccard-desc">基于大模型深度学习，批量重写标题与五点。</div>
-                            </div>
-                        </a>
-                        <a href="#" class="rf-ccard">
-                            <div class="rf-ccard-visual">©️</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Compliance</div>
-                                <div class="rf-ccard-title">违规词筛选器</div>
-                                <div class="rf-ccard-desc">检索敏感词汇库，有效规避侵权风险。</div>
-                            </div>
-                        </a>
-                        <a href="#" class="rf-ccard">
-                            <div class="rf-ccard-visual">✂️</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Efficiency</div>
-                                <div class="rf-ccard-title">文本去重工具</div>
-                                <div class="rf-ccard-desc">自动识别空格，精简埋词文案。</div>
-                            </div>
-                        </a>
-                        <a href="#" class="rf-ccard">
-                            <div class="rf-ccard-visual">📝</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Utility</div>
-                                <div class="rf-ccard-title">大小写转换</div>
-                                <div class="rf-ccard-desc">一键实现首字母大写规范转换。</div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
+<div class="section-header"><h2>数据与解析<span>。深入业务核心。</span></h2></div>
+<div class="shelf-container">
+    <button class="arrow-btn arrow-left" onclick="move('row2', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <button class="arrow-btn arrow-right" onclick="move('row2', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+    <div class="scroll-mask">
+        <div class="scroll-wrapper" id="row2">
+            <a href="seo-parser.html" class="card">
+                <div class="card-tag">Search</div>
+                <h3 class="card-title">SEO 解析校验</h3>
+                <p class="card-desc">批量解析 Search Terms 字符超限情况，一键导出。</p>
+                <div class="card-icon">🔍</div>
+            </a>
+            <a href="word-frequency.html" class="card">
+                <div class="card-tag">Insight</div>
+                <h3 class="card-title">词频统计分析</h3>
+                <p class="card-desc">从竞品评论中挖掘高频词，精准筛选转化关键词。</p>
+                <div class="card-icon">📊</div>
+            </a>
+            <a href="amazon-sku-aggregator.html" class="card">
+                <div class="card-tag">Operation</div>
+                <h3 class="card-title">SKU 销量聚合</h3>
+                <p class="card-desc">自动将子体汇总至父体销量，简化报表处理效率。</p>
+                <div class="card-icon">🧮</div>
+            </a>
         </div>
-    </section>
+    </div>
+</div>
 
-    <section class="rs-cardsshelf">
-        <div class="rs-cards-shelf-header">
-            <h2 class="rs-cards-shelf-title">数据与解析<span>。深入业务核心。</span></h2>
+<div class="section-header"><h2>多媒体处理<span>。惊艳你的视觉。</span></h2></div>
+<div class="shelf-container">
+    <button class="arrow-btn arrow-left" onclick="move('row3', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <button class="arrow-btn arrow-right" onclick="move('row3', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+    <div class="scroll-mask">
+        <div class="scroll-wrapper" id="row3">
+            <a href="image-resizer.html" class="card">
+                <div class="card-tag">Visual</div>
+                <h3 class="card-title">主图尺寸缩放</h3>
+                <p class="card-desc">批量调整为 1600x1600 白底规格，适配系统要求。</p>
+                <div class="card-icon">🖼️</div>
+            </a>
+            <a href="image-hosting.html" class="card">
+                <div class="card-tag">Storage</div>
+                <h3 class="card-title">自动图床工具</h3>
+                <p class="card-desc">一键上传获取 Raw 链接，加速 Listing 上架流程。</p>
+                <div class="card-icon">☁️</div>
+            </a>
+            <a href="html-editor.html" class="card">
+                <div class="card-tag">Design</div>
+                <h3 class="card-title">HTML 编辑器</h3>
+                <p class="card-desc">可视化生成亚马逊 A+ 或描述所需的合规代码。</p>
+                <div class="card-icon">🎨</div>
+            </a>
         </div>
-
-        <div class="rf-cards-scroller">
-            <div class="paddlenav">
-                <button class="paddlenav-arrow" onclick="scrollShelf('shelf-2', -1)">
-                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
-                <button class="paddlenav-arrow" onclick="scrollShelf('shelf-2', 1)">
-                    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </button>
-            </div>
-
-            <div class="rf-cards-scroller-crop">
-                <div class="rf-cards-scroller-content" id="shelf-2">
-                    <div class="rf-cards-scroller-platter">
-                        <a href="#" class="rf-ccard">
-                            <div class="rf-ccard-visual">🔍</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Search</div>
-                                <div class="rf-ccard-title">SEO 解析校验</div>
-                                <div class="rf-ccard-desc">批量解析 Search Terms 字符超限。</div>
-                            </div>
-                        </a>
-                        <a href="#" class="rf-ccard">
-                            <div class="rf-ccard-visual">📊</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Insight</div>
-                                <div class="rf-ccard-title">词频统计分析</div>
-                                <div class="rf-ccard-desc">挖掘评论高频词，锁定转化核心。</div>
-                            </div>
-                        </a>
-                        <a href="#" class="rf-ccard">
-                            <div class="rf-ccard-visual">🧮</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Finance</div>
-                                <div class="rf-ccard-title">SKU 销量聚合</div>
-                                <div class="rf-ccard-desc">自动汇总销量，简化报表流程。</div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
+    </div>
+</div>
 
 <div class="modal-overlay" id="modal">
     <div class="modal">
-        <h2>账户管理</h2>
+        <h2 style="margin-top:0">账户</h2>
         <input type="text" id="acc" class="apple-input" placeholder="账号">
         <input type="password" id="pwd" class="apple-input" placeholder="密码">
-        <button class="apple-btn" onclick="handleAuth()">登录</button>
-        <p style="text-align:center; font-size:12px; color:var(--f-text-secondary); cursor:pointer; margin-top:20px;" onclick="toggleModal()">取消</p>
+        <button class="apple-btn-primary" onclick="handleAuth()">继续</button>
+        <p style="text-align:center; font-size:13px; color:var(--apple-subtext); cursor:pointer; margin-top:15px" onclick="toggleModal()">取消</p>
     </div>
 </div>
 
 <script>
-    // 滚动逻辑：每次滚动一张卡片的宽度
-    function scrollShelf(elementId, direction) {
-        const scroller = document.getElementById(elementId);
-        const cardWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-width'));
-        const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-gap'));
-        scroller.scrollBy({ left: direction * (cardWidth + gap), behavior: 'smooth' });
+    function move(id, d) { 
+        const wrapper = document.getElementById(id);
+        const cardWidth = 310 + 22; // 卡片宽 + 间距
+        wrapper.scrollBy({ left: d * cardWidth, behavior: 'smooth' }); 
     }
 
-    function toggleModal() {
+    function toggleModal() { 
         const m = document.getElementById('modal');
         m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
     }
@@ -322,8 +258,8 @@
     function handleAuth() {
         const acc = document.getElementById('acc').value;
         const pwd = document.getElementById('pwd').value;
-        if (acc === 'admin' && pwd === 'admin') {
-            localStorage.setItem('current_user', JSON.stringify({user:'Shawn', type:'Founder'}));
+        if (acc === 'admin' && pwd === 'admin') { 
+            localStorage.setItem('current_user', JSON.stringify({user: 'Shawn', type: 'Founder'}));
             location.reload();
         } else { alert('验证失败'); }
     }
