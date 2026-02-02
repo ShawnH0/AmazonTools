@@ -2,247 +2,234 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>GitHub 云同步词库 & AI 优化 - Amazon 工具箱</title>
+    <title>品牌词清理专家 - Amazon 工具箱</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #1890ff; --bg: #f0f2f5; --success: #52c41a; --error: #ff4d4f; --warning: #faad14; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; }
-        .container { width: 100%; max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        .container { width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         
         /* 导航与配置 */
         .nav-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .config-card { background: white; border-radius: 12px; padding: 15px 20px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
-        .gh-config-row { display: grid; grid-template-columns: 1fr 1fr 1fr 150px; gap: 15px; background: #f0f5ff; padding: 12px; border-radius: 8px; border: 1px solid #adc6ff; margin-bottom: 10px; }
-        .repo-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f6ffed; padding: 12px; border-radius: 8px; border: 1px solid #b7eb8f; }
+        .config-row { display: grid; grid-template-columns: 1fr 1.5fr 1fr auto; gap: 15px; align-items: end; }
+        .repo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; }
         
-        .config-item { display: flex; flex-direction: column; gap: 4px; }
-        .config-item label { font-size: 11px; color: #595959; font-weight: bold; }
-        .config-item input, .config-item textarea { padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; }
-        .config-item textarea { height: 45px; resize: none; }
+        label { font-size: 12px; font-weight: bold; color: #595959; margin-bottom: 4px; display: block; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
+        textarea { height: 80px; resize: vertical; }
 
-        /* 工作区布局 */
-        .workspace { display: flex; gap: 15px; flex: 1; overflow: hidden; }
-        .main-panel { flex: 1.5; background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
-        .preview-panel { flex: 1.2; background: white; border-radius: 12px; padding: 15px; overflow-y: auto; border-left: 5px solid var(--primary); }
+        /* 工作区 */
+        .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
+        .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
 
-        .btn-group { display: flex; gap: 8px; margin-bottom: 12px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .btn { padding: 8px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; }
         .btn-blue { background: var(--primary); color: white; }
+        .btn-green { background: var(--success); color: white; }
+        .btn-red { background: #fff1f0; color: var(--error); border: 1px solid #ffa39e; }
         .btn-outline { background: white; border: 1px solid #d9d9d9; color: #595959; }
-        .btn-sync { background: #52c41a; color: white; }
-        
-        .table-wrap { flex: 1; overflow: auto; border: 1px solid #f0f0f0; border-radius: 4px; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .table-wrap { flex: 1; overflow: auto; border: 1px solid #f0f0f0; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { background: #fafafa; padding: 10px; text-align: left; position: sticky; top: 0; }
+        th { background: #fafafa; padding: 10px; border-bottom: 2px solid #f0f0f0; position: sticky; top: 0; z-index: 10; }
         td { padding: 8px; border-bottom: 1px solid #f0f0f0; }
         
-        .risk-tag { background: var(--error); color: white; padding: 0 4px; border-radius: 3px; font-weight: bold; }
+        .highlight-del { color: var(--error); text-decoration: line-through; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="nav-header">
-        <div style="font-weight: bold; font-size: 18px;">Amazon Listing 云词库管理系统</div>
-        <div id="syncStatus" style="font-size: 12px; color: #8c8c8c;">未同步到 GitHub</div>
+        <a href="index.html" style="text-decoration:none; color:var(--primary); font-weight:bold;">🏠 返回工具箱首页</a>
+        <div style="font-weight: bold; font-size: 18px;">🛡️ 品牌词/违规词云端剔除工具</div>
+        <div id="status" style="font-size: 12px; color: #999;">云端同步：未连接</div>
     </div>
 
-    <div class="config-card">
-        <div class="gh-config-row">
-            <div class="config-item">
-                <label>GitHub Token (Repo 权限)</label>
-                <input type="password" id="ghToken" placeholder="ghp_xxxx">
-            </div>
-            <div class="config-item">
-                <label>仓库路径 (Username/Repo)</label>
-                <input type="text" id="ghRepo" placeholder="ShawnHo/Amazon-Tools">
-            </div>
-            <div class="config-item">
-                <label>文件名</label>
-                <input type="text" id="ghFile" value="brand_repo.json">
-            </div>
-            <button class="btn btn-sync" onclick="syncWithGitHub()">🔄 立即云同步</button>
+    <div class="card">
+        <div class="config-row">
+            <div><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_xxxx"></div>
+            <div><label>GitHub 仓库 (User/Repo)</label><input type="text" id="ghRepo" placeholder="ShawnHo/Amazon-Store"></div>
+            <div><label>词库文件名 (已锁定)</label><input type="text" value="brand_repo.json" disabled style="background:#f5f5f5;"></div>
+            <button class="btn btn-blue" onclick="syncFromCloud()">🔄 拉取云词库</button>
         </div>
-
-        <div class="repo-section">
-            <div class="config-item">
-                <label>⚖️ 品牌收纳 (逗号分隔)</label>
-                <textarea id="brandWords"></textarea>
-            </div>
-            <div class="config-item">
-                <label>🚫 禁售词收纳 (逗号分隔)</label>
-                <textarea id="restrictedWords"></textarea>
-            </div>
+        <div class="repo-row">
+            <div><label>⚖️ 品牌收纳库 (自动去重)</label><textarea id="brandWords"></textarea></div>
+            <div><label>🚫 禁售词收纳库 (自动去重)</label><textarea id="restrictedWords"></textarea></div>
         </div>
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <div style="font-size:12px; color:#666;">* 保存后将自动与 GitHub 云端数据合并去重</div>
-            <button class="btn btn-blue" onclick="saveAndPush()">💾 保存并推送云端</button>
+        <div style="text-align: right; margin-top: 10px;">
+            <button class="btn btn-green" onclick="pushToCloud()">📤 保存并更新到云端</button>
         </div>
     </div>
 
     <div class="workspace">
-        <div class="main-panel">
+        <div class="panel">
             <div class="btn-group">
-                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📤 上传 Listing 表格</button>
+                <span style="font-weight:bold; line-height:32px;">📝 纯文本剔除</span>
+                <button class="btn btn-blue" style="margin-left:auto" onclick="processText()">🚀 开始剔除</button>
+                <button class="btn btn-outline" onclick="clearText()">🧹 清除</button>
+            </div>
+            <textarea id="textInput" style="flex:1; height:auto;" placeholder="请在此粘贴需要剔除品牌词的文本..."></textarea>
+            <div id="textOutput" class="table-wrap" style="background:#f9f9f9; padding:10px; margin-top:10px; font-size:13px; line-height:1.6; white-space: pre-wrap;"></div>
+        </div>
+
+        <div class="panel">
+            <div class="btn-group">
+                <span style="font-weight:bold; line-height:32px;">📊 表格批量剔除</span>
+                <button class="btn btn-outline" style="margin-left:auto" onclick="document.getElementById('fileInput').click()">📤 上传 Excel</button>
+                <button class="btn btn-blue" id="runTableBtn" onclick="processTable()" disabled>🚀 批量剔除</button>
+                <button class="btn btn-green" id="exportBtn" onclick="exportExcel()" disabled>📊 导出结果</button>
+                <button class="btn btn-red" onclick="clearTable()">🧹 清除</button>
                 <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFile(this.files[0])">
             </div>
             <div class="table-wrap"><table id="dataTable"><thead id="tHead"></thead><tbody id="tBody"></tbody></table></div>
-        </div>
-
-        <div class="preview-panel">
-            <h3 style="margin:0;">🔍 云词库扫描预览</h3>
-            <div id="previewContent" style="margin-top:20px; color:#999; text-align:center;">选择行以执行云端风险扫描</div>
         </div>
     </div>
 </div>
 
 <script>
     let rawData = [];
-    let currentSHA = ""; // GitHub 文件 SHA 标识，用于解决重名/冲突
+    let currentSHA = "";
 
     window.onload = () => {
-        // 读取本地缓存的配置
         document.getElementById('ghToken').value = localStorage.getItem('sh_gh_token') || '';
         document.getElementById('ghRepo').value = localStorage.getItem('sh_gh_repo') || '';
-        document.getElementById('ghFile').value = localStorage.getItem('sh_gh_file') || 'brand_repo.json';
-        
-        // 如果有 Token，自动同步一次
-        if(document.getElementById('ghToken').value) syncWithGitHub();
+        if(document.getElementById('ghToken').value) syncFromCloud();
     };
 
-    // --- GitHub 核心同步引擎 ---
-    async function syncWithGitHub() {
+    // --- GitHub 云端逻辑 ---
+    async function syncFromCloud() {
         const token = document.getElementById('ghToken').value;
         const repo = document.getElementById('ghRepo').value;
-        const file = document.getElementById('ghFile').value;
+        if(!token || !repo) return alert("请完整填写 GitHub 配置");
 
-        if(!token || !repo) return alert("请先填写 GitHub 配置");
-
-        const url = `https://api.github.com/repos/${repo}/contents/${file}`;
-        
         try {
-            const res = await fetch(url, {
-                headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
+            const res = await fetch(`https://api.github.com/repos/${repo}/contents/brand_repo.json`, {
+                headers: { "Authorization": `token ${token}` }
             });
-
-            if(res.status === 200) {
+            if(res.ok) {
                 const data = await res.json();
                 currentSHA = data.sha;
                 const content = JSON.parse(atob(data.content));
-                
-                // 更新 UI
                 document.getElementById('brandWords').value = (content.brands || []).join(', ');
                 document.getElementById('restrictedWords').value = (content.restricted || []).join(', ');
-                document.getElementById('syncStatus').innerText = `✅ 已同步云端 (SHA: ${currentSHA.substring(0,7)})`;
-                document.getElementById('syncStatus').style.color = "var(--success)";
-            } else if(res.status === 404) {
-                alert("云端未找到文件，请点击保存以创建新词库");
+                document.getElementById('status').innerText = "云端同步：已连接";
+                document.getElementById('status').style.color = "var(--success)";
             }
-        } catch (e) {
-            alert("同步失败，请检查 Token 或网络");
-        }
+        } catch (e) { alert("云端读取失败，请检查配置或文件是否存在"); }
     }
 
-    async function saveAndPush() {
+    async function pushToCloud() {
         const token = document.getElementById('ghToken').value;
         const repo = document.getElementById('ghRepo').value;
-        const file = document.getElementById('ghFile').value;
-
-        // 1. 本地配置保存
         localStorage.setItem('sh_gh_token', token);
         localStorage.setItem('sh_gh_repo', repo);
-        localStorage.setItem('sh_gh_file', file);
 
-        // 2. 格式化当前输入数据
-        const process = (id) => [...new Set(document.getElementById(id).value.split(/[,，\n]/).map(w => w.trim().toLowerCase()).filter(w => w))];
-        const brands = process('brandWords');
-        const restricted = process('restrictedWords');
+        const br = [...new Set(document.getElementById('brandWords').value.split(/[,，\n]/).map(w => w.trim().toLowerCase()).filter(w => w))];
+        const rs = [...new Set(document.getElementById('restrictedWords').value.split(/[,，\n]/).map(w => w.trim().toLowerCase()).filter(w => w))];
 
-        const bodyData = {
-            brands: brands,
-            restricted: restricted,
-            lastUpdated: new Date().toLocaleString()
-        };
+        const body = { brands: br, restricted: rs, lastUpdate: new Date().toISOString() };
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/brand_repo.json`, {
+            method: 'PUT',
+            headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message: "Sync brand repo",
+                content: btoa(unescape(encodeURIComponent(JSON.stringify(body, null, 2)))),
+                sha: currentSHA
+            })
+        });
 
-        // 3. 推送到 GitHub
-        const url = `https://api.github.com/repos/${repo}/contents/${file}`;
-        const payload = {
-            message: "Update brand repo via Amazon Listing Tool",
-            content: btoa(JSON.stringify(bodyData, null, 2)),
-            sha: currentSHA // 核心：传入 SHA 避免 409 冲突
-        };
-
-        try {
-            const res = await fetch(url, {
-                method: 'PUT',
-                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if(res.ok) {
-                const result = await res.json();
-                currentSHA = result.content.sha; // 更新最新的 SHA
-                alert("🎉 云端词库更新成功！");
-                syncWithGitHub();
-            } else {
-                const err = await res.json();
-                alert(`推送失败: ${err.message}`);
-            }
-        } catch (e) {
-            alert("推送过程中发生错误");
+        if(res.ok) {
+            const data = await res.json();
+            currentSHA = data.content.sha;
+            alert("✅ 云端词库已更新！");
         }
     }
 
-    // --- 风险扫描预览 ---
-    function scanText(text) {
-        if(!text) return '-';
-        const brs = document.getElementById('brandWords').value.split(',').map(s => s.trim());
-        const rss = document.getElementById('restrictedWords').value.split(',').map(s => s.trim());
+    // --- 核心剔除引擎 ---
+    function performCleanup(text) {
+        if(!text) return "";
+        let cleaned = String(text);
+        const br = document.getElementById('brandWords').value.split(/[,，]/).map(w => w.trim()).filter(w => w);
+        const rs = document.getElementById('restrictedWords').value.split(/[,，]/).map(w => w.trim()).filter(w => w);
         
-        let html = text;
-        [...brs, ...rss].forEach(word => {
-            if(!word) return;
+        const allWords = [...new Set([...br, ...rs])];
+        // 按长度降序排列，防止“Apple Watch”中的“Apple”先被替换导致逻辑混乱
+        allWords.sort((a, b) => b.length - a.length);
+
+        allWords.forEach(word => {
             const reg = new RegExp(`\\b${word}\\b`, 'gi');
-            html = html.replace(reg, `<span class="risk-tag">$&</span>`);
+            cleaned = cleaned.replace(reg, ""); // 直接移除
         });
-        return html;
+        
+        // 清理多余空格
+        return cleaned.replace(/\s+/g, ' ').trim();
     }
 
-    function updatePreview(i) {
-        const row = rawData[i];
-        document.getElementById('previewContent').innerHTML = `
-            <div style="text-align:left;">
-                <p><b>Title 风险扫描:</b></p>
-                <div style="border:1px solid #eee; padding:10px;">${scanText(row.Title)}</div>
-                <p><b>Description 风险扫描:</b></p>
-                <div style="border:1px solid #eee; padding:10px;">${scanText(row['Product Description'])}</div>
-            </div>
-        `;
+    // --- 文本处理 ---
+    function processText() {
+        const input = document.getElementById('textInput').value;
+        const output = performCleanup(input);
+        document.getElementById('textOutput').innerText = output;
     }
 
-    // --- 基础表格处理 ---
+    function clearText() {
+        document.getElementById('textInput').value = "";
+        document.getElementById('textOutput').innerText = "";
+    }
+
+    // --- 表格处理 ---
     function handleFile(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const wb = XLSX.read(data, {type:'array'});
+            const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
             rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             renderTable();
+            document.getElementById('runTableBtn').disabled = false;
         };
         reader.readAsArrayBuffer(file);
     }
 
     function renderTable() {
-        const tbody = document.getElementById('tBody');
         const thead = document.getElementById('tHead');
+        const tbody = document.getElementById('tBody');
         if(rawData.length > 0) {
             const keys = Object.keys(rawData[0]);
             thead.innerHTML = `<tr>${keys.map(k => `<th>${k}</th>`).join('')}</tr>`;
-            tbody.innerHTML = rawData.map((row, i) => `<tr onclick="updatePreview(${i})">${keys.map(k => `<td>${row[k]||''}</td>`).join('')}</tr>`).join('');
+            tbody.innerHTML = rawData.map(row => `<tr>${keys.map(k => `<td>${row[k]||''}</td>`).join('')}</tr>`).join('');
         }
     }
-</script>
 
+    function processTable() {
+        rawData = rawData.map(row => {
+            const newRow = {};
+            for(let key in row) {
+                newRow[key] = performCleanup(row[key]);
+            }
+            return newRow;
+        });
+        renderTable();
+        document.getElementById('exportBtn').disabled = false;
+        alert("✅ 表格品牌词已全量剔除！");
+    }
+
+    function exportExcel() {
+        const ws = XLSX.utils.json_to_sheet(rawData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "CleanedData");
+        XLSX.writeFile(wb, `Cleaned_Listing_${Date.now()}.xlsx`);
+    }
+
+    function clearTable() {
+        rawData = [];
+        document.getElementById('tHead').innerHTML = "";
+        document.getElementById('tBody').innerHTML = "";
+        document.getElementById('runTableBtn').disabled = true;
+        document.getElementById('exportBtn').disabled = true;
+    }
+</script>
 </body>
 </html>
