@@ -5,81 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shawn 的跨境电商工具箱</title>
     <style>
-        :root { --primary: #1890ff; --hover: #40a9ff; --bg: #f0f2f5; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 40px 20px; }
+        :root { --primary: #1890ff; --hover: #40a9ff; --bg: #f0f2f5; --admin: #ff4d4f; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 40px 20px; }
         
+        /* 顶部导航控制 */
+        .top-nav { position: fixed; top: 20px; right: 20px; display: flex; gap: 12px; z-index: 100; }
+        .config-btn { background: white; border: 1px solid #d9d9d9; padding: 8px 18px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: 0.3s; color: #595959; font-weight: 500; }
+        .config-btn:hover { border-color: var(--primary); color: var(--primary); }
+
         .header { text-align: center; margin-bottom: 50px; }
         .header h1 { color: #262626; font-size: 2.5rem; margin-bottom: 10px; }
         .header p { color: #8c8c8c; font-size: 1.1rem; }
 
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 24px; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+        
+        /* 卡片基础样式 */
+        .tool-card { background: white; border-radius: 12px; padding: 30px; text-align: center; text-decoration: none; color: inherit; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid transparent; display: flex; flex-direction: column; align-items: center; }
+        .tool-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); border-color: var(--primary); }
+        .tool-card.locked { opacity: 0.7; cursor: not-allowed; }
+        
+        /* 管理员特有卡片样式 */
+        .admin-only-card { border: 1px dashed var(--admin); display: none; } 
+        .admin-only-card .icon { background: #fff1f0 !important; color: var(--admin); }
 
-        .tool-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            text-decoration: none;
-            color: inherit;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .tool-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
-            border-color: var(--primary);
-        }
-
-        .icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            background: #e6f7ff;
-            width: 80px;
-            height: 80px;
-            line-height: 80px;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
+        .icon { font-size: 48px; margin-bottom: 20px; background: #e6f7ff; width: 80px; height: 80px; line-height: 80px; border-radius: 50%; transition: 0.3s; }
         .tool-card:hover .icon { background: var(--primary); color: white; }
-
         .tool-card h3 { margin: 10px 0; font-size: 1.4rem; color: #1f1f1f; }
         .tool-card p { color: #595959; font-size: 0.95rem; line-height: 1.5; }
+        .badge { background: #52c41a; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-top: 10px; }
 
-        .badge {
-            background: #52c41a;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 10px;
-        }
+        /* 弹窗样式 (仿图四) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; border-radius: 12px; width: 380px; padding: 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .modal-h { font-size: 18px; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: #262626; }
+        .close-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 20px; color: #bfbfbf; }
+        
+        .form-item { margin-bottom: 18px; }
+        .form-item label { display: block; font-size: 13px; color: #595959; margin-bottom: 8px; font-weight: 500; }
+        .form-item input, .form-item select { width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        .form-item input:focus { border-color: var(--primary); }
+        
+        .primary-btn { width: 100%; padding: 12px; background: #ff4d4f; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 15px; transition: 0.3s; }
+        .primary-btn:hover { opacity: 0.9; }
+        .secondary-btn { width: 100%; padding: 10px; background: #f5f5f5; color: #595959; border: 1px solid #d9d9d9; border-radius: 8px; cursor: pointer; margin-top: 10px; }
 
-        @media (max-width: 600px) {
-            .header h1 { font-size: 1.8rem; }
-            .grid { grid-template-columns: 1fr; }
-        }
+        .user-info-box { background: #f9f9f9; border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 12px; line-height: 1.8; color: #8c8c8c; }
     </style>
 </head>
 <body>
+
+<div class="top-nav">
+    <div id="welcomeMsg" style="align-self: center; font-size: 13px; color: #8c8c8c;"></div>
+    <button class="config-btn" onclick="openModal('loginModal')">👤 <span id="loginBtnText">登录 / 账户</span></button>
+</div>
 
 <div class="header">
     <h1>🚀 Amazon 卖家工具箱</h1>
     <p>提升运营效率的专属小工具集合</p>
 </div>
 
-<div class="grid">
+<div class="grid" id="mainGrid">
+    <a href="user-management.html" class="tool-card admin-only-card" id="adminCard">
+        <div class="icon">🔑</div>
+        <h3>用户管理模块</h3>
+        <p>管理员权限：新增/删除用户，修改套餐时效与权限</p>
+    </a>
+
     <a href="listing-ai-rewriter.html" class="tool-card">
         <div class="icon">💻</div>
         <h3>AI Listing 优化工具</h3>
@@ -101,14 +92,14 @@
     <a href="image-resizer.html" class="tool-card">
         <div class="icon">🖼️</div>
         <h3>主图尺寸缩放</h3>
-        <p>批量将图片调整为 1600*1600 像素，自动白底填充，支持 ZIP 和 JPG 导出</p>
+        <p>批量将图片调整为 1600*1600 像素，自动白底填充</p>
     </a>
 
     <a href="image-hosting.html" class="tool-card">
-    <div class="icon">☁️</div>
-    <h3>自动图床工具</h3>
-    <p>批量上传图片到图床，自动生成 Raw 链接并导出 Excel 表格</p>
-</a>
+        <div class="icon">☁️</div>
+        <h3>自动图床工具</h3>
+        <p>批量上传图片到图床，自动生成 Raw 链接并导出 Excel</p>
+    </a>
 
     <a href="deduplicator.html" class="tool-card">
         <div class="icon">✂️</div>
@@ -119,53 +110,140 @@
     <a href="case-converter.html" class="tool-card">
         <div class="icon">📝</div>
         <h3>大小写转换工具</h3>
-        <p>一键实现英文全大写、全小写、或单词首字母大写，优化标题</p>
+        <p>一键实现英文全大写、全小写、或单词首字母大写</p>
     </a>
 
     <a href="word-frequency.html" class="tool-card">
         <div class="icon">📊</div>
         <h3>词频统计工具</h3>
-        <p>深度分析文案高频词，支持 N-Gram 词组分析，精准筛选核心关键词</p>
+        <p>深度分析文案高频词，支持 N-Gram 词组分析</p>
     </a>
 
     <a href="html-editor.html" class="tool-card">
         <div class="icon">🎨</div>
         <h3>可视化 HTML 编辑器</h3>
-        <p>像 Word 一样编辑产品描述，自动生成亚马逊后台可用的 HTML 代码</p>
+        <p>像 Word 一样编辑产品描述，生成亚马逊 HTML 代码</p>
     </a>
 
     <a href="amazon-sku-aggregator.html" class="tool-card">
         <div class="icon">🧮</div>
         <h3>SKU 销量聚合</h3>
-        <p>处理订单报告，自动将子体汇总为父体 SKU，统计总销量并排序导出</p>
+        <p>处理订单报告，自动将子体汇总为父体 SKU</p>
     </a>
 
-    <a href="#" class="tool-card" style="opacity: 0.7; cursor: not-allowed;">
+    <a href="#" class="tool-card locked">
         <div class="icon">💰</div>
         <h3>利润计算器</h3>
         <p>自动计算扣除佣金、配送费及头程后的净利润</p>
         <span class="badge" style="background: #bfbfbf;">开发中</span>
     </a>
-
-    <a href="#" class="tool-card" style="opacity: 0.7; cursor: not-allowed;">
-        <div class="icon">📦</div>
-        <h3>FBA 贴标助手</h3>
-        <p>快速生成符合规范的货件标签和条码</p>
-        <span class="badge" style="background: #bfbfbf;">敬请期待</span>
-    </a>
 </div>
 
+<div class="modal-overlay" id="loginModal">
+    <div class="modal">
+        <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+        <div class="modal-h">⚡ API & 账户配置</div>
+        
+        <div id="loginForm">
+            <div class="form-item">
+                <label>账号</label>
+                <input type="text" id="username" placeholder="请输入账号">
+            </div>
+            <div class="form-item">
+                <label>密码</label>
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+            <p style="font-size: 11px; color: #bfbfbf; margin-bottom: 15px;">Key 仅保存在本地浏览器中，不会上传。</p>
+            <button class="primary-btn" onclick="doLogin()">保存并进入</button>
+        </div>
+
+        <div id="userInfo" style="display:none;">
+            <div class="user-info-box">
+                <b>当前用户：</b><span id="curUser"></span><br>
+                <b>账户类型：</b><span id="curType"></span><br>
+                <b>套餐到期：</b><span id="curExpiry"></span>
+            </div>
+            <button class="secondary-btn" onclick="doLogout()">退出当前登录</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. 初始化用户数据库 (模拟)
+    const ADMIN_ACC = { user: 'admin', pass: 'shawn010208', type: '管理员', expiry: '2099-12-31' };
+    
+    if(!localStorage.getItem('users_db')) {
+        localStorage.setItem('users_db', JSON.stringify([ADMIN_ACC]));
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // 2. 登录逻辑
+    function doLogin() {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const db = JSON.parse(localStorage.getItem('users_db'));
+
+        const userFound = db.find(x => x.user === u && x.pass === p);
+
+        if(userFound) {
+            // VIP 到期检测
+            const now = new Date();
+            if(new Date(userFound.expiry) < now && userFound.type !== '管理员') {
+                userFound.type = '普通用户';
+                localStorage.setItem('users_db', JSON.stringify(db));
+                alert('您的 VIP 已到期，已转为普通权限');
+            }
+
+            localStorage.setItem('current_user', JSON.stringify(userFound));
+            updateUI();
+            closeModal('loginModal');
+        } else {
+            alert('账号或密码错误');
+        }
+    }
+
+    function doLogout() {
+        localStorage.removeItem('current_user');
+        updateUI();
+        closeModal('loginModal');
+    }
+
+    // 3. UI 状态刷新
+    function updateUI() {
+        const user = JSON.parse(localStorage.getItem('current_user'));
+        const adminCard = document.getElementById('adminCard');
+        const welcome = document.getElementById('welcomeMsg');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const loginForm = document.getElementById('loginForm');
+        const userInfo = document.getElementById('userInfo');
+
+        if(user) {
+            welcome.innerText = `你好, ${user.user}`;
+            loginBtnText.innerText = "账户中心";
+            loginForm.style.display = 'none';
+            userInfo.style.display = 'block';
+            document.getElementById('curUser').innerText = user.user;
+            document.getElementById('curType').innerText = user.type;
+            document.getElementById('curExpiry').innerText = user.expiry;
+
+            // 管理员特权：显示管理模块
+            if(user.user === 'admin') {
+                adminCard.style.display = 'flex';
+            } else {
+                adminCard.style.display = 'none';
+            }
+        } else {
+            welcome.innerText = "";
+            loginBtnText.innerText = "登录 / 账户";
+            loginForm.style.display = 'block';
+            userInfo.style.display = 'none';
+            adminCard.style.display = 'none';
+        }
+    }
+
+    window.onload = updateUI;
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
