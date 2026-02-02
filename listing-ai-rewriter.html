@@ -11,114 +11,117 @@
             --apple-bg: #f5f5f7;
             --apple-blue: #0071e3;
             --apple-gray: #86868b;
+            --apple-red: #ff3b30;
             --radius-main: 22px;
+            --trans: cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         body {
-            font-family: 'Inter', -apple-system, "PingFang SC", sans-serif;
+            font-family: 'Inter', -apple-system, "SF Pro Text", "PingFang SC", sans-serif;
             background-color: var(--apple-bg);
             color: #1d1d1f; margin: 0; height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 导航栏 --- */
+        /* --- 导航 --- */
         .nav {
             height: 52px; background: rgba(251, 251, 253, 0.8);
             backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 32px; border-bottom: 0.5px solid rgba(0,0,0,0.1); z-index: 1000; flex-shrink: 0;
         }
-        .nav-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; color: #1d1d1f; font-weight: 600; }
+        .nav-brand { font-weight: 600; display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
 
-        .api-badge { font-size: 12px; padding: 6px 16px; border-radius: 20px; cursor: pointer; border: none; font-weight: 500; }
-        .status-off { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+        .api-badge { font-size: 12px; padding: 6px 16px; border-radius: 20px; cursor: pointer; border: none; font-weight: 500; transition: 0.2s; }
+        .status-off { background: rgba(255, 59, 48, 0.1); color: var(--apple-red); }
         .status-on { background: rgba(52, 199, 89, 0.1); color: #34c759; }
 
         /* --- 主布局 --- */
         .main-content {
-            flex: 1; display: grid; grid-template-columns: 1.1fr 0.9fr;
+            flex: 1; display: grid; grid-template-columns: 1.15fr 0.85fr;
             gap: 24px; padding: 20px 24px; max-width: 1600px; margin: 0 auto;
             width: 100%; box-sizing: border-box; overflow: hidden;
         }
 
         .workspace { display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 0; }
 
-        /* Prompt 区域 */
+        /* Prompt 容器 */
         .prompt-container { background: #fff; border-radius: var(--radius-main); padding: 20px; flex-shrink: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
         .prompt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .input-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-group label { font-size: 10px; color: var(--apple-gray); font-weight: 700; }
+        .input-group label { font-size: 10px; color: var(--apple-gray); font-weight: 700; display: block; margin-bottom: 6px; letter-spacing: 0.5px; }
+        
         .apple-input {
-            width: 100%; height: 60px; border-radius: 12px; border: 1px solid #d2d2d7;
-            background: #fbfbfd; padding: 10px; font-size: 12px; line-height: 1.4;
-            resize: none; box-sizing: border-box; outline: none; transition: 0.3s;
+            width: 100%; height: 64px; border-radius: 12px; border: 1px solid #d2d2d7;
+            background: #fbfbfd; padding: 12px; font-size: 12px; line-height: 1.5;
+            font-family: inherit; /* 统一字体 */
+            resize: none; box-sizing: border-box; outline: none; transition: 0.2s var(--trans);
         }
-        .apple-input:focus { border-color: var(--apple-blue); background: #fff; }
+        .apple-input:focus { border-color: var(--apple-blue); background: #fff; box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+        .apple-input::placeholder { color: #c1c1c6; }
 
-        .toolbar { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .btn { padding: 8px 16px; border-radius: 18px; font-size: 12px; font-weight: 500; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .toolbar { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 8px 18px; border-radius: 20px; font-size: 12px; font-weight: 500; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; font-family: inherit; }
         .btn-primary { background: var(--apple-blue); color: #fff; }
         .btn-secondary { background: #e8e8ed; color: #1d1d1f; }
-        .btn-danger { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+        .btn-danger { background: rgba(255, 59, 48, 0.08); color: var(--apple-red); }
         .btn-export { background: #34c759; color: #fff; margin-left: auto; }
 
-        /* 表格区域 */
-        .table-section {
-            flex: 1; background: #fff; border-radius: var(--radius-main);
-            overflow: hidden; display: flex; flex-direction: column;
-            border: 1px solid rgba(0,0,0,0.05); min-height: 0;
-        }
-        .table-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
+        /* 表格 */
+        .table-section { flex: 1; background: #fff; border-radius: var(--radius-main); overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.05); min-height: 0; }
+        .table-scroll { flex: 1; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
-        th { background: #fafafa; padding: 12px; text-align: left; position: sticky; top: 0; z-index: 5; border-bottom: 1px solid #eee; color: var(--apple-gray); }
+        th { background: #fafafa; padding: 12px; text-align: left; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #eee; color: var(--apple-gray); font-weight: 600; }
         td { padding: 12px; border-bottom: 1px solid #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        tr:hover { background: #fbfbff; cursor: pointer; }
-        tr.selected { background: rgba(0, 113, 227, 0.05); }
+        tr:hover td { background: #fbfbff; cursor: pointer; }
+        tr.selected td { background: rgba(0, 113, 227, 0.05); }
 
-        /* 右侧预览面板适配高度 */
-        .preview-panel {
-            background: #fff; border-radius: var(--radius-main); padding: 24px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.04); display: flex; flex-direction: column; 
-            height: 100%; min-height: 0; box-sizing: border-box;
-        }
-        .preview-body { flex: 1; overflow-y: auto; padding-right: 10px; margin-top: 15px; }
+        .status-tag { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+        .tag-waiting { background: #f5f5f7; color: #86868b; }
+        .tag-running { background: #e0f2ff; color: var(--apple-blue); }
+        .tag-done { background: #e3f9e5; color: #34c759; }
+        .tag-error { background: rgba(255, 59, 48, 0.1); color: var(--apple-red); }
+
+        /* 预览面板 */
+        .preview-panel { background: #fff; border-radius: var(--radius-main); padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); display: flex; flex-direction: column; height: 100%; min-height: 0; }
+        .preview-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid #f2f2f2; flex-shrink: 0; }
+        .preview-body { flex: 1; overflow-y: auto; padding-top: 20px; }
         .listing-item { margin-bottom: 24px; }
-        .listing-label { font-size: 11px; font-weight: 700; color: var(--apple-gray); margin-bottom: 8px; text-transform: uppercase; border-left: 3px solid var(--apple-blue); padding-left: 8px; }
-        .listing-val { font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; background: #f9f9fb; padding: 14px; border-radius: 12px; border: 1px solid #f0f0f2; }
+        .listing-label { font-size: 10px; font-weight: 800; color: var(--apple-gray); margin-bottom: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; }
+        .listing-val { font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; background: #f9f9fb; padding: 16px; border-radius: 14px; border: 1px solid #f0f0f2; }
+        
+        .view-toggle { font-size: 10px; background: #eee; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: inherit; }
+        .view-toggle.active { background: var(--apple-blue); color: #fff; }
 
         /* 弹窗 */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal { background: #fff; width: 420px; border-radius: 24px; padding: 32px; position: relative; }
-        .modal-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #d2d2d7; margin-top: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 13px; outline: none; }
-        
-        .status-tag { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
-        .tag-waiting { background: #f5f5f7; color: #86868b; }
-        .tag-done { background: #e3f9e5; color: #34c759; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal { background: #fff; width: 400px; border-radius: 28px; padding: 32px; box-shadow: 0 24px 64px rgba(0,0,0,0.15); }
+        .modal-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #d2d2d7; margin-top: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 14px; outline: none; font-family: inherit; }
     </style>
 </head>
 <body>
 
 <nav class="nav">
     <a href="#" class="nav-brand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        Shawn's Listing Pro
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        Shawn Listing Pro
     </a>
-    <button id="configBtn" class="api-badge status-off" onclick="toggleModal(true)">API 配置</button>
+    <button id="configBtn" class="api-badge status-off" onclick="toggleModal(true)">API 配置未就绪</button>
 </nav>
 
 <main class="main-content">
     <div class="workspace">
         <section class="prompt-container">
             <div class="prompt-grid">
-                <div class="input-group"><label>TITLE (APPEND PROMPT)</label><textarea id="p_title" class="apple-input" placeholder="输入额外要求..."></textarea></div>
-                <div class="input-group"><label>SEARCH TERMS (APPEND PROMPT)</label><textarea id="p_st" class="apple-input" placeholder="输入额外要求..."></textarea></div>
-                <div class="input-group"><label>BULLET POINTS (APPEND PROMPT)</label><textarea id="p_bp" class="apple-input" placeholder="输入额外要求..."></textarea></div>
-                <div class="input-group"><label>DESCRIPTION (APPEND PROMPT)</label><textarea id="p_desc" class="apple-input" placeholder="输入额外要求..."></textarea></div>
+                <div class="input-group"><label>TITLE PROMPT</label><textarea id="p_title" class="apple-input" placeholder="输入标题优化指令..."></textarea></div>
+                <div class="input-group"><label>SEARCH TERMS PROMPT</label><textarea id="p_st" class="apple-input" placeholder="输入搜索词指令..."></textarea></div>
+                <div class="input-group"><label>BULLET POINTS PROMPT</label><textarea id="p_bp" class="apple-input" placeholder="输入五点描述指令..."></textarea></div>
+                <div class="input-group"><label>DESCRIPTION PROMPT</label><textarea id="p_desc" class="apple-input" placeholder="输入详情描述指令..."></textarea></div>
             </div>
             <div class="toolbar">
-                <button class="btn btn-secondary" onclick="downloadTemplate()">📥 模板下载</button>
+                <button class="btn btn-secondary" onclick="downloadTemplate()">📥 下载模板</button>
                 <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📤 上传 Excel</button>
-                <button id="runBtn" class="btn btn-primary" onclick="handleRun()">🚀 开始优化</button>
+                <button id="runBtn" class="btn btn-primary" onclick="handleRun()">🚀 开始批量优化</button>
                 <button class="btn btn-danger" onclick="clearData()">🧹 清除数据</button>
                 <button id="exportBtn" class="btn btn-export" style="display:none" onclick="exportExcel()">💾 导出结果</button>
                 <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFile(this.files[0])">
@@ -126,18 +129,18 @@
         </section>
 
         <section class="table-section">
-            <div class="table-scroll">
+            <div class="table-scroll" id="tableScroll">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 60px; text-align: center;">序号</th>
-                            <th style="width: 40%;">原始标题</th>
-                            <th style="width: 40%;">实时优化预览</th>
-                            <th style="width: 15%;">处理状态</th>
+                            <th style="width: 50px; text-align: center;">#</th>
+                            <th style="width: 45%;">原始标题</th>
+                            <th style="width: 45%;">优化预览</th>
+                            <th style="width: 120px;">状态</th>
                         </tr>
                     </thead>
                     <tbody id="tBody">
-                        <tr><td colspan="4" style="text-align:center; padding:100px; color:#c1c1c6;">等待数据导入...</td></tr>
+                        <tr><td colspan="4" style="text-align:center; padding:100px; color:#c1c1c6;">请先上传包含 Listing 的 Excel 文件</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -145,61 +148,67 @@
     </div>
 
     <aside class="preview-panel">
-        <div style="font-size:18px; font-weight:600; padding-bottom:15px; border-bottom:1px solid #eee;">深度预览面板</div>
+        <div class="preview-header">
+            <div style="font-weight:700;">深度预览面板</div>
+            <div id="rowCounter" style="font-size:11px; color:var(--apple-gray);">未选择行</div>
+        </div>
         <div id="previewBody" class="preview-body">
-            <div style="text-align:center; color:#c1c1c6; margin-top:150px;">点击列表行<br>在此查看完整Listing详情</div>
+            <div style="text-align:center; color:#c1c1c6; margin-top:150px;">点击列表行查看完整对比</div>
         </div>
     </aside>
 </main>
 
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
-        <button onclick="toggleModal(false)" style="position:absolute; right:20px; top:20px; border:none; background:none; cursor:pointer; font-size:20px; color:#86868b;">×</button>
-        <h3 style="margin-top:0">AI 模型授权</h3>
-        
+        <h3 style="margin:0 0 20px 0;">API 授权设置</h3>
         <label style="font-size:11px; font-weight:700; color:#86868b;">厂商平台</label>
         <select id="apiVendor" class="modal-input" onchange="updateModels()">
             <option value="DeepSeek">DeepSeek</option>
-            <option value="OpenAI">OpenAI / OpenRouter</option>
-            <option value="Gemini">Google Gemini</option>
-            <option value="Doubao">字节豆包 (Ark)</option>
-            <option value="Grok">xAI Grok</option>
+            <option value="OpenAI">OpenAI</option>
+            <option value="Gemini">Gemini</option>
         </select>
-
-        <label style="font-size:11px; font-weight:700; color:#86868b;">选择具体模型</label>
+        <label style="font-size:11px; font-weight:700; color:#86868b;">模型</label>
         <select id="apiModel" class="modal-input"></select>
-
         <label style="font-size:11px; font-weight:700; color:#86868b;">API KEY</label>
         <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-...">
-        
-        <button class="btn btn-primary" style="width:100%; height:46px; justify-content:center; border-radius:12px;" onclick="saveConfig()">保存配置</button>
+        <button class="btn btn-primary" style="width:100%; height:44px; justify-content:center; border-radius:12px;" onclick="saveConfig()">保存并授权</button>
     </div>
 </div>
 
 <script>
-    // 系统核心内置规则
-    const SYSTEM_BASE_PROMPTS = {
-        title: "要求: 150-200 字符。公式: 核心搜索词 + 特色 + 长尾词 + 场景。遵守亚马逊政策，词频控2。禁止品牌名（除非加Compatible with/for）。仅输出标题文本。",
-        st: "要求: 220字符内，常用搜索长尾词，逗号隔开。仅输出关键词内容。",
-        bp: "要求: 包含 [大写标题]：对应的描述，一行展示。字数250左右。精准购买动机。仅输出Bullet Points内容。",
-        desc: "要求: HTML格式（<p>, <li>, <ul>, <strong>）。严禁h标签和style。1500字符内。仅输出详情描述。"
+    // 强制追加：严禁用中文回答
+    const GLOBAL_NEG_PROMPT = "\n\nCRITICAL: Strictly NO Chinese characters in your response! Output MUST be in English only! (严禁用中文回答！！！)";
+
+    const SYSTEM_BASE = {
+        title: "要求: 150-200 字符。公式: 核心词+特色+长尾词+场景。禁止品牌词。仅输出优化后的标题文本。",
+        search_terms: "要求: 220 字符以内，常用搜索长尾词，用逗号隔开。仅输出关键词内容。",
+        bullet_points: "要求: 包含 [大写标题]：对应的描述，必须为一行。不要加粗，字数约250。仅输出对应的一条卖点内容。",
+        description: "要求: 必须 HTML 格式 (<p>, <li>, <ul>, <strong>)。严禁 H 标签。总长 1500 字符以内。仅输出描述内容。"
     };
 
     const MODEL_MAP = {
         "DeepSeek": ["deepseek-chat", "deepseek-reasoner"],
-        "OpenAI": ["gpt-4o", "gpt-4o-mini", "claude-3-5-sonnet"],
-        "Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],
-        "Doubao": ["doubao-pro-32k", "doubao-lite-128k"],
-        "Grok": ["grok-beta"]
+        "OpenAI": ["gpt-4o", "gpt-4o-mini"],
+        "Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"]
     };
 
+    const REQUIRED_FIELDS = ["title", "search terms", "bullet point 1", "bullet point 2", "bullet point 3", "bullet point 4", "bullet point 5", "description"];
+    
     let tableData = [];
-    let config = { key: "", vendor: "DeepSeek", model: "" };
+    let config = JSON.parse(localStorage.getItem('listing_ai_config')) || { key: "", vendor: "DeepSeek", model: "deepseek-chat" };
+    let isRenderMode = true;
+
+    function normalizeKey(k) { return k.toLowerCase().trim().replace(/\s+/g, '_'); }
+
+    if(config.key) {
+        document.getElementById('configBtn').className = 'api-badge status-on';
+        document.getElementById('configBtn').innerText = '授权有效: ' + config.model;
+    }
 
     function updateModels() {
-        const vendor = document.getElementById('apiVendor').value;
-        const select = document.getElementById('apiModel');
-        select.innerHTML = MODEL_MAP[vendor].map(m => `<option value="${m}">${m}</option>`).join('');
+        const v = document.getElementById('apiVendor').value;
+        const s = document.getElementById('apiModel');
+        s.innerHTML = MODEL_MAP[v].map(m => `<option value="${m}">${m}</option>`).join('');
     }
     updateModels();
 
@@ -209,18 +218,18 @@
         config.key = document.getElementById('apiKeyInput').value;
         config.vendor = document.getElementById('apiVendor').value;
         config.model = document.getElementById('apiModel').value;
-        if(!config.key) return alert("请输入Key");
+        if(!config.key) return alert("Key 不能为空");
+        localStorage.setItem('listing_ai_config', JSON.stringify(config));
         document.getElementById('configBtn').className = 'api-badge status-on';
-        document.getElementById('configBtn').innerText = '已授权: ' + config.model;
+        document.getElementById('configBtn').innerText = '授权有效: ' + config.model;
         toggleModal(false);
     }
 
     function downloadTemplate() {
-        const headers = [["title", "search terms", "bullet point 1", "bullet point 2", "bullet point 3", "bullet point 4", "bullet point 5", "description"]];
-        const ws = XLSX.utils.aoa_to_sheet(headers);
+        const ws = XLSX.utils.aoa_to_sheet([REQUIRED_FIELDS]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Listing");
-        XLSX.writeFile(wb, "Shawn_Template.xlsx");
+        XLSX.writeFile(wb, "Listing_Upload_Template.xlsx");
     }
 
     function handleFile(file) {
@@ -228,7 +237,15 @@
         const reader = new FileReader();
         reader.onload = (e) => {
             const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
-            tableData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            if(!raw.length) return alert("文件为空");
+            const headers = Object.keys(raw[0]).map(k => k.toLowerCase().trim());
+            if(!REQUIRED_FIELDS.every(f => headers.includes(f))) return alert("Excel 列名不匹配，请下载模板核对！");
+
+            tableData = raw.map(item => {
+                let n = {}; Object.keys(item).forEach(k => n[normalizeKey(k)] = item[k]);
+                return n;
+            });
             renderTable();
         };
         reader.readAsArrayBuffer(file);
@@ -236,126 +253,148 @@
 
     function renderTable() {
         const tbody = document.getElementById('tBody');
-        if(tableData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:60px; color:#c1c1c6;">暂无数据</td></tr>`;
-            return;
-        }
         tbody.innerHTML = tableData.map((row, i) => `
             <tr onclick="showFullPreview(${i})" id="row-${i}">
-                <td style="text-align:center; color:var(--apple-gray); font-size:11px; font-weight:700;">${i+1}</td>
+                <td style="text-align:center; font-weight:700; color:var(--apple-gray);">${i+1}</td>
                 <td>${row.title || '-'}</td>
-                <td id="opt-title-${i}">${row.opt_title || '-'}</td>
-                <td id="status-${i}"><span class="status-tag tag-waiting">等待任务</span></td>
+                <td id="td-opt-title-${i}">${row.opt_title || '-'}</td>
+                <td id="status-${i}"><span class="status-tag tag-waiting">就绪</span></td>
             </tr>
         `).join('');
-    }
-
-    function clearData() {
-        tableData = [];
-        renderTable();
-        document.getElementById('previewBody').innerHTML = `<div style="text-align:center; color:#c1c1c6; margin-top:150px;">数据已清除</div>`;
-        document.getElementById('exportBtn').style.display = 'none';
-        document.getElementById('fileInput').value = '';
     }
 
     async function handleRun() {
         if(!config.key) return toggleModal(true);
         const btn = document.getElementById('runBtn');
-        btn.disabled = true; btn.innerText = "批量处理中...";
+        btn.disabled = true; btn.innerText = "正在优化...";
 
-        const targetCols = ["title", "search terms", "bullet point 1", "bullet point 2", "bullet point 3", "bullet point 4", "bullet point 5", "description"];
+        const prompts = {
+            title: document.getElementById('p_title').value,
+            search_terms: document.getElementById('p_st').value,
+            bullet_points: document.getElementById('p_bp').value,
+            description: document.getElementById('p_desc').value
+        };
 
         for(let i=0; i<tableData.length; i++) {
-            document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag" style="background:#e0f2ff; color:#0071e3;">优化中...</span>`;
-            
-            const tasks = targetCols.map(col => {
-                const cellValue = tableData[i][col];
-                const baseTitle = tableData[i]['title'] || "";
-                
-                // 1. 获取用户自定义 Prompt
-                let userExtra = "";
-                if(col === 'title') userExtra = document.getElementById('p_title').value;
-                else if(col === 'search terms') userExtra = document.getElementById('p_st').value;
-                else if(col === 'description') userExtra = document.getElementById('p_desc').value;
-                else userExtra = document.getElementById('p_bp').value;
+            const statusBox = document.getElementById(`status-${i}`);
+            try {
+                // 第一组并发：Title + ST
+                statusBox.innerHTML = `<span class="status-tag tag-running">核心词...</span>`;
+                await Promise.all([
+                    processField(i, 'title', prompts.title),
+                    processField(i, 'search_terms', prompts.search_terms)
+                ]);
 
-                // 2. 构造组合 Prompt
-                let finalPrompt = "";
-                const baseRule = SYSTEM_BASE_PROMPTS[col === 'title' ? 'title' : (col === 'search terms' ? 'st' : (col === 'description' ? 'desc' : 'bp'))];
-                
-                if(!cellValue) {
-                    // 空值专用 Prompt：强制要求根据标题生成
-                    finalPrompt = `请根据产品标题【${baseTitle}】，为我重新创作这个产品的 ${col} 内容。要求：${baseRule}。额外要求：${userExtra}`;
-                } else {
-                    // 正常优化 Prompt
-                    finalPrompt = `请为我优化以下产品的 ${col} 内容：${cellValue}。要求：${baseRule}。额外要求：${userExtra}`;
-                }
-                
-                // 如果是空值，则输入内容变为标题辅助AI理解
-                const inputContent = cellValue || `(基于标题生成: ${baseTitle})`;
+                // 第二组并发：Bullet Points (分段处理，确保空值不乱写)
+                statusBox.innerHTML = `<span class="status-tag tag-running">卖点...</span>`;
+                await Promise.all([1,2,3,4,5].map(n => processField(i, `bullet_point_${n}`, prompts.bullet_points, n)));
 
-                return callAI(inputContent, finalPrompt).then(res => {
-                    tableData[i]['opt_'+col] = res;
-                    if(col === 'title') document.getElementById(`opt-title-${i}`).innerText = res;
-                }).catch(err => console.error(err));
-            });
+                // 第三组：Description
+                statusBox.innerHTML = `<span class="status-tag tag-running">详情...</span>`;
+                await processField(i, 'description', prompts.description);
 
-            await Promise.all(tasks);
-            document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag tag-done">已完成</span>`;
+                statusBox.innerHTML = `<span class="status-tag tag-done">已完成</span>`;
+            } catch (err) {
+                statusBox.innerHTML = `<span class="status-tag tag-error" title="${err.message}">接口异常</span>`;
+            }
         }
-        btn.disabled = false; btn.innerText = "🚀 开始优化";
+        btn.disabled = false; btn.innerText = "🚀 开始批量优化";
         document.getElementById('exportBtn').style.display = 'block';
     }
 
-    async function callAI(content, prompt) {
+    async function processField(idx, field, userPrompt, bpIndex = null) {
+        const val = tableData[idx][field];
+        const baseTitle = tableData[idx]['title'] || "";
+        
+        // 核心优化：空值判定与单一字段补全
+        let finalPrompt = "";
+        const baseRule = SYSTEM_BASE[field.includes('bullet') ? 'bullet_points' : field];
+        
+        if (bpIndex) {
+            // 针对 Bullet Point 的特殊精准控制
+            if (!val) {
+                finalPrompt = `Product Title: 【${baseTitle}】\nInstruction: This cell is EMPTY. Please CREATE the Bullet Point NO.${bpIndex} for this product based on the title. ${baseRule}. Your response should ONLY contain this ONE bullet point. ${userPrompt}`;
+            } else {
+                finalPrompt = `Optimize this Bullet Point: "${val}". Product Title: 【${baseTitle}】. ${baseRule}. ${userPrompt}`;
+            }
+        } else {
+            // 普通字段
+            finalPrompt = !val 
+                ? `The ${field} is EMPTY. Create it based on Product Title: 【${baseTitle}】. ${baseRule}. ${userPrompt}`
+                : `Optimize this ${field}: "${val}". ${baseRule}. ${userPrompt}`;
+        }
+
+        // 强制英文约束
+        finalPrompt += GLOBAL_NEG_PROMPT;
+
+        const result = await callAI(finalPrompt);
+        tableData[idx]['opt_' + field] = result;
+        if(field === 'title') document.getElementById(`td-opt-title-${idx}`).innerText = result;
+    }
+
+    async function callAI(p) {
         const urlMap = {
             "DeepSeek": "https://api.deepseek.com/chat/completions",
             "OpenAI": "https://api.openai.com/v1/chat/completions",
-            "Gemini": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-            "Doubao": "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+            "Gemini": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
         };
-        const url = urlMap[config.vendor] || urlMap["OpenAI"];
-
-        const res = await fetch(url, {
+        const res = await fetch(urlMap[config.vendor], {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.key}` },
-            body: JSON.stringify({
-                model: config.model,
-                messages: [{role: "user", content: prompt}] // 这里直接传构造好的组合Prompt
-            })
+            body: JSON.stringify({ model: config.model, messages: [{role: "user", content: p}] })
         });
         const data = await res.json();
-        return data.choices[0].message.content.trim();
+        if(!data.choices || !data.choices[0]) throw new Error("API No Response");
+        return data.choices[0].message.content.trim().replace(/^"|"$/g, ''); // 去除 AI 偶尔带的引号
     }
 
     function showFullPreview(i) {
         document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
         document.getElementById(`row-${i}`).classList.add('selected');
-
+        document.getElementById('rowCounter').innerText = `Row ${i+1}`;
+        
         const r = tableData[i];
         const box = document.getElementById('previewBody');
+        box.scrollTop = 0;
+
         box.innerHTML = `
-            <div class="listing-item"><div class="listing-label">Optimized Title</div><div class="listing-val">${r.opt_title || '-'}</div></div>
-            <div class="listing-item"><div class="listing-label">Search Terms</div><div class="listing-val">${r['opt_search terms'] || '-'}</div></div>
+            <div class="listing-item"><div class="listing-label">OPTIMIZED TITLE</div><div class="listing-val">${r.opt_title || '-'}</div></div>
+            <div class="listing-item"><div class="listing-label">SEARCH TERMS</div><div class="listing-val">${r.opt_search_terms || '-'}</div></div>
             <div class="listing-item">
-                <div class="listing-label">Bullet Points</div>
-                <div class="listing-val">${[1,2,3,4,5].map(n => r['opt_bullet point '+n] || '').filter(v => v).join('\n\n')}</div>
+                <div class="listing-label">BULLET POINTS</div>
+                <div class="listing-val">${[1,2,3,4,5].map(n => r['opt_bullet_point_'+n] || '').filter(v => v).join('\n\n')}</div>
             </div>
-            <div class="listing-item"><div class="listing-label">Description (HTML)</div><div class="listing-val" style="font-family:monospace; background:#2c2c2e; color:#0ad3ff; border:none;">${r.opt_description || '-'}</div></div>
+            <div class="listing-item">
+                <div class="listing-label">
+                    DESCRIPTION 
+                    <button class="view-toggle ${isRenderMode?'active':''}" onclick="toggleView(${i})">${isRenderMode?'Preview':'Source'}</button>
+                </div>
+                <div class="listing-val" style="${isRenderMode ? '' : 'font-family:monospace; color:#0071e3;'}">
+                    ${isRenderMode ? (r.opt_description || '-') : escapeHTML(r.opt_description || '-')}
+                </div>
+            </div>
         `;
     }
 
+    function toggleView(i) { isRenderMode = !isRenderMode; showFullPreview(i); }
+    function escapeHTML(s) { return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
     function exportExcel() {
-        const EXPORT_ORDER = ["opt_title", "opt_search terms", "opt_bullet point 1", "opt_bullet point 2", "opt_bullet point 3", "opt_bullet point 4", "opt_bullet point 5", "opt_description"];
-        const cleanData = tableData.map(row => {
-            let newRow = {};
-            EXPORT_ORDER.forEach(key => newRow[key] = row[key] || "");
-            return newRow;
+        const order = ["opt_title", "opt_search_terms", "opt_bullet_point_1", "opt_bullet_point_2", "opt_bullet_point_3", "opt_bullet_point_4", "opt_bullet_point_5", "opt_description"];
+        const clean = tableData.map(r => {
+            let n = {}; order.forEach(k => n[k] = r[k] || ""); return n;
         });
-        const ws = XLSX.utils.json_to_sheet(cleanData, { header: EXPORT_ORDER });
+        const ws = XLSX.utils.json_to_sheet(clean);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Shawn_Optimized");
-        XLSX.writeFile(wb, `Listing_Batch_${new Date().getTime()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Optimized");
+        XLSX.writeFile(wb, `Shawn_Listing_${Date.now()}.xlsx`);
+    }
+
+    function clearData() {
+        tableData = []; renderTable(); 
+        document.getElementById('previewBody').innerHTML = '数据已清空';
+        document.getElementById('exportBtn').style.display = 'none';
+        document.getElementById('fileInput').value = '';
     }
 </script>
 
