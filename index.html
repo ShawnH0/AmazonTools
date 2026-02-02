@@ -1,34 +1,34 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Shawn 的跨境工具箱</title>
+    
     <style>
-        /* 1. 完全引用你提供的 Apple 变量及字体 */
         :root {
-            --r-globalnav-height: 44px;
             --sk-body-background-color: #f5f5f7;
             --sk-body-text-color: #1d1d1f;
+            --sk-glyph-gray-secondary: #6e6e73;
             --sk-fill-blue: #0071e3;
             --sk-fill-orange: #b64400;
-            --sk-glyph-gray-secondary: #6e6e73;
+            --r-globalnav-height: 44px;
             
-            /* 关键对齐变量：Apple 官网动态计算公式 */
+            /* --- 核心修复：对齐变量 --- */
+            /* 默认手机端边距 */
             --p-margin: 22px; 
             --card-width: 312px;
             --card-gap: 20px;
         }
 
-        /* Apple 官网响应式断点：确保文字与卡片在任何屏幕下都绝对对齐 */
+        /* 1:1 复刻 Apple 官网的响应式对齐基准 */
         @media only screen and (min-width: 734px) { :root { --p-margin: 40px; } }
         @media only screen and (min-width: 1068px) { :root { --p-margin: calc((100vw - 980px) / 2); } }
         @media only screen and (min-width: 1440px) { :root { --p-margin: calc((100vw - 1250px) / 2); } }
 
-        /* 2. 基础样式复刻 */
         html {
-            font-family: "SF Pro HK", "SF Pro Text", "SF Pro Icons", "PingFang HK", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
-            font-size: 106.25%; /* 官网 1:1 缩放 */
+            font-family: "SF Pro Text", "SF Pro Icons", "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            font-size: 106.25%;
             -webkit-text-size-adjust: 100%;
             background-color: var(--sk-body-background-color);
         }
@@ -36,12 +36,11 @@
         body {
             margin: 0; padding: 0;
             color: var(--sk-body-text-color);
-            line-height: 1.47059;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
         }
 
-        /* 3. Global Nav 1:1 */
+        /* --- 导航栏 --- */
         #globalnav {
             position: fixed; top: 0; left: 0; right: 0;
             height: var(--r-globalnav-height);
@@ -53,31 +52,33 @@
         }
         .nav-content {
             height: 100%; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 var(--p-margin);
+            padding: 0 var(--p-margin); /* 导航同样对齐 */
         }
-        .nav-logo { font-weight: 600; font-size: 17px; letter-spacing: -0.01em; cursor: pointer; }
+        .nav-logo { font-weight: 600; font-size: 17px; }
 
-        /* 4. Hero Section */
+        /* --- 头部对齐修正 --- */
         .hero-section {
             padding-top: 120px;
-            padding-left: var(--p-margin);
+            padding-left: var(--p-margin); /* 严格左对齐 */
             padding-right: var(--p-margin);
-            margin-bottom: 20px;
+            box-sizing: border-box;
         }
         .hero-eyebrow { font-size: 21px; font-weight: 600; color: var(--sk-fill-orange); margin-bottom: 8px; }
-        .hero-headline { font-size: 48px; line-height: 1.1; font-weight: 700; letter-spacing: -0.015em; margin: 0; }
+        .hero-headline { font-size: 48px; line-height: 1.1; font-weight: 700; margin: 0; letter-spacing: -0.015em; }
 
-        /* 5. Shelf (货架系统) - 解决对齐的核心逻辑 */
-        .shelf-header {
-            padding: 60px var(--p-margin) 15px;
+        /* --- 货架标题对齐 --- */
+        .shelf-header { 
+            padding: 60px var(--p-margin) 15px; 
+            box-sizing: border-box;
         }
-        .shelf-title { font-size: 28px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+        .shelf-title { font-size: 28px; font-weight: 600; margin: 0; }
         .shelf-title span { color: var(--sk-glyph-gray-secondary); }
 
+        /* --- 关键：货架容器蒙版对齐 --- */
         .shelf-container {
             position: relative;
             width: 100%;
-            /* 1:1 复刻 Apple 渐隐蒙版：蒙版起始点必须与 p-margin 变量严格同步 */
+            /* 蒙版必须与 p-margin 完全一致 */
             -webkit-mask-image: linear-gradient(to right, 
                 transparent 0%, 
                 black var(--p-margin), 
@@ -93,38 +94,37 @@
         .scroll-wrapper {
             display: flex;
             gap: var(--card-gap);
-            overflow-x: auto;
-            /* 第一张卡片左侧 padding 必须等于 p-margin 才能对齐上方文字 */
-            padding: 16px var(--p-margin) 60px;
+            overflow-x: scroll;
+            /* 变更：移除左右的 var(--p-margin) 内边距，避免重复偏移。
+               蒙版负责可视区域的对齐，滚动容器内部从 0 开始摆放卡片。 */
+            padding: 16px 0 60px; /* 左右 padding 设为 0 */
             scroll-behavior: smooth;
             scrollbar-width: none;
             scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
         }
         .scroll-wrapper::-webkit-scrollbar { display: none; }
 
-        /* 6. Apple 风格卡片细节 */
+        /* --- 卡片样式 --- */
         .card {
             flex: 0 0 var(--card-width);
-            height: 400px;
+            height: 390px;
             background: #fff;
             border-radius: 22px;
             padding: 30px;
             text-decoration: none; color: inherit;
             display: flex; flex-direction: column;
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
             scroll-snap-align: start;
             box-sizing: border-box;
         }
         .card:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
         .card-tag { font-size: 12px; font-weight: 600; color: var(--sk-fill-orange); text-transform: uppercase; margin-bottom: 8px; }
         .card-title { font-size: 24px; font-weight: 600; line-height: 1.1; margin: 0; }
-        .card-desc { font-size: 15px; color: var(--sk-glyph-gray-secondary); margin-top: 10px; line-height: 1.4; }
+        .card-desc { font-size: 15px; color: var(--sk-glyph-gray-secondary); margin-top: 10px; }
         .card-icon { flex-grow: 1; display: flex; align-items: flex-end; justify-content: center; font-size: 90px; }
 
-        /* 7. 左右控制按钮 (仅在大屏幕显示) */
+        /* --- 按钮修正 --- */
         .arrow-btn {
             position: absolute; width: 44px; height: 44px;
             background: rgba(210, 210, 215, 0.5);
@@ -135,19 +135,10 @@
             opacity: 0; transition: 0.3s;
         }
         .shelf-container:hover .arrow-btn { opacity: 1; }
-        .arrow-left { left: calc(var(--p-margin) - 22px); }
-        .arrow-right { right: calc(var(--p-margin) - 22px); }
-        .arrow-btn svg { width: 22px; height: 22px; fill: none; stroke: #1d1d1f; stroke-width: 2.5; }
-
-        /* 弹窗逻辑 (保留 Shawn 的原有账户功能) */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.3); backdrop-filter: blur(15px);
-            display: none; justify-content: center; align-items: center; z-index: 10001;
-        }
-        .modal { background: #fff; width: 340px; padding: 40px; border-radius: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); }
-        .apple-input { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        .apple-btn { width: 100%; padding: 12px; background: var(--sk-fill-blue); color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        /* 变更：将箭头对齐到页面的 p-margin（与标题等对齐基准一致） */
+        .arrow-left { left: var(--p-margin); }
+        .arrow-right { right: var(--p-margin); }
+        .arrow-btn svg { width: 20px; height: 20px; fill: none; stroke: #1d1d1f; stroke-width: 2.5; }
     </style>
 </head>
 <body>
@@ -155,7 +146,7 @@
 <nav id="globalnav">
     <div class="nav-content">
         <div class="nav-logo">ShawnTools</div>
-        <div style="font-size:12px; color:var(--sk-glyph-gray-secondary); cursor:pointer;" onclick="toggleModal()" id="userTag">账户</div>
+        <div style="font-size:12px; color:var(--sk-glyph-gray-secondary);">登录 / 账户</div>
     </div>
 </nav>
 
@@ -169,28 +160,28 @@
         <h2 class="shelf-title">AI 与 文本工具<span>。智能且高效。</span></h2>
     </div>
     <div class="shelf-container">
-        <button class="arrow-btn arrow-left" onclick="move('row1', -1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="arrow-btn arrow-right" onclick="move('row1', 1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+        <button class="arrow-btn arrow-left" aria-label="向左滚动" onclick="move('row1', -1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="arrow-btn arrow-right" aria-label="向右滚动" onclick="move('row1', 1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
         <div class="scroll-wrapper" id="row1">
-            <a href="listing-ai-rewriter.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Intelligence</div>
                 <h3 class="card-title">AI Listing 优化</h3>
                 <p class="card-desc">基于 AI 批量重写标题、五点及描述。</p>
                 <div class="card-icon">💻</div>
             </a>
-            <a href="baned-words-filter.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Compliance</div>
                 <h3 class="card-title">违规词筛选器</h3>
                 <p class="card-desc">全自动检索敏感词汇，规避侵权风险。</p>
                 <div class="card-icon">©️</div>
             </a>
-            <a href="deduplicator.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Efficiency</div>
                 <h3 class="card-title">文本去重工具</h3>
                 <p class="card-desc">自动识别空格换行，精简文案内容。</p>
                 <div class="card-icon">✂️</div>
             </a>
-            <a href="case-converter.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Writing</div>
                 <h3 class="card-title">大小写转换</h3>
                 <p class="card-desc">一键实现全大写、首字母大写转换。</p>
@@ -203,25 +194,23 @@
         <h2 class="shelf-title">数据与解析工具<span>。深入业务核心。</span></h2>
     </div>
     <div class="shelf-container">
-        <button class="arrow-btn arrow-left" onclick="move('row2', -1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="arrow-btn arrow-right" onclick="move('row2', 1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
         <div class="scroll-wrapper" id="row2">
-            <a href="seo-parser.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Search</div>
                 <h3 class="card-title">SEO 解析校验</h3>
                 <p class="card-desc">批量解析字符超限，一键导出 Excel。</p>
                 <div class="card-icon">🔍</div>
             </a>
-            <a href="word-frequency.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Insight</div>
                 <h3 class="card-title">词频统计分析</h3>
-                <p class="card-desc">挖掘高频词，精准筛选关键词。</p>
+                <p class="card-desc">深度挖掘高频词，精准筛选关键词。</p>
                 <div class="card-icon">📊</div>
             </a>
-            <a href="amazon-sku-aggregator.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Operation</div>
                 <h3 class="card-title">SKU 销量聚合</h3>
-                <p class="card-desc">子体汇总父体销量，处理订单报告。</p>
+                <p class="card-desc">处理订单报告，子体汇总父体销量。</p>
                 <div class="card-icon">🧮</div>
             </a>
         </div>
@@ -231,22 +220,20 @@
         <h2 class="shelf-title">多媒体处理<span>。惊艳你的视觉。</span></h2>
     </div>
     <div class="shelf-container">
-        <button class="arrow-btn arrow-left" onclick="move('row3', -1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <button class="arrow-btn arrow-right" onclick="move('row3', 1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
         <div class="scroll-wrapper" id="row3">
-            <a href="image-resizer.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Visual</div>
                 <h3 class="card-title">主图尺寸缩放</h3>
                 <p class="card-desc">批量调整为 1600x1600 白底规格。</p>
                 <div class="card-icon">🖼️</div>
             </a>
-            <a href="image-hosting.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Storage</div>
                 <h3 class="card-title">自动图床工具</h3>
-                <p class="card-desc">一键上传至 GitHub 图床。</p>
+                <p class="card-desc">一键上传至图床，获取 Raw 链接。</p>
                 <div class="card-icon">☁️</div>
             </a>
-            <a href="html-editor.html" class="card">
+            <a href="#" class="card">
                 <div class="card-tag">Design</div>
                 <h3 class="card-title">HTML 编辑器</h3>
                 <p class="card-desc">生成符合亚马逊标准的可视化代码。</p>
@@ -256,41 +243,36 @@
     </div>
 </main>
 
-<div class="modal-overlay" id="modal">
-    <div class="modal">
-        <h2 style="margin-top:0">账户管理</h2>
-        <input type="text" id="acc" class="apple-input" placeholder="账号">
-        <input type="password" id="pwd" class="apple-input" placeholder="密码">
-        <button class="apple-btn" onclick="handleAuth()">登录</button>
-        <p style="text-align:center; font-size:12px; color:var(--sk-glyph-gray-secondary); cursor:pointer; margin-top:15px;" onclick="toggleModal()">返回</p>
-    </div>
-</div>
-
 <script>
     function move(id, d) {
         const wrapper = document.getElementById(id);
-        const cardStep = 312 + 20; // card-width + card-gap
+        // 从 CSS 变量读取宽度与间距，兼容响应式调整
+        const styles = getComputedStyle(document.documentElement);
+        const cardWidthRaw = styles.getPropertyValue('--card-width') || '312px';
+        const cardGapRaw = styles.getPropertyValue('--card-gap') || '20px';
+        const cardWidth = parseFloat(cardWidthRaw);
+        const cardGap = parseFloat(cardGapRaw);
+        const cardStep = (Number.isFinite(cardWidth) ? cardWidth : 312) + (Number.isFinite(cardGap) ? cardGap : 20);
         wrapper.scrollBy({ left: d * cardStep, behavior: 'smooth' });
     }
 
-    function toggleModal() {
-        const m = document.getElementById('modal');
-        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-    }
-
-    function handleAuth() {
-        const acc = document.getElementById('acc').value;
-        const pwd = document.getElementById('pwd').value;
-        if (acc === 'admin' && pwd === 'admin') {
-            localStorage.setItem('current_user', JSON.stringify({user:'admin', type:'VIP'}));
-            location.reload();
-        } else { alert('验证失败'); }
-    }
-
-    window.onload = () => {
-        const u = JSON.parse(localStorage.getItem('current_user'));
-        if(u) document.getElementById('userTag').innerText = `你好, ${u.user}`;
-    }
+    // 可选增强：当窗口大小或 CSS 变量变化时，保持滚动位置对齐到最近卡片
+    // 下面是个简单的节流 + snap-on-end 行为（非必须，可按需启用）
+    /*
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            // 对每个行进行对齐（如果需要）
+            ['row1','row2','row3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                // 强制小幅滚动以触发 snap 效果（可根据需要替换为更精细的逻辑）
+                el.scrollBy({ left: 1, behavior: 'smooth' });
+            });
+        }, 150);
+    });
+    */
 </script>
 
 </body>
