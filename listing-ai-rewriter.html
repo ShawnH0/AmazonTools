@@ -46,7 +46,6 @@
 
         .workspace { display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 0; }
 
-        /* Prompt 容器 */
         .prompt-container { background: #fff; border-radius: var(--radius-main); padding: 20px; flex-shrink: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
         .prompt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .input-group label { font-size: 10px; color: var(--apple-gray); font-weight: 700; display: block; margin-bottom: 6px; letter-spacing: 0.5px; }
@@ -54,11 +53,9 @@
         .apple-input {
             width: 100%; height: 64px; border-radius: 12px; border: 1px solid #d2d2d7;
             background: #fbfbfd; padding: 12px; font-size: 12px; line-height: 1.5;
-            font-family: inherit; /* 统一字体 */
-            resize: none; box-sizing: border-box; outline: none; transition: 0.2s var(--trans);
+            font-family: inherit; resize: none; box-sizing: border-box; outline: none; transition: 0.2s var(--trans);
         }
         .apple-input:focus { border-color: var(--apple-blue); background: #fff; box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
-        .apple-input::placeholder { color: #c1c1c6; }
 
         .toolbar { display: flex; gap: 10px; margin-top: 15px; }
         .btn { padding: 8px 18px; border-radius: 20px; font-size: 12px; font-weight: 500; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; font-family: inherit; }
@@ -67,7 +64,6 @@
         .btn-danger { background: rgba(255, 59, 48, 0.08); color: var(--apple-red); }
         .btn-export { background: #34c759; color: #fff; margin-left: auto; }
 
-        /* 表格 */
         .table-section { flex: 1; background: #fff; border-radius: var(--radius-main); overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.05); min-height: 0; }
         .table-scroll { flex: 1; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
@@ -82,7 +78,6 @@
         .tag-done { background: #e3f9e5; color: #34c759; }
         .tag-error { background: rgba(255, 59, 48, 0.1); color: var(--apple-red); }
 
-        /* 预览面板 */
         .preview-panel { background: #fff; border-radius: var(--radius-main); padding: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); display: flex; flex-direction: column; height: 100%; min-height: 0; }
         .preview-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid #f2f2f2; flex-shrink: 0; }
         .preview-body { flex: 1; overflow-y: auto; padding-top: 20px; }
@@ -93,7 +88,6 @@
         .view-toggle { font-size: 10px; background: #eee; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: 700; font-family: inherit; }
         .view-toggle.active { background: var(--apple-blue); color: #fff; }
 
-        /* 弹窗 */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal { background: #fff; width: 400px; border-radius: 28px; padding: 32px; box-shadow: 0 24px 64px rgba(0,0,0,0.15); }
         .modal-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #d2d2d7; margin-top: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 14px; outline: none; font-family: inherit; }
@@ -102,10 +96,10 @@
 <body>
 
 <nav class="nav">
-    <a href="#" class="nav-brand">
+    <div class="nav-brand">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
         Shawn Listing Pro
-    </a>
+    </div>
     <button id="configBtn" class="api-badge status-off" onclick="toggleModal(true)">API 配置未就绪</button>
 </nav>
 
@@ -129,18 +123,19 @@
         </section>
 
         <section class="table-section">
-            <div class="table-scroll" id="tableScroll">
+            <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
                             <th style="width: 50px; text-align: center;">#</th>
-                            <th style="width: 45%;">原始标题</th>
-                            <th style="width: 45%;">优化预览</th>
-                            <th style="width: 120px;">状态</th>
+                            <th style="width: 100px;">SKU</th>
+                            <th style="width: 40%;">原始标题</th>
+                            <th style="width: 40%;">优化预览</th>
+                            <th style="width: 100px;">状态</th>
                         </tr>
                     </thead>
                     <tbody id="tBody">
-                        <tr><td colspan="4" style="text-align:center; padding:100px; color:#c1c1c6;">请先上传包含 Listing 的 Excel 文件</td></tr>
+                        <tr><td colspan="5" style="text-align:center; padding:100px; color:#c1c1c6;">请先上传包含 Listing 的 Excel 文件</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -176,13 +171,12 @@
 </div>
 
 <script>
-    // 强制追加：严禁用中文回答
     const GLOBAL_NEG_PROMPT = "\n\nCRITICAL: Strictly NO Chinese characters in your response! Output MUST be in English only! (严禁用中文回答！！！)";
 
     const SYSTEM_BASE = {
         title: "要求: 150-200 字符。公式: 核心词+特色+长尾词+场景。禁止品牌词。仅输出优化后的标题文本。",
         search_terms: "要求: 220 字符以内，常用搜索长尾词，用逗号隔开。仅输出关键词内容。",
-        bullet_points: "要求: 包含 [大写标题]：对应的描述，必须为一行。不要加粗，字数约250。仅输出对应的一条卖点内容。",
+        bullet_points: "要求: 包含 [大写标题]：对应的描述，必须为一行。字数约250。仅输出对应的一条卖点内容。",
         description: "要求: 必须 HTML 格式 (<p>, <li>, <ul>, <strong>)。严禁 H 标签。总长 1500 字符以内。仅输出描述内容。"
     };
 
@@ -192,13 +186,15 @@
         "Gemini": ["gemini-1.5-pro", "gemini-1.5-flash"]
     };
 
+    // 核心校验字段：只需要检查这些关键字段即可
     const REQUIRED_FIELDS = ["title", "search terms", "bullet point 1", "bullet point 2", "bullet point 3", "bullet point 4", "bullet point 5", "description"];
     
     let tableData = [];
     let config = JSON.parse(localStorage.getItem('listing_ai_config')) || { key: "", vendor: "DeepSeek", model: "deepseek-chat" };
     let isRenderMode = true;
 
-    function normalizeKey(k) { return k.toLowerCase().trim().replace(/\s+/g, '_'); }
+    // --- 归一化逻辑 ---
+    function normalizeKey(k) { return k.toString().toLowerCase().trim().replace(/\s+/g, '_'); }
 
     if(config.key) {
         document.getElementById('configBtn').className = 'api-badge status-on';
@@ -226,12 +222,14 @@
     }
 
     function downloadTemplate() {
-        const ws = XLSX.utils.aoa_to_sheet([REQUIRED_FIELDS]);
+        // 显式导出这几列
+        const ws = XLSX.utils.aoa_to_sheet([["SKU", "Title", "Search Terms", "Bullet Point 1", "Bullet Point 2", "Bullet Point 3", "Bullet Point 4", "Bullet Point 5", "Description"]]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Listing");
-        XLSX.writeFile(wb, "Listing_Upload_Template.xlsx");
+        XLSX.writeFile(wb, "Listing_Template.xlsx");
     }
 
+    // --- 重点优化的 handleFile ---
     function handleFile(file) {
         if(!file) return;
         const reader = new FileReader();
@@ -239,11 +237,23 @@
             const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
             let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             if(!raw.length) return alert("文件为空");
-            const headers = Object.keys(raw[0]).map(k => k.toLowerCase().trim());
-            if(!REQUIRED_FIELDS.every(f => headers.includes(f))) return alert("Excel 列名不匹配，请下载模板核对！");
 
+            // 获取原始表头的清洗版
+            const rawHeaders = Object.keys(raw[0]).map(k => normalizeKey(k));
+            
+            // 检查必备字段（只要包含即可，不要求完全一致或仅限这些字段）
+            const missing = REQUIRED_FIELDS.filter(f => !rawHeaders.includes(normalizeKey(f)));
+            if(missing.length > 0) {
+                return alert("Excel 缺少以下列，请核对后再上传：\n" + missing.join(", "));
+            }
+
+            // 转换数据，建立归一化的 Key 映射
             tableData = raw.map(item => {
-                let n = {}; Object.keys(item).forEach(k => n[normalizeKey(k)] = item[k]);
+                let n = {}; 
+                Object.keys(item).forEach(k => {
+                    const normK = normalizeKey(k);
+                    n[normK] = item[k];
+                });
                 return n;
             });
             renderTable();
@@ -256,6 +266,7 @@
         tbody.innerHTML = tableData.map((row, i) => `
             <tr onclick="showFullPreview(${i})" id="row-${i}">
                 <td style="text-align:center; font-weight:700; color:var(--apple-gray);">${i+1}</td>
+                <td>${row.sku || '-'}</td>
                 <td>${row.title || '-'}</td>
                 <td id="td-opt-title-${i}">${row.opt_title || '-'}</td>
                 <td id="status-${i}"><span class="status-tag tag-waiting">就绪</span></td>
@@ -263,6 +274,7 @@
         `).join('');
     }
 
+    // --- 执行逻辑与 AI 请求保持不变 ---
     async function handleRun() {
         if(!config.key) return toggleModal(true);
         const btn = document.getElementById('runBtn');
@@ -278,24 +290,21 @@
         for(let i=0; i<tableData.length; i++) {
             const statusBox = document.getElementById(`status-${i}`);
             try {
-                // 第一组并发：Title + ST
-                statusBox.innerHTML = `<span class="status-tag tag-running">核心词...</span>`;
+                statusBox.innerHTML = `<span class="status-tag tag-running">标题词...</span>`;
                 await Promise.all([
                     processField(i, 'title', prompts.title),
                     processField(i, 'search_terms', prompts.search_terms)
                 ]);
 
-                // 第二组并发：Bullet Points (分段处理，确保空值不乱写)
                 statusBox.innerHTML = `<span class="status-tag tag-running">卖点...</span>`;
                 await Promise.all([1,2,3,4,5].map(n => processField(i, `bullet_point_${n}`, prompts.bullet_points, n)));
 
-                // 第三组：Description
                 statusBox.innerHTML = `<span class="status-tag tag-running">详情...</span>`;
                 await processField(i, 'description', prompts.description);
 
                 statusBox.innerHTML = `<span class="status-tag tag-done">已完成</span>`;
             } catch (err) {
-                statusBox.innerHTML = `<span class="status-tag tag-error" title="${err.message}">接口异常</span>`;
+                statusBox.innerHTML = `<span class="status-tag tag-error" title="${err.message}">异常</span>`;
             }
         }
         btn.disabled = false; btn.innerText = "🚀 开始批量优化";
@@ -305,28 +314,20 @@
     async function processField(idx, field, userPrompt, bpIndex = null) {
         const val = tableData[idx][field];
         const baseTitle = tableData[idx]['title'] || "";
-        
-        // 核心优化：空值判定与单一字段补全
         let finalPrompt = "";
         const baseRule = SYSTEM_BASE[field.includes('bullet') ? 'bullet_points' : field];
         
         if (bpIndex) {
-            // 针对 Bullet Point 的特殊精准控制
-            if (!val) {
-                finalPrompt = `Product Title: 【${baseTitle}】\nInstruction: This cell is EMPTY. Please CREATE the Bullet Point NO.${bpIndex} for this product based on the title. ${baseRule}. Your response should ONLY contain this ONE bullet point. ${userPrompt}`;
-            } else {
-                finalPrompt = `Optimize this Bullet Point: "${val}". Product Title: 【${baseTitle}】. ${baseRule}. ${userPrompt}`;
-            }
-        } else {
-            // 普通字段
             finalPrompt = !val 
-                ? `The ${field} is EMPTY. Create it based on Product Title: 【${baseTitle}】. ${baseRule}. ${userPrompt}`
-                : `Optimize this ${field}: "${val}". ${baseRule}. ${userPrompt}`;
+                ? `Title: 【${baseTitle}】\nCREATE Bullet Point NO.${bpIndex}. ${baseRule}. ${userPrompt}`
+                : `Optimize Bullet Point: "${val}". Title: 【${baseTitle}】. ${baseRule}. ${userPrompt}`;
+        } else {
+            finalPrompt = !val 
+                ? `${field} is EMPTY. Create based on Title: 【${baseTitle}】. ${baseRule}. ${userPrompt}`
+                : `Optimize ${field}: "${val}". ${baseRule}. ${userPrompt}`;
         }
 
-        // 强制英文约束
         finalPrompt += GLOBAL_NEG_PROMPT;
-
         const result = await callAI(finalPrompt);
         tableData[idx]['opt_' + field] = result;
         if(field === 'title') document.getElementById(`td-opt-title-${idx}`).innerText = result;
@@ -345,7 +346,7 @@
         });
         const data = await res.json();
         if(!data.choices || !data.choices[0]) throw new Error("API No Response");
-        return data.choices[0].message.content.trim().replace(/^"|"$/g, ''); // 去除 AI 偶尔带的引号
+        return data.choices[0].message.content.trim().replace(/^"|"$/g, '');
     }
 
     function showFullPreview(i) {
@@ -380,7 +381,7 @@
     function escapeHTML(s) { return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     function exportExcel() {
-        const order = ["opt_title", "opt_search_terms", "opt_bullet_point_1", "opt_bullet_point_2", "opt_bullet_point_3", "opt_bullet_point_4", "opt_bullet_point_5", "opt_description"];
+        const order = ["sku", "opt_title", "opt_search_terms", "opt_bullet_point_1", "opt_bullet_point_2", "opt_bullet_point_3", "opt_bullet_point_4", "opt_bullet_point_5", "opt_description"];
         const clean = tableData.map(r => {
             let n = {}; order.forEach(k => n[k] = r[k] || ""); return n;
         });
