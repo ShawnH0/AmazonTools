@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shawn's Toolbox - Apple Edition</title>
+    <title>Shawn 的跨境工具箱</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,8 +12,9 @@
             --apple-subtext: #86868b;
             --apple-blue: #0066cc;
             --card-white: #ffffff;
-            --content-width: 1100px;
-            --gutter: calc((100vw - var(--content-width)) / 2);
+            /* 响应式对齐宽度 */
+            --content-max-width: 1100px;
+            --side-padding: max(22px, calc((100vw - var(--content-max-width)) / 2));
         }
 
         body {
@@ -32,100 +33,108 @@
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             z-index: 9999; display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        .nav-content { max-width: var(--content-width); margin: 0 auto; width: 100%; display: flex; justify-content: flex-end; padding: 0 20px; }
-        .login-btn { font-size: 12px; cursor: pointer; color: var(--apple-text); opacity: 0.7; transition: 0.3s; }
+        .nav-content { width: 100%; max-width: var(--content-max-width); margin: 0 auto; display: flex; justify-content: flex-end; padding: 0 22px; }
+        .login-trigger { font-size: 12px; cursor: pointer; opacity: 0.7; transition: 0.3s; }
+        .login-trigger:hover { opacity: 1; color: var(--apple-blue); }
 
-        /* 标题对齐区 */
-        .hero, .section-header {
-            max-width: var(--content-width);
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .hero { padding-top: 100px; padding-bottom: 40px; }
+        /* 英雄头图区 - 与卡片严格对齐 */
+        .hero { padding: 100px var(--side-padding) 40px; }
         .hero h2 { font-size: 21px; color: #bf4800; margin-bottom: 8px; font-weight: 600; }
         .hero h1 { font-size: 48px; font-weight: 700; margin: 0; letter-spacing: -1.2px; }
 
-        .section-header { margin-top: 60px; margin-bottom: 25px; }
+        /* 标题对齐 */
+        .section-header { padding: 60px var(--side-padding) 20px; }
         .section-header h2 { font-size: 28px; font-weight: 600; margin: 0; }
         .section-header h2 span { color: var(--apple-subtext); }
 
-        /* 核心：横向滚动容器 */
+        /* 货架容器 */
         .shelf-container {
             position: relative;
-            width: 100vw;
-            margin-left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
         }
 
         .scroll-wrapper {
             display: flex;
-            gap: 20px;
+            gap: 22px;
             overflow-x: auto;
-            padding: 10px 0 40px 0; /* 上下内边距 */
+            padding: 20px var(--side-padding) 60px; /* 侧边距动态计算 */
             scroll-behavior: smooth;
             scrollbar-width: none;
+            scroll-snap-type: x proximity;
         }
         .scroll-wrapper::-webkit-scrollbar { display: none; }
-
-        /* 关键对齐补丁：确保第一张和最后一张卡片对齐标题 */
-        .scroll-wrapper::before, .scroll-wrapper::after {
-            content: '';
-            min-width: var(--gutter);
-            display: block;
-        }
 
         /* 苹果风格卡片 */
         .card {
             min-width: 310px; width: 310px; height: 380px;
-            background: var(--card-white); border-radius: 24px;
+            background: var(--card-white); border-radius: 28px;
             padding: 30px; text-decoration: none; color: inherit;
-            display: flex; flex-direction: column; 
+            display: flex; flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            scroll-snap-align: start;
         }
         .card:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
 
         .card-tag { font-size: 11px; font-weight: 700; color: #bf4800; margin-bottom: 6px; text-transform: uppercase; }
         .card-title { font-size: 24px; font-weight: 600; margin: 0; line-height: 1.1; }
         .card-desc { font-size: 15px; color: var(--apple-subtext); margin-top: 10px; line-height: 1.4; }
-        
-        /* 参考图中的图标位置：居中靠下 */
-        .card-icon { 
-            flex-grow: 1;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            font-size: 80px;
-            padding-bottom: 10px;
-        }
+        .card-icon { flex-grow: 1; display: flex; align-items: flex-end; justify-content: center; font-size: 100px; padding-bottom: 10px; }
 
-        /* 控制箭头：仿参考图中的灰色圆圈 */
+        /* 苹果原装悬浮箭头 */
         .arrow-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            width: 44px; height: 44px; background: rgba(210, 210, 215, 0.7);
-            border-radius: 50%; border: none; cursor: pointer;
+            position: absolute; width: 45px; height: 45px;
+            background: rgba(210, 210, 215, 0.64);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: none; border-radius: 50%; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            z-index: 100; transition: 0.3s; opacity: 0; /* 默认隐藏 */
+            z-index: 10; opacity: 0; transition: opacity 0.3s, background 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .shelf-container:hover .arrow-btn { opacity: 1; }
         .arrow-btn:hover { background: rgba(210, 210, 215, 0.9); }
-        .arrow-btn svg { width: 20px; height: 20px; fill: #1d1d1f; }
-        .arrow-left { left: 20px; }
-        .arrow-right { right: 20px; }
+        .arrow-btn svg { width: 24px; height: 24px; fill: #424245; }
+        .arrow-left { left: calc(var(--side-padding) / 2); }
+        .arrow-right { right: calc(var(--side-padding) / 2); }
 
-        /* 弹窗及管理区隐藏逻辑（同前） */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .modal { background: rgba(255,255,255,0.9); width: 380px; padding: 40px; border-radius: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { font-size: 12px; color: var(--apple-subtext); display: block; margin-bottom: 5px; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 12px; background: transparent; box-sizing: border-box; }
-        .apple-btn { width: 100%; padding: 14px; background: var(--apple-blue); color: #fff; border: none; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        /* 账户弹窗修复版 */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(15px);
+            display: none; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .modal {
+            background: rgba(255,255,255,0.95); width: 380px; padding: 40px; border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2); position: relative;
+        }
+        /* 关闭按钮 */
+        .close-btn {
+            position: absolute; top: 20px; right: 20px; width: 30px; height: 30px;
+            background: #e8e8ed; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            color: #86868b; font-size: 18px; transition: 0.2s;
+        }
+        .close-btn:hover { background: #d2d2d7; color: #1d1d1f; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { font-size: 12px; color: var(--apple-subtext); margin-bottom: 8px; display: block; }
+        .form-group input {
+            width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 12px;
+            background: transparent; box-sizing: border-box; font-size: 16px; outline: none;
+        }
+        .apple-btn {
+            width: 100%; padding: 14px; background: var(--apple-blue); color: #fff;
+            border: none; border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .apple-btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
 <div class="nav">
-    <div class="nav-content"><span class="login-btn" onclick="toggleModal()" id="statusTxt">登录 / 账户</span></div>
+    <div class="nav-content"><span class="login-trigger" onclick="toggleModal()" id="userTag">登录 / 账户</span></div>
 </div>
 
 <div class="hero">
@@ -135,12 +144,8 @@
 
 <div class="section-header"><h2>AI 与 文本工具<span>。智能且高效。</span></h2></div>
 <div class="shelf-container">
-    <button class="arrow-btn arrow-left" onclick="scrollShelf('row1', -1)">
-        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-    </button>
-    <button class="arrow-btn arrow-right" onclick="scrollShelf('row1', 1)">
-        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-    </button>
+    <button class="arrow-btn arrow-left" onclick="move('row1', -1)"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+    <button class="arrow-btn arrow-right" onclick="move('row1', 1)"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
     <div class="scroll-wrapper" id="row1">
         <a href="listing-ai-rewriter.html" class="card">
             <div class="card-tag">APPLE INTELLIGENCE</div>
@@ -171,12 +176,8 @@
 
 <div class="section-header"><h2>数据与解析工具<span>。深入业务核心。</span></h2></div>
 <div class="shelf-container">
-    <button class="arrow-btn arrow-left" onclick="scrollShelf('row2', -1)">
-        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-    </button>
-    <button class="arrow-btn arrow-right" onclick="scrollShelf('row2', 1)">
-        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-    </button>
+    <button class="arrow-btn arrow-left" onclick="move('row2', -1)"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+    <button class="arrow-btn arrow-right" onclick="move('row2', 1)"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
     <div class="scroll-wrapper" id="row2">
         <a href="seo-parser.html" class="card">
             <div class="card-tag">SEARCH</div>
@@ -201,21 +202,17 @@
 
 <div class="section-header"><h2>多媒体处理<span>。惊艳你的视觉。</span></h2></div>
 <div class="shelf-container">
-    <button class="arrow-btn arrow-left" onclick="scrollShelf('row3', -1)">
-        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-    </button>
-    <button class="arrow-btn arrow-right" onclick="scrollShelf('row3', 1)">
-        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-    </button>
+    <button class="arrow-btn arrow-left" onclick="move('row3', -1)"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+    <button class="arrow-btn arrow-right" onclick="move('row3', 1)"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>
     <div class="scroll-wrapper" id="row3">
         <a href="image-resizer.html" class="card">
-            <div class="card-tag">PHOTOGRAPHY</div>
+            <div class="card-tag">VISUAL</div>
             <h3 class="card-title">主图尺寸缩放</h3>
             <p class="card-desc">批量调整为 1600x1600 白底规格。</p>
             <div class="card-icon">🖼️</div>
         </a>
         <a href="image-hosting.html" class="card">
-            <div class="card-tag">CLOUD</div>
+            <div class="card-tag">STORAGE</div>
             <h3 class="card-title">自动图床工具</h3>
             <p class="card-desc">一键上传至图床，获取 Raw 链接。</p>
             <div class="card-icon">☁️</div>
@@ -229,78 +226,57 @@
     </div>
 </div>
 
-<div id="adminArea" style="display: none;">
-    <div class="section-header"><h2>管理员后台<span>。</span></h2></div>
-    <div class="shelf-container">
-        <div class="scroll-wrapper">
-            <a href="user-management.html" class="card" style="background: #1d1d1f; color: #fff;">
-                <div class="card-tag">SYSTEM</div>
-                <h3 class="card-title">用户管理</h3>
-                <p class="card-desc">管理 VIP 权限与 API 配置。</p>
-                <div class="card-icon">🔑</div>
-            </a>
-        </div>
-    </div>
-</div>
-
 <div class="modal-overlay" id="modal">
     <div class="modal">
-        <h2 style="margin-top:0;">账户</h2>
+        <div class="close-btn" onclick="toggleModal()">✕</div>
+        <h2 style="margin: 0 0 30px; font-size: 24px;">账户</h2>
         <div class="form-group"><label>账号</label><input type="text" id="acc"></div>
-        <div class="form-group" id="pwdBox"><label>密码</label><input type="password" id="pwd"></div>
-        <div id="vipBox" style="display:none; border-top:1px solid #ddd; padding-top:15px; margin-top:15px;">
-            <div class="form-group"><label>API Key (VIP)</label><input type="password" id="key"></div>
+        <div class="form-group" id="p-box"><label>密码</label><input type="password" id="pwd"></div>
+        <div id="v-box" style="display:none; border-top:1px solid #eee; padding-top:20px; margin-top:10px;">
+            <div class="form-group"><label>OpenRouter API Key (VIP)</label><input type="password" id="key"></div>
         </div>
-        <button class="apple-btn" onclick="auth()">继续</button>
-        <button class="apple-btn" style="background:#e8e8ed; color:#1d1d1f; margin-top:10px; display:none;" id="out" onclick="logout()">退出</button>
+        <button class="apple-btn" onclick="handleAuth()">继续</button>
+        <button class="apple-btn" style="background:#e8e8ed; color:#1d1d1f; margin-top:10px; display:none;" id="l-out" onclick="logout()">退出登录</button>
     </div>
 </div>
 
 <script>
-    function scrollShelf(id, dir) {
-        const el = document.getElementById(id);
-        const scrollAmount = 330; // 卡片宽度 + gap
-        el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
-    }
+    function move(id, d) { document.getElementById(id).scrollBy({ left: d * 332, behavior: 'smooth' }); }
 
     function update() {
-        const user = JSON.parse(localStorage.getItem('current_user'));
-        const txt = document.getElementById('statusTxt');
-        const admin = document.getElementById('adminArea');
-        const vip = document.getElementById('vipBox');
-        const out = document.getElementById('out');
-        const main = document.getElementById('mainBtn');
+        const u = JSON.parse(localStorage.getItem('current_user'));
+        const tag = document.getElementById('userTag');
+        const vBox = document.getElementById('v-box');
+        const lOut = document.getElementById('l-out');
 
-        if (user) {
-            txt.innerText = user.user;
-            admin.style.display = (user.user === 'admin') ? 'block' : 'none';
-            document.getElementById('pwdBox').style.display = 'none';
-            out.style.display = 'block';
-            if (user.type === 'VIP用户' || user.user === 'admin') {
-                vip.style.display = 'block';
-                document.getElementById('key').value = localStorage.getItem(`api_${user.user}`) || '';
+        if (u) {
+            tag.innerText = `你好, ${u.user}`;
+            document.getElementById('p-box').style.display = 'none';
+            lOut.style.display = 'block';
+            if (u.type === 'VIP用户' || u.user === 'admin') {
+                vBox.style.display = 'block';
+                document.getElementById('key').value = localStorage.getItem(`api_${u.user}`) || '';
             }
         } else {
-            txt.innerText = "登录 / 账户";
-            admin.style.display = 'none';
-            document.getElementById('pwdBox').style.display = 'block';
-            vip.style.display = 'none';
-            out.style.display = 'none';
+            tag.innerText = "登录 / 账户";
+            document.getElementById('p-box').style.display = 'block';
+            vBox.style.display = 'none';
+            lOut.style.display = 'none';
         }
     }
 
-    function auth() {
-        const user = JSON.parse(localStorage.getItem('current_user'));
-        if (!user) {
-            const u = document.getElementById('acc').value;
-            const p = document.getElementById('pwd').value;
+    function handleAuth() {
+        const u = JSON.parse(localStorage.getItem('current_user'));
+        if (!u) {
+            const acc = document.getElementById('acc').value;
+            const pwd = document.getElementById('pwd').value;
             const db = JSON.parse(localStorage.getItem('users_db')) || [];
-            const found = db.find(x => x.user === u && x.pass === p);
+            const found = db.find(x => x.user === acc && x.pass === pwd);
             if (found) { localStorage.setItem('current_user', JSON.stringify(found)); update(); toggleModal(); }
-            else alert('账号密码错误');
+            else alert('账号或密码不正确');
         } else {
-            if (user.type === 'VIP用户' || user.user === 'admin') {
-                localStorage.setItem(`api_${user.user}`, document.getElementById('key').value);
+            if (u.type === 'VIP用户' || u.user === 'admin') {
+                localStorage.setItem(`api_${u.user}`, document.getElementById('key').value);
             }
             toggleModal();
         }
