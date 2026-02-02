@@ -11,7 +11,7 @@
             --apple-bg: #f5f5f7;
             --apple-blue: #0071e3;
             --apple-gray: #86868b;
-            --radius-main: 20px;
+            --radius-main: 22px;
         }
 
         body {
@@ -34,11 +34,11 @@
         .status-off { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
         .status-on { background: rgba(52, 199, 89, 0.1); color: #34c759; }
 
-        /* --- 主布局 (核心：适配高度) --- */
+        /* --- 主布局 --- */
         .main-content {
-            flex: 1; display: grid; grid-template-columns: 1.2fr 0.8fr;
-            gap: 24px; padding: 24px; max-width: 1600px; margin: 0 auto;
-            width: 100%; box-sizing: border-box; overflow: hidden; /* 关键：禁止外层滚动 */
+            flex: 1; display: grid; grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px; padding: 20px 24px; max-width: 1600px; margin: 0 auto;
+            width: 100%; box-sizing: border-box; overflow: hidden;
         }
 
         .workspace { display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 0; }
@@ -46,6 +46,8 @@
         /* Prompt 区域 */
         .prompt-container { background: #fff; border-radius: var(--radius-main); padding: 20px; flex-shrink: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
         .prompt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .input-group { display: flex; flex-direction: column; gap: 4px; }
+        .input-group label { font-size: 10px; color: var(--apple-gray); font-weight: 700; }
         .apple-input {
             width: 100%; height: 60px; border-radius: 12px; border: 1px solid #d2d2d7;
             background: #fbfbfd; padding: 10px; font-size: 12px; line-height: 1.4;
@@ -60,7 +62,7 @@
         .btn-danger { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
         .btn-export { background: #34c759; color: #fff; margin-left: auto; }
 
-        /* 表格区域 (核心：内部滚动) --- */
+        /* 表格区域 */
         .table-section {
             flex: 1; background: #fff; border-radius: var(--radius-main);
             overflow: hidden; display: flex; flex-direction: column;
@@ -73,20 +75,21 @@
         tr:hover { background: #fbfbff; cursor: pointer; }
         tr.selected { background: rgba(0, 113, 227, 0.05); }
 
-        /* --- 右侧：预览面板 (核心：独立滚动) --- */
+        /* 右侧预览面板适配高度 */
         .preview-panel {
             background: #fff; border-radius: var(--radius-main); padding: 24px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.04); display: flex; flex-direction: column; height: 100%; min-height: 0;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04); display: flex; flex-direction: column; 
+            height: 100%; min-height: 0; box-sizing: border-box;
         }
         .preview-body { flex: 1; overflow-y: auto; padding-right: 10px; margin-top: 15px; }
-        .listing-item { margin-bottom: 20px; }
-        .listing-label { font-size: 11px; font-weight: 700; color: var(--apple-gray); margin-bottom: 6px; text-transform: uppercase; }
-        .listing-val { font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; background: #f9f9fb; padding: 12px; border-radius: 10px; border: 1px solid #f0f0f2; }
+        .listing-item { margin-bottom: 24px; }
+        .listing-label { font-size: 11px; font-weight: 700; color: var(--apple-gray); margin-bottom: 8px; text-transform: uppercase; border-left: 3px solid var(--apple-blue); padding-left: 8px; }
+        .listing-val { font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; background: #f9f9fb; padding: 14px; border-radius: 12px; border: 1px solid #f0f0f2; }
 
-        /* --- 弹窗 --- */
+        /* 弹窗 */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal { background: #fff; width: 400px; border-radius: 24px; padding: 28px; position: relative; }
-        .modal-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d2d2d7; margin-top: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 13px; }
+        .modal { background: #fff; width: 420px; border-radius: 24px; padding: 32px; position: relative; }
+        .modal-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #d2d2d7; margin-top: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 13px; outline: none; }
         
         .status-tag { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
         .tag-waiting { background: #f5f5f7; color: #86868b; }
@@ -96,9 +99,9 @@
 <body>
 
 <nav class="nav">
-    <a href="index.html" class="nav-brand">
+    <a href="#" class="nav-brand">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        ShawnTools
+        Shawn's Listing Pro
     </a>
     <button id="configBtn" class="api-badge status-off" onclick="toggleModal(true)">API 配置</button>
 </nav>
@@ -107,10 +110,10 @@
     <div class="workspace">
         <section class="prompt-container">
             <div class="prompt-grid">
-                <div style="display:flex; flex-direction:column; gap:4px;"><label style="font-size:10px; color:var(--apple-gray); font-weight:700;">TITLE PROMPT</label><textarea id="p_title" class="apple-input"></textarea></div>
-                <div style="display:flex; flex-direction:column; gap:4px;"><label style="font-size:10px; color:var(--apple-gray); font-weight:700;">SEARCH TERMS PROMPT</label><textarea id="p_st" class="apple-input"></textarea></div>
-                <div style="display:flex; flex-direction:column; gap:4px;"><label style="font-size:10px; color:var(--apple-gray); font-weight:700;">BULLET POINTS PROMPT</label><textarea id="p_bp" class="apple-input"></textarea></div>
-                <div style="display:flex; flex-direction:column; gap:4px;"><label style="font-size:10px; color:var(--apple-gray); font-weight:700;">DESCRIPTION PROMPT</label><textarea id="p_desc" class="apple-input"></textarea></div>
+                <div class="input-group"><label>TITLE (APPEND PROMPT)</label><textarea id="p_title" class="apple-input" placeholder="输入额外要求..."></textarea></div>
+                <div class="input-group"><label>SEARCH TERMS (APPEND PROMPT)</label><textarea id="p_st" class="apple-input" placeholder="输入额外要求..."></textarea></div>
+                <div class="input-group"><label>BULLET POINTS (APPEND PROMPT)</label><textarea id="p_bp" class="apple-input" placeholder="输入额外要求..."></textarea></div>
+                <div class="input-group"><label>DESCRIPTION (APPEND PROMPT)</label><textarea id="p_desc" class="apple-input" placeholder="输入额外要求..."></textarea></div>
             </div>
             <div class="toolbar">
                 <button class="btn btn-secondary" onclick="downloadTemplate()">📥 模板下载</button>
@@ -127,14 +130,14 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 50px; text-align: center;">序号</th>
-                            <th style="width: 38%;">原始标题</th>
-                            <th style="width: 38%;">优化标题</th>
-                            <th style="width: 15%;">状态</th>
+                            <th style="width: 60px; text-align: center;">序号</th>
+                            <th style="width: 40%;">原始标题</th>
+                            <th style="width: 40%;">实时优化预览</th>
+                            <th style="width: 15%;">处理状态</th>
                         </tr>
                     </thead>
                     <tbody id="tBody">
-                        <tr><td colspan="4" style="text-align:center; padding:60px; color:#c1c1c6;">请上传数据</td></tr>
+                        <tr><td colspan="4" style="text-align:center; padding:100px; color:#c1c1c6;">等待数据导入...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -142,9 +145,9 @@
     </div>
 
     <aside class="preview-panel">
-        <div style="font-size:18px; font-weight:600;">深度预览</div>
+        <div style="font-size:18px; font-weight:600; padding-bottom:15px; border-bottom:1px solid #eee;">深度预览面板</div>
         <div id="previewBody" class="preview-body">
-            <div style="text-align:center; color:#c1c1c6; margin-top:100px;">选择行查看详情</div>
+            <div style="text-align:center; color:#c1c1c6; margin-top:150px;">点击列表行<br>在此查看完整Listing详情</div>
         </div>
     </aside>
 </main>
@@ -152,7 +155,7 @@
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <button onclick="toggleModal(false)" style="position:absolute; right:20px; top:20px; border:none; background:none; cursor:pointer; font-size:20px; color:#86868b;">×</button>
-        <h3 style="margin-top:0">API 设置</h3>
+        <h3 style="margin-top:0">AI 模型授权</h3>
         
         <label style="font-size:11px; font-weight:700; color:#86868b;">厂商平台</label>
         <select id="apiVendor" class="modal-input" onchange="updateModels()">
@@ -163,22 +166,23 @@
             <option value="Grok">xAI Grok</option>
         </select>
 
-        <label style="font-size:11px; font-weight:700; color:#86868b;">选择模型</label>
+        <label style="font-size:11px; font-weight:700; color:#86868b;">选择具体模型</label>
         <select id="apiModel" class="modal-input"></select>
 
         <label style="font-size:11px; font-weight:700; color:#86868b;">API KEY</label>
-        <input type="password" id="apiKeyInput" class="modal-input" placeholder="输入 API 密钥">
+        <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-...">
         
-        <button class="btn btn-primary" style="width:100%; height:44px; justify-content:center;" onclick="saveConfig()">保存授权</button>
+        <button class="btn btn-primary" style="width:100%; height:46px; justify-content:center; border-radius:12px;" onclick="saveConfig()">保存配置</button>
     </div>
 </div>
 
 <script>
-    const DEFAULT_PROMPTS = {
-        title: "要求: 150-200 字符。公式: 核心搜索词 + 产品特色 + 长尾词 + 使用场景/目标人群。符合亚马逊标题的规则，不能出现违规词。限制: 词频控制，同一个词出现不能超过 2 次（单复数计为不同词），字符控制在190以内，不能出现品牌词，如果要有品牌需要加Compatible with或者for。用英语回答，且只需要回答标题，不需要其他任何一个多余的字。",
-        st: "要求: 亚马逊上顾客最常用的搜索词和长尾词，用逗号隔开。字数220以内。用英语回答，且只需要回答关键词的内容，不需要其他任何一个多余的字。",
-        bp: "要求: 包含 [大写标题]：对应的描述（不准换行，必须是一行），需要精准符合顾客购买需求。字数: 约 250 字符。用英语回答，且只需要回答Bullet Points的内容，不需要其他任何一个多余的字。",
-        desc: "格式要求: 必须使用 HTML 格式。标签限制: 仅限使用 <p>, <li>, <ul>, <strong>。严禁出现 <h> 标签、任何 style 样式或其他属性。内容: 包含产品使用方法、特色、规格。字数限制: 严格控制总字符数（含标签）在 1500 字符以内。用英语回答，且只需要回答详情描述的内容，不需要其他任何一个多余的字。"
+    // 系统核心内置规则
+    const SYSTEM_BASE_PROMPTS = {
+        title: "要求: 150-200 字符。公式: 核心搜索词 + 特色 + 长尾词 + 场景。遵守亚马逊政策，词频控2。禁止品牌名（除非加Compatible with/for）。仅输出标题文本。",
+        st: "要求: 220字符内，常用搜索长尾词，逗号隔开。仅输出关键词内容。",
+        bp: "要求: 包含 [大写标题]：对应的描述，一行展示。字数250左右。精准购买动机。仅输出Bullet Points内容。",
+        desc: "要求: HTML格式（<p>, <li>, <ul>, <strong>）。严禁h标签和style。1500字符内。仅输出详情描述。"
     };
 
     const MODEL_MAP = {
@@ -233,15 +237,15 @@
     function renderTable() {
         const tbody = document.getElementById('tBody');
         if(tableData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:60px; color:#c1c1c6;">数据已清除</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:60px; color:#c1c1c6;">暂无数据</td></tr>`;
             return;
         }
         tbody.innerHTML = tableData.map((row, i) => `
             <tr onclick="showFullPreview(${i})" id="row-${i}">
-                <td style="text-align:center; color:var(--apple-gray); font-size:10px;">${i+1}</td>
+                <td style="text-align:center; color:var(--apple-gray); font-size:11px; font-weight:700;">${i+1}</td>
                 <td>${row.title || '-'}</td>
                 <td id="opt-title-${i}">${row.opt_title || '-'}</td>
-                <td id="status-${i}"><span class="status-tag tag-waiting">待处理</span></td>
+                <td id="status-${i}"><span class="status-tag tag-waiting">等待任务</span></td>
             </tr>
         `).join('');
     }
@@ -249,7 +253,7 @@
     function clearData() {
         tableData = [];
         renderTable();
-        document.getElementById('previewBody').innerHTML = `<div style="text-align:center; color:#c1c1c6; margin-top:100px;">数据已清除</div>`;
+        document.getElementById('previewBody').innerHTML = `<div style="text-align:center; color:#c1c1c6; margin-top:150px;">数据已清除</div>`;
         document.getElementById('exportBtn').style.display = 'none';
         document.getElementById('fileInput').value = '';
     }
@@ -257,25 +261,40 @@
     async function handleRun() {
         if(!config.key) return toggleModal(true);
         const btn = document.getElementById('runBtn');
-        btn.disabled = true; btn.innerText = "优化中...";
-
-        const prompts = {
-            title: document.getElementById('p_title').value || DEFAULT_PROMPTS.title,
-            st: document.getElementById('p_st').value || DEFAULT_PROMPTS.st,
-            bp: document.getElementById('p_bp').value || DEFAULT_PROMPTS.bp,
-            desc: document.getElementById('p_desc').value || DEFAULT_PROMPTS.desc
-        };
+        btn.disabled = true; btn.innerText = "批量处理中...";
 
         const targetCols = ["title", "search terms", "bullet point 1", "bullet point 2", "bullet point 3", "bullet point 4", "bullet point 5", "description"];
 
         for(let i=0; i<tableData.length; i++) {
-            document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag" style="background:#e0f2ff; color:#0071e3;">处理中...</span>`;
+            document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag" style="background:#e0f2ff; color:#0071e3;">优化中...</span>`;
             
             const tasks = targetCols.map(col => {
-                if(!tableData[i][col]) return Promise.resolve();
-                let p = (col === 'title') ? prompts.title : (col === 'search terms' ? prompts.st : (col === 'description' ? prompts.desc : prompts.bp));
+                const cellValue = tableData[i][col];
+                const baseTitle = tableData[i]['title'] || "";
                 
-                return callAI(tableData[i][col], p).then(res => {
+                // 1. 获取用户自定义 Prompt
+                let userExtra = "";
+                if(col === 'title') userExtra = document.getElementById('p_title').value;
+                else if(col === 'search terms') userExtra = document.getElementById('p_st').value;
+                else if(col === 'description') userExtra = document.getElementById('p_desc').value;
+                else userExtra = document.getElementById('p_bp').value;
+
+                // 2. 构造组合 Prompt
+                let finalPrompt = "";
+                const baseRule = SYSTEM_BASE_PROMPTS[col === 'title' ? 'title' : (col === 'search terms' ? 'st' : (col === 'description' ? 'desc' : 'bp'))];
+                
+                if(!cellValue) {
+                    // 空值专用 Prompt：强制要求根据标题生成
+                    finalPrompt = `请根据产品标题【${baseTitle}】，为我重新创作这个产品的 ${col} 内容。要求：${baseRule}。额外要求：${userExtra}`;
+                } else {
+                    // 正常优化 Prompt
+                    finalPrompt = `请为我优化以下产品的 ${col} 内容：${cellValue}。要求：${baseRule}。额外要求：${userExtra}`;
+                }
+                
+                // 如果是空值，则输入内容变为标题辅助AI理解
+                const inputContent = cellValue || `(基于标题生成: ${baseTitle})`;
+
+                return callAI(inputContent, finalPrompt).then(res => {
                     tableData[i]['opt_'+col] = res;
                     if(col === 'title') document.getElementById(`opt-title-${i}`).innerText = res;
                 }).catch(err => console.error(err));
@@ -289,7 +308,6 @@
     }
 
     async function callAI(content, prompt) {
-        // 这里根据厂商封装请求，这里以通用 OpenAI 格式为例，实际可根据 vendor 切换 URL
         const urlMap = {
             "DeepSeek": "https://api.deepseek.com/chat/completions",
             "OpenAI": "https://api.openai.com/v1/chat/completions",
@@ -303,7 +321,7 @@
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.key}` },
             body: JSON.stringify({
                 model: config.model,
-                messages: [{role: "user", content: `${prompt}\n\n内容：${content}`}]
+                messages: [{role: "user", content: prompt}] // 这里直接传构造好的组合Prompt
             })
         });
         const data = await res.json();
@@ -319,27 +337,25 @@
         box.innerHTML = `
             <div class="listing-item"><div class="listing-label">Optimized Title</div><div class="listing-val">${r.opt_title || '-'}</div></div>
             <div class="listing-item"><div class="listing-label">Search Terms</div><div class="listing-val">${r['opt_search terms'] || '-'}</div></div>
-            <div class="listing-item"><div class="listing-label">Bullet Points</div><div class="listing-val">${r['opt_bullet point 1']||''}\n${r['opt_bullet point 2']||''}\n${r['opt_bullet point 3']||''}\n${r['opt_bullet point 4']||''}\n${r['opt_bullet point 5']||''}</div></div>
-            <div class="listing-item"><div class="listing-label">Description (HTML)</div><div class="listing-val" style="font-family:monospace;">${r.opt_description || '-'}</div></div>
+            <div class="listing-item">
+                <div class="listing-label">Bullet Points</div>
+                <div class="listing-val">${[1,2,3,4,5].map(n => r['opt_bullet point '+n] || '').filter(v => v).join('\n\n')}</div>
+            </div>
+            <div class="listing-item"><div class="listing-label">Description (HTML)</div><div class="listing-val" style="font-family:monospace; background:#2c2c2e; color:#0ad3ff; border:none;">${r.opt_description || '-'}</div></div>
         `;
     }
 
     function exportExcel() {
         const EXPORT_ORDER = ["opt_title", "opt_search terms", "opt_bullet point 1", "opt_bullet point 2", "opt_bullet point 3", "opt_bullet point 4", "opt_bullet point 5", "opt_description"];
-        
-        // 重新构建数据对象，确保顺序
         const cleanData = tableData.map(row => {
             let newRow = {};
-            EXPORT_ORDER.forEach(key => {
-                newRow[key] = row[key] || "";
-            });
+            EXPORT_ORDER.forEach(key => newRow[key] = row[key] || "");
             return newRow;
         });
-
         const ws = XLSX.utils.json_to_sheet(cleanData, { header: EXPORT_ORDER });
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Shawn_Optimized");
-        XLSX.writeFile(wb, `Optimized_Listing_${new Date().getTime()}.xlsx`);
+        XLSX.writeFile(wb, `Listing_Batch_${new Date().getTime()}.xlsx`);
     }
 </script>
 
