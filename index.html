@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Shawn 的跨境工具箱 | Apple Style</title>
+    <title>Shawn Tools | Apple Operations Hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,8 +13,9 @@
             --apple-blue: #0066cc;
             --card-white: #ffffff;
             
-            /* 核心布局参数 */
+            /* --- 核心对齐逻辑 --- */
             --content-width: 1100px;
+            /* 侧边距公式：保持标题和内容在宽屏下依然垂直对齐 */
             --side-gap: max(22px, calc((100vw - var(--content-width)) / 2));
             --card-gap: 22px;
         }
@@ -33,33 +34,32 @@
             position: fixed; top: 0; width: 100%; height: 48px;
             background: rgba(251, 251, 253, 0.8);
             backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-            z-index: 9999; display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05);
+            z-index: 9999; border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        .nav-content { 
-            width: 100%; padding: 0 var(--side-gap); 
-            display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box;
-        }
-        .nav-logo { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
-        .login-trigger { font-size: 12px; cursor: pointer; opacity: 0.7; transition: 0.3s; }
-        .login-trigger:hover { opacity: 1; color: var(--apple-blue); }
-
-        /* --- Hero 主视觉 --- */
+        .nav-content { width: 100%; padding: 0 var(--side-gap); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; height: 100%; }
+        
+        /* --- Hero --- */
         .hero { padding: 120px var(--side-gap) 40px; box-sizing: border-box; }
         .hero h2 { font-size: 21px; color: #f56300; margin-bottom: 8px; font-weight: 600; }
-        .hero h1 { font-size: 56px; font-weight: 700; margin: 0; letter-spacing: -0.02em; line-height: 1.07; }
+        .hero h1 { font-size: 56px; font-weight: 700; margin: 0; letter-spacing: -0.02em; line-height: 1.1; }
 
-        /* --- 货架公共样式 --- */
-        .section-header { padding: 60px var(--side-gap) 20px; box-sizing: border-box; }
+        /* --- 货架标题 --- */
+        .section-header { padding: 60px var(--side-gap) 10px; box-sizing: border-box; }
         .section-header h2 { font-size: 28px; font-weight: 600; margin: 0; }
         .section-header h2 span { color: var(--apple-subtext); }
 
-        .shelf-container { position: relative; width: 100%; margin-bottom: 20px; }
+        /* --- 终极货架结构 --- */
+        .shelf-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-        /* --- 核心优化：渐变消隐蒙版 --- */
+        /* 第一层：裁剪与渐隐 (The Mask) */
         .scroll-mask {
-            overflow: hidden;
-            /* 关键逻辑：在左右边缘各保留 side-gap 宽度的渐变区域 */
+            position: relative;
+            width: 100%;
+            overflow: hidden; /* 生死线：绝对裁剪溢出 */
             -webkit-mask-image: linear-gradient(to right, 
                 transparent 0%, 
                 black var(--side-gap), 
@@ -72,81 +72,73 @@
                 transparent 100%);
         }
 
+        /* 第二层：蓝色视口区 (The Viewport) */
+        .scroll-viewport {
+            width: 100%;
+            padding: 0 var(--side-gap); /* 保证第一张卡片对齐标题 */
+            box-sizing: border-box;
+            display: flex;
+        }
+
+        /* 第三层：滚动容器 (The Wrapper) */
         .scroll-wrapper {
             display: flex;
             overflow-x: auto;
-            /* padding 必须与 side-gap 一致，保证第一张卡片精准对齐 */
-            padding: 20px var(--side-gap) 60px; 
+            padding: 20px 0 60px; /* 彻底取消左右 padding，防止露白 */
             scroll-behavior: smooth;
             scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
+            -webkit-overflow-scrolling: touch; /* iOS 惯性滑动 */
+            scroll-snap-type: x proximity;
         }
         .scroll-wrapper::-webkit-scrollbar { display: none; }
 
-        /* --- 苹果风格卡片 --- */
+        /* --- 卡片设计 --- */
         .card {
-            flex: 0 0 310px;
-            height: 380px;
-            margin-right: var(--card-gap);
-            background: var(--card-white); border-radius: 28px;
-            padding: 30px; text-decoration: none; color: inherit;
-            display: flex; flex-direction: column;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-            box-sizing: border-box;
+            flex: 0 0 310px; height: 380px; margin-right: var(--card-gap);
+            background: var(--card-white); border-radius: 28px; padding: 30px;
+            text-decoration: none; color: inherit; display: flex; flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box; scroll-snap-align: start;
         }
         .card:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-
         .card-tag { font-size: 11px; font-weight: 700; color: #f56300; margin-bottom: 8px; text-transform: uppercase; }
-        .ai-glow { 
-            background: linear-gradient(90deg, #0071e3, #9b51e0); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-        }
+        .ai-glow { background: linear-gradient(90deg, #0071e3, #9b51e0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .card-title { font-size: 24px; font-weight: 600; margin: 0; line-height: 1.1; }
         .card-desc { font-size: 15px; color: var(--apple-subtext); margin-top: 12px; line-height: 1.4; }
         .card-icon { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 80px; }
 
-        /* --- 悬浮控制按钮 --- */
+        /* --- 按钮定位逻辑 --- */
         .arrow-btn {
-            position: absolute; width: 44px; height: 44px;
-            top: 50%; transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(0,0,0,0.05); border-radius: 50%; cursor: pointer;
+            position: absolute; width: 44px; height: 44px; top: 50%; transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(0,0,0,0.05); border-radius: 50%; cursor: pointer; z-index: 100; opacity: 0; transition: 0.3s;
             display: flex; align-items: center; justify-content: center;
-            z-index: 100; opacity: 0; transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .shelf-container:hover .arrow-btn { opacity: 1; }
-        .arrow-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
-        .arrow-btn svg { width: 18px; height: 18px; fill: none; stroke: #1d1d1f; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .arrow-btn svg { width: 18px; height: 18px; fill: none; stroke: #333; stroke-width: 2.5; }
         
+        /* 针对大屏：箭头永远贴着 1100px 内容区的两边缘 */
         .arrow-left { left: calc(var(--side-gap) - 22px); }
         .arrow-right { right: calc(var(--side-gap) - 22px); }
 
-        /* --- 账户弹窗 --- */
-        .modal-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.3); backdrop-filter: blur(20px);
-            display: none; justify-content: center; align-items: center; z-index: 10000;
+        @media (min-width: 1200px) {
+            .arrow-left { left: calc(50% - (var(--content-width) / 2) - 22px); }
+            .arrow-right { right: calc(50% - (var(--content-width) / 2) - 22px); }
         }
+
+        /* --- 弹窗样式 --- */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: none; justify-content: center; align-items: center; z-index: 10000; }
         .modal { background: #fff; width: 340px; padding: 40px; border-radius: 24px; position: relative; }
         .apple-input { width: 100%; padding: 14px; border: 1px solid #d2d2d7; border-radius: 12px; background: #f5f5f7; box-sizing: border-box; font-size: 16px; margin-bottom: 15px; outline: none; }
         .apple-btn-primary { width: 100%; padding: 14px; background: var(--apple-blue); color: #fff; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
-
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 38px; }
-            .arrow-btn { display: none; } /* 移动端靠滑动手势 */
-        }
     </style>
 </head>
 <body>
 
 <div class="nav">
     <div class="nav-content">
-        <span class="nav-logo">ShawnTools </span>
-        <span class="login-trigger" onclick="toggleModal()" id="userTag">账户</span>
+        <span style="font-weight:600">ShawnTools </span>
+        <span onclick="toggleModal()" style="font-size:12px; cursor:pointer" id="userTag">账户</span>
     </div>
 </div>
 
@@ -160,31 +152,33 @@
     <button class="arrow-btn arrow-left" onclick="move('row1', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
     <button class="arrow-btn arrow-right" onclick="move('row1', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
     <div class="scroll-mask">
-        <div class="scroll-wrapper" id="row1">
-            <a href="listing-ai-rewriter.html" class="card">
-                <div class="card-tag ai-glow">Apple Intelligence</div>
-                <h3 class="card-title">AI Listing 优化</h3>
-                <p class="card-desc">基于 AI 批量重写标题、五点及描述。</p>
-                <div class="card-icon">💻</div>
-            </a>
-            <a href="baned-words-filter.html" class="card">
-                <div class="card-tag">Compliance</div>
-                <h3 class="card-title">违规词筛选器</h3>
-                <p class="card-desc">全自动检索敏感词汇，规避侵权风险。</p>
-                <div class="card-icon">©️</div>
-            </a>
-            <a href="deduplicator.html" class="card">
-                <div class="card-tag">Efficiency</div>
-                <h3 class="card-title">文本去重工具</h3>
-                <p class="card-desc">自动识别空格换行，精简文案内容。</p>
-                <div class="card-icon">✂️</div>
-            </a>
-            <a href="case-converter.html" class="card">
-                <div class="card-tag">Writing</div>
-                <h3 class="card-title">大小写转换</h3>
-                <p class="card-desc">一键实现全大写、首字母大写转换。</p>
-                <div class="card-icon">📝</div>
-            </a>
+        <div class="scroll-viewport">
+            <div class="scroll-wrapper" id="row1">
+                <a href="listing-ai-rewriter.html" class="card">
+                    <div class="card-tag ai-glow">Apple Intelligence</div>
+                    <h3 class="card-title">AI Listing 优化</h3>
+                    <p class="card-desc">基于 AI 批量重写标题、五点及描述。</p>
+                    <div class="card-icon">💻</div>
+                </a>
+                <a href="baned-words-filter.html" class="card">
+                    <div class="card-tag">Compliance</div>
+                    <h3 class="card-title">违规词筛选器</h3>
+                    <p class="card-desc">全自动检索敏感词汇，规避侵权风险。</p>
+                    <div class="card-icon">©️</div>
+                </a>
+                <a href="deduplicator.html" class="card">
+                    <div class="card-tag">Efficiency</div>
+                    <h3 class="card-title">文本去重工具</h3>
+                    <p class="card-desc">自动识别空格换行，精简文案内容。</p>
+                    <div class="card-icon">✂️</div>
+                </a>
+                <a href="case-converter.html" class="card">
+                    <div class="card-tag">Writing</div>
+                    <h3 class="card-title">大小写转换</h3>
+                    <p class="card-desc">一键实现全大写、首字母大写转换。</p>
+                    <div class="card-icon">📝</div>
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -194,25 +188,27 @@
     <button class="arrow-btn arrow-left" onclick="move('row2', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
     <button class="arrow-btn arrow-right" onclick="move('row2', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
     <div class="scroll-mask">
-        <div class="scroll-wrapper" id="row2">
-            <a href="seo-parser.html" class="card">
-                <div class="card-tag">Search</div>
-                <h3 class="card-title">SEO 解析校验</h3>
-                <p class="card-desc">批量解析字符超限，一键导出 Excel。</p>
-                <div class="card-icon">🔍</div>
-            </a>
-            <a href="word-frequency.html" class="card">
-                <div class="card-tag">Insight</div>
-                <h3 class="card-title">词频统计分析</h3>
-                <p class="card-desc">深度挖掘高频词，精准筛选关键词。</p>
-                <div class="card-icon">📊</div>
-            </a>
-            <a href="amazon-sku-aggregator.html" class="card">
-                <div class="card-tag">Operation</div>
-                <h3 class="card-title">SKU 销量聚合</h3>
-                <p class="card-desc">处理订单报告，子体汇总父体销量。</p>
-                <div class="card-icon">🧮</div>
-            </a>
+        <div class="scroll-viewport">
+            <div class="scroll-wrapper" id="row2">
+                <a href="seo-parser.html" class="card">
+                    <div class="card-tag">Search</div>
+                    <h3 class="card-title">SEO 解析校验</h3>
+                    <p class="card-desc">批量解析字符超限，一键导出 Excel。</p>
+                    <div class="card-icon">🔍</div>
+                </a>
+                <a href="word-frequency.html" class="card">
+                    <div class="card-tag">Insight</div>
+                    <h3 class="card-title">词频统计分析</h3>
+                    <p class="card-desc">深度挖掘高频词，精准筛选关键词。</p>
+                    <div class="card-icon">📊</div>
+                </a>
+                <a href="amazon-sku-aggregator.html" class="card">
+                    <div class="card-tag">Operation</div>
+                    <h3 class="card-title">SKU 销量聚合</h3>
+                    <p class="card-desc">处理订单报告，子体汇总父体销量。</p>
+                    <div class="card-icon">🧮</div>
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -222,25 +218,27 @@
     <button class="arrow-btn arrow-left" onclick="move('row3', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
     <button class="arrow-btn arrow-right" onclick="move('row3', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
     <div class="scroll-mask">
-        <div class="scroll-wrapper" id="row3">
-            <a href="image-resizer.html" class="card">
-                <div class="card-tag">Visual</div>
-                <h3 class="card-title">主图尺寸缩放</h3>
-                <p class="card-desc">批量调整为 1600x1600 白底规格。</p>
-                <div class="card-icon">🖼️</div>
-            </a>
-            <a href="image-hosting.html" class="card">
-                <div class="card-tag">Storage</div>
-                <h3 class="card-title">自动图床工具</h3>
-                <p class="card-desc">一键上传至图床，获取 Raw 链接。</p>
-                <div class="card-icon">☁️</div>
-            </a>
-            <a href="html-editor.html" class="card">
-                <div class="card-tag">Design</div>
-                <h3 class="card-title">HTML 编辑器</h3>
-                <p class="card-desc">生成符合亚马逊标准的可视化代码。</p>
-                <div class="card-icon">🎨</div>
-            </a>
+        <div class="scroll-viewport">
+            <div class="scroll-wrapper" id="row3">
+                <a href="image-resizer.html" class="card">
+                    <div class="card-tag">Visual</div>
+                    <h3 class="card-title">主图尺寸缩放</h3>
+                    <p class="card-desc">批量调整为 1600x1600 白底规格。</p>
+                    <div class="card-icon">🖼️</div>
+                </a>
+                <a href="image-hosting.html" class="card">
+                    <div class="card-tag">Storage</div>
+                    <h3 class="card-title">自动图床工具</h3>
+                    <p class="card-desc">一键上传至图床，获取 Raw 链接。</p>
+                    <div class="card-icon">☁️</div>
+                </a>
+                <a href="html-editor.html" class="card">
+                    <div class="card-tag">Design</div>
+                    <h3 class="card-title">HTML 编辑器</h3>
+                    <p class="card-desc">生成符合亚马逊标准的可视化代码。</p>
+                    <div class="card-icon">🎨</div>
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -256,10 +254,9 @@
 </div>
 
 <script>
-    // 基于 ID 执行独立滚动
     function move(id, d) { 
         const wrapper = document.getElementById(id);
-        const cardStep = 310 + 22; // 卡片宽度 + 间距
+        const cardStep = 310 + 22; 
         wrapper.scrollBy({ left: d * cardStep, behavior: 'smooth' }); 
     }
 
@@ -272,9 +269,9 @@
         const acc = document.getElementById('acc').value;
         const pwd = document.getElementById('pwd').value;
         if (acc === 'admin' && pwd === 'admin') { 
-            localStorage.setItem('current_user', JSON.stringify({user: 'Shawn', type: 'VIP'}));
+            localStorage.setItem('current_user', JSON.stringify({user: 'Shawn', type: 'Founder'}));
             location.reload();
-        } else { alert('验证失败'); }
+        } else { alert('账号或密码不正确'); }
     }
 
     window.onload = () => {
