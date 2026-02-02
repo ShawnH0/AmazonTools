@@ -3,145 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon 卖家工具箱</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Shawn 的跨境工具箱 - Apple Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --apple-bg: #f5f5f7;
-            --apple-card: #ffffff;
             --apple-text: #1d1d1f;
             --apple-subtext: #86868b;
             --apple-blue: #0066cc;
-            --radius: 22px; /* 苹果标志性的平滑大圆角 */
+            --card-white: #ffffff;
+            --transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--apple-bg);
             color: var(--apple-text);
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 顶部导航：半透明磨砂效果 */
+        /* 顶部导航 */
         .nav {
-            position: fixed;
-            top: 0; width: 100%; height: 44px;
+            position: fixed; top: 0; width: 100%; height: 48px;
             background: rgba(251, 251, 253, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 9999; display: flex; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05);
         }
+        .nav-content { max-width: 1200px; margin: 0 auto; width: 100%; display: flex; justify-content: flex-end; padding: 0 30px; }
+        .login-trigger { font-size: 12px; cursor: pointer; color: var(--apple-text); opacity: 0.7; transition: 0.3s; }
+        .login-trigger:hover { opacity: 1; color: var(--apple-blue); }
 
-        .nav-content {
-            width: 100%; max-width: 1000px;
-            display: flex; justify-content: flex-end; padding: 0 22px;
+        /* 头部排版 */
+        .hero { padding: 120px 0 60px; text-align: left; max-width: 1200px; margin: 0 auto; padding-left: 40px; }
+        .hero h2 { font-size: 24px; color: #bf4800; margin-bottom: 10px; font-weight: 600; }
+        .hero h1 { font-size: 48px; font-weight: 700; margin: 0; letter-spacing: -1px; }
+
+        /* 分类区块 */
+        .section-container { margin-bottom: 80px; position: relative; }
+        .section-header { max-width: 1200px; margin: 0 auto 25px; padding-left: 40px; }
+        .section-header h2 { font-size: 28px; font-weight: 600; }
+        .section-header h2 span { color: var(--apple-subtext); }
+
+        /* 横向滚动区域 */
+        .scroll-wrapper {
+            display: flex; gap: 20px; overflow-x: auto;
+            padding: 20px 40px 40px; scroll-behavior: smooth;
+            scrollbar-width: none; /* 隐藏进度条 */
         }
+        .scroll-wrapper::-webkit-scrollbar { display: none; }
 
-        .login-btn {
-            font-size: 12px; color: var(--apple-text); text-decoration: none; opacity: 0.8; transition: 0.3s; cursor: pointer;
-        }
-        .login-btn:hover { color: var(--apple-blue); opacity: 1; }
-
-        /* 头部文字排版 */
-        .hero {
-            text-align: center;
-            padding: 120px 20px 60px;
-            animation: fadeInMove 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hero h1 { font-size: 48px; font-weight: 700; letter-spacing: -0.015em; margin: 0; }
-        .hero p { font-size: 21px; color: var(--apple-subtext); margin-top: 10px; font-weight: 400; }
-
-        /* 苹果风格网格布局 */
-        .container {
-            max-width: 1100px; margin: 0 auto; padding: 0 22px 100px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 仿苹果官网大卡片布局 */
-            gap: 22px;
-        }
-
-        /* 卡片基础交互 */
+        /* 苹果风格卡片 */
         .card {
-            background: var(--apple-card);
-            border-radius: var(--radius);
-            padding: 40px;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
-            box-shadow: 0 0px 0px rgba(0,0,0,0);
+            min-width: 320px; width: 320px; height: 420px;
+            background: var(--card-white); border-radius: 28px;
+            padding: 30px; text-decoration: none; color: inherit;
+            display: flex; flex-direction: column; position: relative;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+            transition: var(--transition);
         }
+        .card:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
 
-        .card:hover {
-            transform: scale(1.015);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+        .card-tag { font-size: 12px; font-weight: 600; color: #bf4800; margin-bottom: 8px; text-transform: uppercase; }
+        .card-title { font-size: 24px; font-weight: 600; margin: 0; line-height: 1.2; }
+        .card-desc { font-size: 16px; color: var(--apple-subtext); margin-top: 12px; line-height: 1.4; }
+        
+        .card-icon { align-self: center; font-size: 100px; margin-top: auto; transition: var(--transition); }
+        .card:hover .card-icon { transform: scale(1.1) rotate(-5deg); }
+
+        /* 左右控制箭头 (仿图五、图六) */
+        .arrow-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 40px; height: 40px; background: rgba(210, 210, 215, 0.6);
+            border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10; transition: 0.3s;
         }
+        .arrow-btn:hover { background: rgba(210, 210, 215, 0.9); }
+        .arrow-left { left: 10px; }
+        .arrow-right { right: 10px; }
 
-        /* 卡片内容排版 */
-        .card-header span { font-size: 14px; font-weight: 600; color: #bf4800; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .card-header h3 { font-size: 28px; font-weight: 600; margin: 0; line-height: 1.1; }
-        .card-header p { font-size: 17px; color: var(--apple-subtext); margin-top: 12px; line-height: 1.4; max-width: 280px; }
+        /* 管理员特有样式 */
+        .admin-section { background: #000; padding: 60px 0; margin-top: 50px; display: none; }
+        .admin-section h2 { color: #fff; }
+        .card-admin { background: #1d1d1f; color: #fff; }
 
-        /* 模拟苹果官网的图片位置 */
-        .card-icon {
-            align-self: flex-end;
-            font-size: 80px;
-            margin-top: 40px;
-            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .card:hover .card-icon { transform: scale(1.1) translateY(-10px); }
-
-        /* 特殊样式的卡片：管理员 */
-        .card-admin { background: #000; color: #fff; grid-column: span 2; display: none; }
-        .card-admin .card-header p { color: #86868b; }
-
-        /* 动效 */
-        @keyframes fadeInMove {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 模态框样式：苹果侧滑/浮窗风格 */
+        /* 弹窗样式 */
         .modal-overlay {
             position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(15px);
             display: none; justify-content: center; align-items: center; z-index: 10000;
         }
         .modal {
-            background: rgba(255,255,255,0.9);
-            width: 400px; padding: 40px; border-radius: 30px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
-            animation: modalPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(255,255,255,0.9); width: 400px; padding: 40px; border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2); animation: pop 0.4s ease;
         }
-        @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .input-group { margin-bottom: 20px; }
-        .input-group label { font-size: 12px; font-weight: 600; color: var(--apple-subtext); margin-bottom: 8px; display: block; }
-        .input-group input {
-            width: 100%; border: 1px solid #d2d2d7; padding: 12px; border-radius: 12px; font-size: 16px;
-            box-sizing: border-box; background: rgba(255,255,255,0.5); outline: none; transition: 0.3s;
+        @keyframes pop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { font-size: 12px; color: var(--apple-subtext); margin-bottom: 8px; display: block; }
+        .form-group input { 
+            width: 100%; padding: 12px; border: 1px solid #d2d2d7; border-radius: 12px; 
+            background: transparent; box-sizing: border-box; font-size: 16px; outline: none;
         }
-        .input-group input:focus { border-color: var(--apple-blue); }
-
         .apple-btn {
             width: 100%; padding: 14px; background: var(--apple-blue); color: #fff;
-            border: none; border-radius: 20px; font-size: 16px; font-weight: 600; cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 32px; }
-            .card-admin { grid-column: span 1; }
+            border: none; border-radius: 20px; font-weight: 600; cursor: pointer;
         }
     </style>
 </head>
@@ -149,129 +117,163 @@
 
 <div class="nav">
     <div class="nav-content">
-        <span class="login-btn" onclick="openModal()" id="navUserText">登录 / 账户</span>
+        <span class="login-trigger" id="userStatus" onclick="toggleModal()">登录 / 账户</span>
     </div>
 </div>
 
 <div class="hero">
-    <h1>Amazon 卖家工具箱</h1>
-    <p>新意迎新春。助力每一个爆款出海。</p>
+    <h2>新意迎新春。</h2>
+    <h1>送上好礼惊喜，开个好年。</h1>
 </div>
 
-<div class="container">
-    <a href="user-management.html" class="card card-admin" id="adminCard">
-        <div class="card-header">
-            <span>Admin Only</span>
-            <h3>用户权限管理</h3>
-            <p>集中配置账号套餐与后端 API Keys。</p>
-        </div>
-        <div class="card-icon">🔑</div>
-    </a>
+<div class="section-container" id="adminSection" style="display: none;">
+    <div class="section-header"><h2>管理员专选<span>。让效率倍增。</span></h2></div>
+    <div class="scroll-wrapper">
+        <a href="user-management.html" class="card card-admin">
+            <div class="card-tag">SYSTEM</div>
+            <h3 class="card-title">用户权限管理</h3>
+            <p class="card-desc">配置账号、VIP 套餐及 Key 存储。</p>
+            <div class="card-icon">🔑</div>
+        </a>
+    </div>
+</div>
 
-    <a href="listing-ai-rewriter.html" class="card">
-        <div class="card-header">
-            <span>Apple Intelligence 风格</span>
-            <h3>AI Listing 优化</h3>
-            <p>基于顶级 LLM 重写标题与五点，让文案充满吸引力。</p>
-        </div>
-        <div class="card-icon">💻</div>
-    </a>
+<div class="section-container">
+    <div class="section-header"><h2>AI 与 文本工具<span>。智能且高效。</span></h2></div>
+    <button class="arrow-btn arrow-left" onclick="scrollLeft('row1')">‹</button>
+    <button class="arrow-btn arrow-right" onclick="scrollRight('row1')">›</button>
+    <div class="scroll-wrapper" id="row1">
+        <a href="listing-ai-rewriter.html" class="card">
+            <div class="card-tag">Apple Intelligence</div>
+            <h3 class="card-title">AI Listing 优化</h3>
+            <p class="card-desc">基于 AI 批量重写标题、五点及描述。</p>
+            <div class="card-icon">💻</div>
+        </a>
+        <a href="baned-words-filter.html" class="card">
+            <div class="card-tag">Compliance</div>
+            <h3 class="card-title">违规词筛选器</h3>
+            <p class="card-desc">全自动检索敏感词汇，规避侵权风险。</p>
+            <div class="card-icon">©️</div>
+        </a>
+        <a href="deduplicator.html" class="card">
+            <div class="card-tag">Efficiency</div>
+            <h3 class="card-title">文本去重工具</h3>
+            <p class="card-desc">自动识别空格换行，精简文案内容。</p>
+            <div class="card-icon">✂️</div>
+        </a>
+        <a href="case-converter.html" class="card">
+            <div class="card-tag">Writing</div>
+            <h3 class="card-title">大小写转换</h3>
+            <p class="card-desc">一键实现全大写、首字母大写转换。</p>
+            <div class="card-icon">📝</div>
+        </a>
+    </div>
+</div>
 
-    <a href="baned-words-filter.html" class="card">
-        <div class="card-header">
-            <span>安全合规</span>
-            <h3>违规词筛选器</h3>
-            <p>全自动检索敏感词汇，规避侵权与下架风险。</p>
-        </div>
-        <div class="card-icon">©️</div>
-    </a>
+<div class="section-container">
+    <div class="section-header"><h2>数据与解析工具<span>。深入业务核心。</span></h2></div>
+    <button class="arrow-btn arrow-left" onclick="scrollLeft('row2')">‹</button>
+    <button class="arrow-btn arrow-right" onclick="scrollRight('row2')">›</button>
+    <div class="scroll-wrapper" id="row2">
+        <a href="seo-parser.html" class="card">
+            <div class="card-tag">Search</div>
+            <h3 class="card-title">SEO 解析校验</h3>
+            <p class="card-desc">批量解析字符超限，一键导出 Excel。</p>
+            <div class="card-icon">🔍</div>
+        </a>
+        <a href="word-frequency.html" class="card">
+            <div class="card-tag">Insight</div>
+            <h3 class="card-title">词频统计分析</h3>
+            <p class="card-desc">深度挖掘高频词，精准筛选关键词。</p>
+            <div class="card-icon">📊</div>
+        </a>
+        <a href="amazon-sku-aggregator.html" class="card">
+            <div class="card-tag">Operation</div>
+            <h3 class="card-title">SKU 销量聚合</h3>
+            <p class="card-desc">处理订单报告，子体汇总父体销量。</p>
+            <div class="card-icon">🧮</div>
+        </a>
+        <a href="#" class="card" style="opacity:0.6; cursor:default;">
+            <div class="card-tag">Upcoming</div>
+            <h3 class="card-title">利润计算器</h3>
+            <p class="card-desc">自动计算扣除佣金及配送后的利润。</p>
+            <div class="card-icon">💰</div>
+        </a>
+    </div>
+</div>
 
-    <a href="seo-parser.html" class="card">
-        <div class="card-header">
-            <span>深度解析</span>
-            <h3>SEO 解析 & 校验</h3>
-            <p>洞察关键词权重，优化每一处字符限制。</p>
-        </div>
-        <div class="card-icon">🔍</div>
-    </a>
-
-    <a href="image-resizer.html" class="card">
-        <div class="card-header">
-            <span>视觉影像</span>
-            <h3>主图尺寸缩放</h3>
-            <p>批量处理为 1600px 白底规格，符合官方标准。</p>
-        </div>
-        <div class="card-icon">🖼️</div>
-    </a>
-
-    <a href="word-frequency.html" class="card">
-        <div class="card-header">
-            <span>数据洞察</span>
-            <h3>词频统计分析</h3>
-            <p>挖掘搜索趋势，通过数据驱动决策。</p>
-        </div>
-        <div class="card-icon">📊</div>
-    </a>
+<div class="section-container">
+    <div class="section-header"><h2>多媒体处理<span>。惊艳你的视觉。</span></h2></div>
+    <button class="arrow-btn arrow-left" onclick="scrollLeft('row3')">‹</button>
+    <button class="arrow-btn arrow-right" onclick="scrollRight('row3')">›</button>
+    <div class="scroll-wrapper" id="row3">
+        <a href="image-resizer.html" class="card">
+            <div class="card-tag">Photography</div>
+            <h3 class="card-title">主图尺寸缩放</h3>
+            <p class="card-desc">批量调整为 1600x1600 白底规格。</p>
+            <div class="card-icon">🖼️</div>
+        </a>
+        <a href="image-hosting.html" class="card">
+            <div class="card-tag">Cloud</div>
+            <h3 class="card-title">自动图床工具</h3>
+            <p class="card-desc">一键上传至图床，获取 Raw 链接。</p>
+            <div class="card-icon">☁️</div>
+        </a>
+        <a href="html-editor.html" class="card">
+            <div class="card-tag">Design</div>
+            <h3 class="card-title">HTML 编辑器</h3>
+            <p class="card-desc">像 Word 一样编辑描述，生成 HTML。</p>
+            <div class="card-icon">🎨</div>
+        </a>
+    </div>
 </div>
 
 <div class="modal-overlay" id="loginModal">
     <div class="modal">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h2 style="margin:0; font-size: 24px;">账户中心</h2>
-            <span style="cursor:pointer; font-size:24px; color:#86868b;" onclick="closeModal()">×</span>
-        </div>
-        
-        <div id="loginForm">
-            <div class="input-group">
-                <label>Apple ID (账号)</label>
-                <input type="text" id="accInput" placeholder="请输入您的账号">
+        <h2 style="margin-top:0;">账户设置</h2>
+        <div id="authContent">
+            <div class="form-group"><label>账号</label><input type="text" id="accIn"></div>
+            <div class="form-group" id="pwdGroup"><label>密码</label><input type="password" id="pwdIn"></div>
+            <div id="vipArea" style="display:none; border-top:1px solid #eee; padding-top:15px; margin-top:15px;">
+                <div class="form-group"><label>Token / Key (VIP 专属)</label><input type="password" id="keyIn"></div>
             </div>
-            <div class="input-group" id="pwdGroup">
-                <label>密码</label>
-                <input type="password" id="pwdInput" placeholder="请输入密码">
-            </div>
-
-            <div id="vipArea" style="display:none; border-top: 1px solid #d2d2d7; margin-top: 20px; padding-top: 20px;">
-                <div class="input-group">
-                    <label>OpenRouter API Key (VIP 专属)</label>
-                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-...">
-                </div>
-            </div>
-
-            <button class="apple-btn" onclick="handleAuth()" id="mainBtn" style="margin-top: 10px;">继续</button>
-            <button class="apple-btn" onclick="handleLogout()" id="logoutBtn" style="display:none; margin-top: 10px; background:#e8e8ed; color:#1d1d1f;">退出登录</button>
+            <button class="apple-btn" onclick="handleAuth()" id="mainBtn">继续</button>
+            <button class="apple-btn" style="background:#e8e8ed; color:#1d1d1f; margin-top:10px; display:none;" id="outBtn" onclick="handleLogout()">登出</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 权限与状态逻辑
+    // 左右滑动逻辑
+    function scrollLeft(id) { document.getElementById(id).scrollBy({ left: -340, behavior: 'smooth' }); }
+    function scrollRight(id) { document.getElementById(id).scrollBy({ left: 340, behavior: 'smooth' }); }
+
+    // 状态管理
     function updateUI() {
         const user = JSON.parse(localStorage.getItem('current_user'));
-        const navText = document.getElementById('navUserText');
-        const adminCard = document.getElementById('adminCard');
+        const status = document.getElementById('userStatus');
+        const adminSec = document.getElementById('adminSection');
         const vipArea = document.getElementById('vipArea');
         const pwdGroup = document.getElementById('pwdGroup');
-        const logoutBtn = document.getElementById('logoutBtn');
+        const outBtn = document.getElementById('outBtn');
         const mainBtn = document.getElementById('mainBtn');
 
         if (user) {
-            navText.innerText = `你好, ${user.user}`;
-            adminCard.style.display = (user.user === 'admin') ? 'flex' : 'none';
+            status.innerText = `你好, ${user.user}`;
+            adminSec.style.display = (user.user === 'admin') ? 'block' : 'none';
             pwdGroup.style.display = 'none';
-            logoutBtn.style.display = 'block';
+            outBtn.style.display = 'block';
             mainBtn.innerText = "保存配置";
-            
             if (user.type === 'VIP用户' || user.user === 'admin') {
                 vipArea.style.display = 'block';
-                document.getElementById('apiKeyInput').value = localStorage.getItem(`api_${user.user}`) || '';
+                document.getElementById('keyIn').value = localStorage.getItem(`api_${user.user}`) || '';
             }
         } else {
-            navText.innerText = "登录 / 账户";
-            adminCard.style.display = 'none';
+            status.innerText = "登录 / 账户";
+            adminSec.style.display = 'none';
             pwdGroup.style.display = 'block';
             vipArea.style.display = 'none';
-            logoutBtn.style.display = 'none';
+            outBtn.style.display = 'none';
             mainBtn.innerText = "继续";
         }
     }
@@ -279,25 +281,27 @@
     function handleAuth() {
         const user = JSON.parse(localStorage.getItem('current_user'));
         if (!user) {
-            const u = document.getElementById('accInput').value;
-            const p = document.getElementById('pwdInput').value;
+            const u = document.getElementById('accIn').value;
+            const p = document.getElementById('pwdIn').value;
             const db = JSON.parse(localStorage.getItem('users_db')) || [];
             const found = db.find(x => x.user === u && x.pass === p);
-            if (found) {
-                localStorage.setItem('current_user', JSON.stringify(found));
-                updateUI();
-            } else { alert('验证失败'); }
+            if (found) { localStorage.setItem('current_user', JSON.stringify(found)); updateUI(); }
+            else { alert('验证失败'); }
         } else {
             if (user.type === 'VIP用户' || user.user === 'admin') {
-                localStorage.setItem(`api_${user.user}`, document.getElementById('apiKeyInput').value);
+                localStorage.setItem(`api_${user.user}`, document.getElementById('keyIn').value);
             }
-            closeModal();
+            toggleModal();
         }
     }
 
-    function handleLogout() { localStorage.removeItem('current_user'); updateUI(); closeModal(); }
-    function openModal() { document.getElementById('loginModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
+    function handleLogout() { localStorage.removeItem('current_user'); updateUI(); toggleModal(); }
+    function toggleModal() { 
+        const m = document.getElementById('loginModal');
+        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        const user = JSON.parse(localStorage.getItem('current_user'));
+        if(user) document.getElementById('accIn').value = user.user;
+    }
     window.onload = updateUI;
 </script>
 </body>
