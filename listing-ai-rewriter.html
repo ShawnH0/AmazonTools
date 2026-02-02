@@ -24,13 +24,16 @@
         .main-panel { flex: 1.8; background: white; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
         .preview-panel { flex: 1.2; background: white; border-radius: 12px; padding: 20px; overflow-y: auto; border-left: 4px solid var(--primary); }
 
-        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-green { background: var(--success); color: white; }
+        .btn-red { background: #fff1f0; color: var(--error); border: 1px solid #ffa39e; }
+        .btn-red:hover { background: #ff4d4f; color: white; }
         .btn-outline { background: white; border: 1px solid #d9d9d9; color: #595959; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .table-wrap { flex: 1; overflow: auto; border: 1px solid #f0f0f0; margin-top: 10px; }
+        .table-wrap { flex: 1; overflow: auto; border: 1px solid #f0f0f0; margin-top: 10px; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th { background: #fafafa; padding: 12px; border-bottom: 2px solid #f0f0f0; position: sticky; top: 0; z-index: 10; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #f0f0f0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -49,7 +52,7 @@
 <div class="container">
     <div class="nav-header">
         <a href="index.html" style="text-decoration:none; color:var(--primary);">🏠 返回工具箱首页</a>
-        <div style="font-weight: bold;">Listing AI 优化 (多模型+自定义 Prompt 版)</div>
+        <div style="font-weight: bold;">Listing AI 优化 Pro</div>
     </div>
 
     <div class="config-card">
@@ -78,10 +81,10 @@
         </div>
 
         <div class="prompt-grid">
-            <div class="config-item"><label>Title Prompt (选填)</label><textarea id="p_title" placeholder="默认：作为亚马逊专家优化标题..."></textarea></div>
-            <div class="config-item"><label>Description Prompt (选填)</label><textarea id="p_desc" placeholder="默认：优化产品描述并使用HTML..."></textarea></div>
-            <div class="config-item"><label>Bullet Points Prompt (选填)</label><textarea id="p_bp" placeholder="默认：优化五点描述..."></textarea></div>
-            <div class="config-item"><label>Search Terms Prompt (选填)</label><textarea id="p_st" placeholder="默认：提取核心搜索词..."></textarea></div>
+            <div class="config-item"><label>Title Prompt (选填)</label><textarea id="p_title" placeholder="默认：优化标题，突出核心卖点..."></textarea></div>
+            <div class="config-item"><label>Description Prompt (选填)</label><textarea id="p_desc" placeholder="默认：使用HTML标签优化详情描述..."></textarea></div>
+            <div class="config-item"><label>Bullet Points Prompt (选填)</label><textarea id="p_bp" placeholder="默认：精简并增强五点描述..."></textarea></div>
+            <div class="config-item"><label>Search Terms Prompt (选填)</label><textarea id="p_st" placeholder="默认：筛选高转化关键词..."></textarea></div>
         </div>
     </div>
 
@@ -89,10 +92,11 @@
         <div class="main-panel">
             <div class="btn-group">
                 <button class="btn btn-outline" onclick="downloadBlankTemplate()">📥 下载模板</button>
+                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📤 上传表格</button>
                 <button class="btn btn-blue" id="runBtn" onclick="startAIProcessing()" disabled>🚀 开始处理</button>
                 <button class="btn btn-green" id="exportBtn" onclick="exportFinalExcel()" disabled>📊 导出结果</button>
+                <button class="btn btn-red" id="clearBtn" onclick="clearAll()">🧹 清除记录</button>
                 <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFileLoad(this.files[0])">
-                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">📤 上传表格</button>
             </div>
 
             <div id="progBar" style="display:none; margin-bottom:10px;">
@@ -106,7 +110,7 @@
 
         <div class="preview-panel" id="previewArea">
             <h3 style="margin-top:0;">🔍 全维度 Listing 预览</h3>
-            <div id="previewContent"><p style="color:#999; text-align:center; margin-top:50px;">选择行以预览优化结果</p></div>
+            <div id="previewContent"><p style="color:#999; text-align:center; margin-top:50px;">上传表格并选择行以预览</p></div>
         </div>
     </div>
 </div>
@@ -144,7 +148,21 @@
         ['p_title','p_desc','p_bp','p_st'].forEach(id => {
             localStorage.setItem('sh_ls_' + id, document.getElementById(id).value);
         });
-        alert('配置已保存');
+        alert('配置已成功保存到本地存储！');
+    }
+
+    function clearAll() {
+        if (rawData.length > 0 && !confirm("确定要清除当前所有数据和处理进度吗？")) return;
+        rawData = [];
+        headers = [];
+        document.getElementById('tHead').innerHTML = "";
+        document.getElementById('tBody').innerHTML = "";
+        document.getElementById('previewContent').innerHTML = `<p style="color:#999; text-align:center; margin-top:50px;">上传表格并选择行以预览</p>`;
+        document.getElementById('progBar').style.display = 'none';
+        document.getElementById('progFill').style.width = '0%';
+        document.getElementById('runBtn').disabled = true;
+        document.getElementById('exportBtn').disabled = true;
+        document.getElementById('fileInput').value = "";
     }
 
     function downloadBlankTemplate() {
@@ -152,7 +170,7 @@
         const ws = XLSX.utils.aoa_to_sheet([headerRow]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Template");
-        XLSX.writeFile(wb, "Listing_Template.xlsx");
+        XLSX.writeFile(wb, "Amazon_Listing_Template.xlsx");
     }
 
     function handleFileLoad(file) {
@@ -177,7 +195,10 @@
         tbody.innerHTML = rawData.map((row, i) => `
             <tr onclick="updatePreview(${i})" id="row-${i}">
                 <td id="status-${i}" style="color:#999">待处理</td>
-                ${headers.map(h => `<td id="cell-${i}-${h.replace(/\s/g,'')}">${row[h]||''}<span class="char-tag" id="tag-${i}-${h.replace(/\s/g,'')}">${(row[h]||'').length}</span></td>`).join('')}
+                ${headers.map(h => {
+                    const val = String(row[h] || '');
+                    return `<td id="cell-${i}-${h.replace(/\s/g,'')}">${val}<span class="char-tag" id="tag-${i}-${h.replace(/\s/g,'')}">${val.length}</span></td>`;
+                }).join('')}
             </tr>
         `).join('');
     }
@@ -216,6 +237,7 @@
         
         document.getElementById('progBar').style.display = 'block';
         document.getElementById('runBtn').disabled = true;
+        document.getElementById('clearBtn').disabled = true;
 
         const queue = [...rawData.keys()];
         const workers = Array(concurrency).fill(null).map(() => (async () => {
@@ -225,7 +247,7 @@
                 let hasError = false;
 
                 for (let h of headers) {
-                    if (rawData[idx][h]) {
+                    if (rawData[idx][h] && rawData[idx][h] !== "API Error: 调用失败") {
                         const customPrompt = getPrompt(h);
                         const res = await callAI(host, key, model, h, rawData[idx][h], customPrompt);
                         
@@ -236,11 +258,13 @@
                             rawData[idx][h] = res;
                         }
                         
-                        // 更新 UI
                         const cellId = `cell-${idx}-${h.replace(/\s/g,'')}`;
                         const tagId = `tag-${idx}-${h.replace(/\s/g,'')}`;
-                        document.getElementById(cellId).firstChild.textContent = rawData[idx][h];
-                        document.getElementById(tagId).innerText = rawData[idx][h].length;
+                        const cell = document.getElementById(cellId);
+                        if(cell) {
+                            cell.firstChild.textContent = rawData[idx][h];
+                            document.getElementById(tagId).innerText = rawData[idx][h].length;
+                        }
                     }
                 }
                 
@@ -259,6 +283,7 @@
         })());
         await Promise.all(workers);
         document.getElementById('exportBtn').disabled = false;
+        document.getElementById('clearBtn').disabled = false;
     }
 
     function getPrompt(field) {
@@ -270,7 +295,7 @@
     }
 
     async function callAI(host, key, model, field, content, customPrompt) {
-        const defaultPrompt = `作为亚马逊SEO专家，优化以下${field}：${content}`;
+        const defaultPrompt = `作为亚马逊SEO专家精通亚马逊的算法，优化以下${field}：${content}, 用英语回答，且只需要回答内容，不需要其他任何一个多余的字`;
         const finalPrompt = customPrompt ? `${customPrompt}\n\n内容：${content}` : defaultPrompt;
 
         try {
