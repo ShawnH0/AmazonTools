@@ -2,154 +2,218 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>用户权限管理控制台 - 管理员专用</title>
+    <title>用户权限管理 - 直观表格版</title>
     <script>
-        // 【1. 顶部安全校验】 必须在页面渲染前执行
+        // 顶部权限校验
         (function() {
             const currentUser = JSON.parse(localStorage.getItem('current_user'));
-            // 检查是否存在登录信息，且账号是否为 admin
             if (!currentUser || currentUser.user !== 'admin') {
-                alert('⚠️ 访问受限：检测到非管理员操作，正在返回首页...');
+                alert('权限不足');
                 window.location.href = 'index.html';
             }
         })();
     </script>
     <style>
-        :root { --primary: #1890ff; --success: #52c41a; --error: #ff4d4f; --bg: #f0f2f5; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 30px; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        :root { --primary: #1890ff; --success: #52c41a; --error: #ff4d4f; --bg: #f0f2f5; --text: #262626; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
         
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f0f2f5; padding-bottom: 20px; margin-bottom: 20px; }
-        .header h2 { margin: 0; color: #333; display: flex; align-items: center; gap: 10px; }
-        
-        .toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-box { flex: 1; padding: 8px 15px; border: 1px solid #d9d9d9; border-radius: 6px; outline: none; }
-        .search-box:focus { border-color: var(--primary); }
+        /* 头部样式 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 24px; }
+        .back-link { color: var(--primary); text-decoration: none; font-size: 14px; }
 
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th { background: #fafafa; padding: 15px; text-align: left; color: #595959; font-weight: 600; border-bottom: 2px solid #f0f0f0; }
-        td { padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        
-        .btn { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; transition: 0.2s; }
-        .btn-add { background: var(--primary); color: white; }
-        .btn-edit { background: #e6f7ff; color: var(--primary); margin-right: 5px; }
-        .btn-vip { background: #f6ffed; color: var(--success); border: 1px solid #b7eb8f; margin-right: 5px; }
-        .btn-del { background: #fff1f0; color: var(--error); border: 1px solid #ffa39e; }
-        .btn:hover { opacity: 0.8; }
+        /* 工具栏 */
+        .toolbar { display: flex; gap: 15px; margin-bottom: 20px; }
+        .search-input { flex: 1; padding: 10px 15px; border: 1px solid #d9d9d9; border-radius: 8px; outline: none; transition: 0.3s; }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #40a9ff; }
 
-        .tag { padding: 2px 8px; border-radius: 4px; font-size: 12px; }
-        .tag-vip { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        /* 表格样式 */
+        .table-wrapper { border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #fafafa; padding: 16px; font-weight: 600; color: #595959; border-bottom: 1px solid #f0f0f0; }
+        td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        tr:hover { background: #fafafa; }
+
+        /* 标签 */
+        .tag { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
         .tag-admin { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
-        .tag-user { background: #f5f5f5; color: #8c8c8c; }
+        .tag-vip { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        .tag-user { background: #f5f5f5; color: #8c8c8c; border: 1px solid #d9d9d9; }
+
+        /* 操作按钮 */
+        .action-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 14px; padding: 0 8px; }
+        .action-btn.del { color: var(--error); }
+        .action-btn:hover { text-decoration: underline; }
+
+        /* 自定义模态框 (Modal) */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; width: 450px; border-radius: 12px; padding: 24px; box-shadow: 0 12px 48px rgba(0,0,0,0.15); }
+        .modal-header { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #595959; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; box-sizing: border-box; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>🔑 用户管理后台 <span style="font-size: 14px; color: #8c8c8c; font-weight: normal;">(仅管理员可见)</span></h2>
-        <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: 500;">← 返回卖家工具箱</a>
+        <h2>🔑 用户管理控制台</h2>
+        <a href="index.html" class="back-link">← 返回工具箱首页</a>
     </div>
 
     <div class="toolbar">
-        <input type="text" id="searchKey" class="search-box" placeholder="搜索用户名或账号类型..." oninput="loadUsers()">
-        <button class="btn btn-add" onclick="userAction('add')">+ 新增用户</button>
+        <input type="text" id="searchInput" class="search-input" placeholder="按账号或类型搜索用户..." oninput="renderTable()">
+        <button class="btn btn-primary" onclick="openUserModal()">+ 新增用户</button>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>账号</th>
-                <th>密码</th>
-                <th>用户类型</th>
-                <th>套餐到期时间</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="userTableBody">
-            </tbody>
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>账号</th>
+                    <th>密码</th>
+                    <th>用户类型</th>
+                    <th>套餐到期时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-overlay" id="userModal">
+    <div class="modal">
+        <div class="modal-header" id="modalTitle">新增用户</div>
+        <input type="hidden" id="editIndex">
+        <div class="form-group">
+            <label>账号名称</label>
+            <input type="text" id="formUser" placeholder="例如: shawn_helper">
+        </div>
+        <div class="form-group">
+            <label>设置密码</label>
+            <input type="text" id="formPass" placeholder="请输入登录密码">
+        </div>
+        <div class="form-group">
+            <label>账户类型</label>
+            <select id="formType">
+                <option value="普通用户">普通用户</option>
+                <option value="VIP用户">VIP用户</option>
+                <option value="管理员">管理员</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>到期日期</label>
+            <input type="date" id="formExpiry">
+        </div>
+        <div class="modal-footer">
+            <button class="btn" style="background:#eee" onclick="closeUserModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveUser()">保存用户信息</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    // 初始化本地模拟数据库
-    function getDB() {
-        return JSON.parse(localStorage.getItem('users_db')) || [];
-    }
+    // 核心数据操作
+    function getDB() { return JSON.parse(localStorage.getItem('users_db')) || []; }
+    function setDB(db) { localStorage.setItem('users_db', JSON.stringify(db)); renderTable(); }
 
-    function saveDB(data) {
-        localStorage.setItem('users_db', JSON.stringify(data));
-        loadUsers();
-    }
-
-    // 加载并渲染用户列表
-    function loadUsers() {
+    // 渲染表格
+    function renderTable() {
         const db = getDB();
-        const keyword = document.getElementById('searchKey').value.toLowerCase();
+        const search = document.getElementById('searchInput').value.toLowerCase();
         const tbody = document.getElementById('userTableBody');
         tbody.innerHTML = '';
 
-        db.filter(u => u.user.toLowerCase().includes(keyword) || u.type.includes(keyword)).forEach((user, index) => {
-            const isVIP = user.type === 'VIP用户';
-            const isAdmin = user.user === 'admin';
-            
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${user.user}</strong></td>
-                    <td><code>${user.pass}</code></td>
-                    <td><span class="tag ${isAdmin ? 'tag-admin' : (isVIP ? 'tag-vip' : 'tag-user')}">${user.type}</span></td>
-                    <td>${user.expiry}</td>
-                    <td>
-                        <button class="btn btn-edit" onclick="userAction('edit', ${index})">修改</button>
-                        ${!isAdmin ? `<button class="btn btn-vip" onclick="makeForeverVIP(${index})">✨ 永久VIP</button>` : ''}
-                        ${!isAdmin ? `<button class="btn btn-del" onclick="userAction('delete', ${index})">删除</button>` : ''}
-                    </td>
-                </tr>
-            `;
+        db.forEach((u, index) => {
+            if(u.user.toLowerCase().includes(search) || u.type.includes(search)) {
+                const typeClass = u.user === 'admin' ? 'tag-admin' : (u.type === 'VIP用户' ? 'tag-vip' : 'tag-user');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${u.user}</strong></td>
+                        <td><code>${u.pass}</code></td>
+                        <td><span class="tag ${typeClass}">${u.type}</span></td>
+                        <td>${u.expiry}</td>
+                        <td>
+                            <button class="action-btn" onclick="openUserModal(${index})">编辑</button>
+                            ${u.user !== 'admin' ? `<button class="action-btn" onclick="makeForever(${index})">永久VIP</button>` : ''}
+                            ${u.user !== 'admin' ? `<button class="action-btn del" onclick="deleteUser(${index})">删除</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }
         });
     }
 
-    // 【一键设为永久 VIP 逻辑】
-    function makeForeverVIP(index) {
+    // 模态框控制
+    function openUserModal(index = null) {
+        const modal = document.getElementById('userModal');
         const db = getDB();
-        db[index].type = 'VIP用户';
-        db[index].expiry = '2099-12-31'; // 设置一个遥远的日期作为永久标识
-        if(confirm(`确定要将用户 [${db[index].user}] 提升为永久 VIP 吗？`)) {
-            saveDB(db);
-        }
-    }
-
-    // CRUD 操作逻辑
-    function userAction(type, index) {
-        let db = getDB();
         
-        if (type === 'delete') {
-            if(confirm('确定删除该用户吗？操作不可撤销。')) {
-                db.splice(index, 1);
-                saveDB(db);
-            }
-        } else if (type === 'add' || type === 'edit') {
-            const isEdit = type === 'edit';
-            const userObj = isEdit ? db[index] : { user: '', pass: '', type: '普通用户', expiry: '2026-12-31' };
-            
-            const newName = isEdit ? userObj.user : prompt("请输入新账号:", "");
-            if(!newName) return;
-            
-            const newPass = prompt("设置密码:", userObj.pass);
-            const newType = prompt("用户类型 (普通用户/VIP用户):", userObj.type);
-            const newExpiry = prompt("套餐到期日期 (YYYY-MM-DD):", userObj.expiry);
+        if (index !== null) {
+            document.getElementById('modalTitle').innerText = "编辑用户信息";
+            document.getElementById('editIndex').value = index;
+            document.getElementById('formUser').value = db[index].user;
+            document.getElementById('formPass').value = db[index].pass;
+            document.getElementById('formType').value = db[index].type;
+            document.getElementById('formExpiry').value = db[index].expiry;
+        } else {
+            document.getElementById('modalTitle').innerText = "新增用户";
+            document.getElementById('editIndex').value = "";
+            document.getElementById('formUser').value = "";
+            document.getElementById('formPass').value = "";
+            document.getElementById('formType').value = "普通用户";
+            document.getElementById('formExpiry').value = "2026-12-31";
+        }
+        modal.style.display = 'flex';
+    }
 
-            if(isEdit) {
-                db[index] = { user: newName, pass: newPass, type: newType, expiry: newExpiry };
-            } else {
-                db.push({ user: newName, pass: newPass, type: newType, expiry: newExpiry });
-            }
-            saveDB(db);
+    function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
+
+    function saveUser() {
+        const db = getDB();
+        const index = document.getElementById('editIndex').value;
+        const newUser = {
+            user: document.getElementById('formUser').value,
+            pass: document.getElementById('formPass').value,
+            type: document.getElementById('formType').value,
+            expiry: document.getElementById('formExpiry').value
+        };
+
+        if(!newUser.user || !newUser.pass) return alert("请填写完整信息");
+
+        if(index !== "") {
+            db[index] = newUser;
+        } else {
+            db.push(newUser);
+        }
+        
+        setDB(db);
+        closeUserModal();
+    }
+
+    function deleteUser(index) {
+        if(confirm("确定要删除该用户吗？")) {
+            const db = getDB();
+            db.splice(index, 1);
+            setDB(db);
         }
     }
 
-    // 页面加载执行
-    window.onload = loadUsers;
+    function makeForever(index) {
+        const db = getDB();
+        db[index].type = "VIP用户";
+        db[index].expiry = "2099-12-31";
+        setDB(db);
+    }
+
+    window.onload = renderTable;
 </script>
 </body>
 </html>
