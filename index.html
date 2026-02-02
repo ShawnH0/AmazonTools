@@ -3,274 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shawn 的跨境电商工具箱</title>
+    <title>Amazon 卖家工具箱</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #ff4d4f; --hover: #ff7875; --bg: #f0f2f5; --blue: #1890ff; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 40px 20px; }
-        
-        /* 顶部导航与状态 */
-        .top-nav { position: fixed; top: 20px; right: 20px; display: flex; gap: 12px; z-index: 100; }
-        .config-btn { background: white; border: 1px solid #d9d9d9; padding: 8px 18px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: 0.3s; }
-        .config-btn:hover { border-color: var(--primary); color: var(--primary); }
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-card: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-subtext: #86868b;
+            --apple-blue: #0066cc;
+            --radius: 22px; /* 苹果标志性的平滑大圆角 */
+        }
 
-        .header { text-align: center; margin-bottom: 50px; }
-        .header h1 { color: #262626; font-size: 2.5rem; margin-bottom: 10px; }
-        .header p { color: #8c8c8c; font-size: 1.1rem; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        /* 网格布局 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+        /* 顶部导航：半透明磨砂效果 */
+        .nav {
+            position: fixed;
+            top: 0; width: 100%; height: 44px;
+            background: rgba(251, 251, 253, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
 
-        /* 卡片样式 */
-        .tool-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
+        .nav-content {
+            width: 100%; max-width: 1000px;
+            display: flex; justify-content: flex-end; padding: 0 22px;
+        }
+
+        .login-btn {
+            font-size: 12px; color: var(--apple-text); text-decoration: none; opacity: 0.8; transition: 0.3s; cursor: pointer;
+        }
+        .login-btn:hover { color: var(--apple-blue); opacity: 1; }
+
+        /* 头部文字排版 */
+        .hero {
             text-align: center;
+            padding: 120px 20px 60px;
+            animation: fadeInMove 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hero h1 { font-size: 48px; font-weight: 700; letter-spacing: -0.015em; margin: 0; }
+        .hero p { font-size: 21px; color: var(--apple-subtext); margin-top: 10px; font-weight: 400; }
+
+        /* 苹果风格网格布局 */
+        .container {
+            max-width: 1100px; margin: 0 auto; padding: 0 22px 100px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 仿苹果官网大卡片布局 */
+            gap: 22px;
+        }
+
+        /* 卡片基础交互 */
+        .card {
+            background: var(--apple-card);
+            border-radius: var(--radius);
+            padding: 40px;
             text-decoration: none;
             color: inherit;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
+            box-shadow: 0 0px 0px rgba(0,0,0,0);
         }
-        .tool-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); border-color: var(--blue); }
-        .admin-card { border: 1px dashed var(--primary); display: none; } /* 默认隐藏管理入口 */
 
-        .icon { font-size: 48px; margin-bottom: 20px; background: #e6f7ff; width: 80px; height: 80px; line-height: 80px; border-radius: 50%; transition: 0.3s; }
-        .tool-card:hover .icon { background: var(--blue); color: white; }
-        .tool-card h3 { margin: 10px 0; font-size: 1.4rem; color: #1f1f1f; }
-        .tool-card p { color: #595959; font-size: 0.95rem; line-height: 1.5; }
+        .card:hover {
+            transform: scale(1.015);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+        }
 
-        .badge { background: #52c41a; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-top: 10px; }
+        /* 卡片内容排版 */
+        .card-header span { font-size: 14px; font-weight: 600; color: #bf4800; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .card-header h3 { font-size: 28px; font-weight: 600; margin: 0; line-height: 1.1; }
+        .card-header p { font-size: 17px; color: var(--apple-subtext); margin-top: 12px; line-height: 1.4; max-width: 280px; }
 
-        /* 登录配置弹窗 */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: white; border-radius: 12px; width: 380px; padding: 24px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .modal-h { font-size: 18px; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-        .close-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 20px; color: #bfbfbf; }
-        
-        .form-item { margin-bottom: 16px; }
-        .form-item label { display: block; font-size: 13px; color: #595959; margin-bottom: 6px; }
-        .form-item input { width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; box-sizing: border-box; }
-        
-        /* VIP 配置区 */
-        .vip-section { border-top: 1px dashed #eee; margin-top: 15px; padding-top: 15px; display: none; }
-        .vip-tag { font-size: 10px; background: #fff7e6; color: #fa8c16; padding: 2px 6px; border-radius: 4px; margin-left: 5px; border: 1px solid #ffd591; }
+        /* 模拟苹果官网的图片位置 */
+        .card-icon {
+            align-self: flex-end;
+            font-size: 80px;
+            margin-top: 40px;
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .card:hover .card-icon { transform: scale(1.1) translateY(-10px); }
 
-        .primary-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .secondary-btn { width: 100%; padding: 10px; background: #f5f5f5; color: #595959; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
-        
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        /* 特殊样式的卡片：管理员 */
+        .card-admin { background: #000; color: #fff; grid-column: span 2; display: none; }
+        .card-admin .card-header p { color: #86868b; }
+
+        /* 动效 */
+        @keyframes fadeInMove {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 模态框样式：苹果侧滑/浮窗风格 */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .modal {
+            background: rgba(255,255,255,0.9);
+            width: 400px; padding: 40px; border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            animation: modalPop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { font-size: 12px; font-weight: 600; color: var(--apple-subtext); margin-bottom: 8px; display: block; }
+        .input-group input {
+            width: 100%; border: 1px solid #d2d2d7; padding: 12px; border-radius: 12px; font-size: 16px;
+            box-sizing: border-box; background: rgba(255,255,255,0.5); outline: none; transition: 0.3s;
+        }
+        .input-group input:focus { border-color: var(--apple-blue); }
+
+        .apple-btn {
+            width: 100%; padding: 14px; background: var(--apple-blue); color: #fff;
+            border: none; border-radius: 20px; font-size: 16px; font-weight: 600; cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 32px; }
+            .card-admin { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
 
-<div class="top-nav">
-    <div id="welcomeUser" style="align-self: center; font-size: 12px; color: #8c8c8c;"></div>
-    <button class="config-btn" onclick="openModal()">👤 <span id="loginBtnText">登录 / 账户</span></button>
+<div class="nav">
+    <div class="nav-content">
+        <span class="login-btn" onclick="openModal()" id="navUserText">登录 / 账户</span>
+    </div>
 </div>
 
-<div class="header">
-    <h1>🚀 Amazon 卖家工具箱</h1>
-    <p>提升运营效率的专属小工具集合</p>
+<div class="hero">
+    <h1>Amazon 卖家工具箱</h1>
+    <p>新意迎新春。助力每一个爆款出海。</p>
 </div>
 
-<div class="grid">
-    <a href="user-management.html" class="tool-card admin-card" id="adminCard">
-        <div class="icon" style="background: #fff1f0; color: #ff4d4f;">🔑</div>
-        <h3>用户管理后台</h3>
-        <p>管理员权限：配置账号、VIP 套餐时效及权限管理</p>
+<div class="container">
+    <a href="user-management.html" class="card card-admin" id="adminCard">
+        <div class="card-header">
+            <span>Admin Only</span>
+            <h3>用户权限管理</h3>
+            <p>集中配置账号套餐与后端 API Keys。</p>
+        </div>
+        <div class="card-icon">🔑</div>
     </a>
 
-    <a href="listing-ai-rewriter.html" class="tool-card">
-        <div class="icon">💻</div>
-        <h3>AI Listing 优化工具</h3>
-        <p>基于 AI 批量重写标题、五点及描述，支持自定义 Prompt 与标准模板导出</p>
+    <a href="listing-ai-rewriter.html" class="card">
+        <div class="card-header">
+            <span>Apple Intelligence 风格</span>
+            <h3>AI Listing 优化</h3>
+            <p>基于顶级 LLM 重写标题与五点，让文案充满吸引力。</p>
+        </div>
+        <div class="card-icon">💻</div>
     </a>
 
-    <a href="baned-words-filter.html" class="tool-card">
-        <div class="icon">©️</div>
-        <h3>违规词筛选器</h3>
-        <p>基于数据库筛选出品牌词和亚马逊违规词</p>
+    <a href="baned-words-filter.html" class="card">
+        <div class="card-header">
+            <span>安全合规</span>
+            <h3>违规词筛选器</h3>
+            <p>全自动检索敏感词汇，规避侵权与下架风险。</p>
+        </div>
+        <div class="card-icon">©️</div>
     </a>
 
-    <a href="seo-parser.html" class="tool-card">
-        <div class="icon">🔍</div>
-        <h3>SEO 解析 & 校验</h3>
-        <p>支持批量解析、字符超限监测、Excel 一键导出</p>
+    <a href="seo-parser.html" class="card">
+        <div class="card-header">
+            <span>深度解析</span>
+            <h3>SEO 解析 & 校验</h3>
+            <p>洞察关键词权重，优化每一处字符限制。</p>
+        </div>
+        <div class="card-icon">🔍</div>
     </a>
 
-    <a href="image-resizer.html" class="tool-card">
-        <div class="icon">🖼️</div>
-        <h3>主图尺寸缩放</h3>
-        <p>批量将图片调整为 1600*1600 像素，自动白底填充，支持 ZIP 和 JPG 导出</p>
+    <a href="image-resizer.html" class="card">
+        <div class="card-header">
+            <span>视觉影像</span>
+            <h3>主图尺寸缩放</h3>
+            <p>批量处理为 1600px 白底规格，符合官方标准。</p>
+        </div>
+        <div class="card-icon">🖼️</div>
     </a>
 
-    <a href="image-hosting.html" class="tool-card">
-        <div class="icon">☁️</div>
-        <h3>自动图床工具</h3>
-        <p>批量上传图片到图床，自动生成 Raw 链接并导出 Excel 表格</p>
-    </a>
-
-    <a href="deduplicator.html" class="tool-card">
-        <div class="icon">✂️</div>
-        <h3>文本去重工具</h3>
-        <p>自动识别空格、逗号、换行，节省字符空间</p>
-    </a>
-
-    <a href="case-converter.html" class="tool-card">
-        <div class="icon">📝</div>
-        <h3>大小写转换工具</h3>
-        <p>一键实现英文全大写、全小写、或单词首字母大写，优化标题</p>
-    </a>
-
-    <a href="word-frequency.html" class="tool-card">
-        <div class="icon">📊</div>
-        <h3>词频统计工具</h3>
-        <p>深度分析文案高频词，支持 N-Gram 词组分析，精准筛选核心关键词</p>
-    </a>
-
-    <a href="html-editor.html" class="tool-card">
-        <div class="icon">🎨</div>
-        <h3>可视化 HTML 编辑器</h3>
-        <p>像 Word 一样编辑产品描述，自动生成亚马逊后台可用的 HTML 代码</p>
-    </a>
-
-    <a href="amazon-sku-aggregator.html" class="tool-card">
-        <div class="icon">🧮</div>
-        <h3>SKU 销量聚合</h3>
-        <p>处理订单报告，自动将子体汇总为父体 SKU，统计总销量并排序导出</p>
-    </a>
-
-    <a href="#" class="tool-card" style="opacity: 0.7; cursor: not-allowed;">
-        <div class="icon">💰</div>
-        <h3>利润计算器</h3>
-        <p>自动计算扣除佣金、配送费及头程后的净利润</p>
-        <span class="badge" style="background: #bfbfbf;">开发中</span>
-    </a>
-
-    <a href="#" class="tool-card" style="opacity: 0.7; cursor: not-allowed;">
-        <div class="icon">📦</div>
-        <h3>FBA 贴标助手</h3>
-        <p>快速生成符合规范的货件标签和条码</p>
-        <span class="badge" style="background: #bfbfbf;">敬请期待</span>
+    <a href="word-frequency.html" class="card">
+        <div class="card-header">
+            <span>数据洞察</span>
+            <h3>词频统计分析</h3>
+            <p>挖掘搜索趋势，通过数据驱动决策。</p>
+        </div>
+        <div class="card-icon">📊</div>
     </a>
 </div>
 
 <div class="modal-overlay" id="loginModal">
     <div class="modal">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <div class="modal-h">⚡ API & 账户配置</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 style="margin:0; font-size: 24px;">账户中心</h2>
+            <span style="cursor:pointer; font-size:24px; color:#86868b;" onclick="closeModal()">×</span>
+        </div>
         
-        <div class="form-item">
-            <label>账号</label>
-            <input type="text" id="accInput" placeholder="请输入账号">
-        </div>
-        <div class="form-item" id="pwdItem">
-            <label>密码</label>
-            <input type="password" id="pwdInput" placeholder="请输入密码">
-        </div>
-
-        <div class="vip-section" id="vipArea">
-            <div class="form-item">
-                <label>GitHub Token <span class="vip-tag">VIP 专属</span></label>
-                <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxx">
+        <div id="loginForm">
+            <div class="input-group">
+                <label>Apple ID (账号)</label>
+                <input type="text" id="accInput" placeholder="请输入您的账号">
             </div>
-            <div class="form-item">
-                <label>API Key <span class="vip-tag">VIP 专属</span></label>
-                <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxx">
+            <div class="input-group" id="pwdGroup">
+                <label>密码</label>
+                <input type="password" id="pwdInput" placeholder="请输入密码">
             </div>
-        </div>
 
-        <button class="primary-btn" id="loginBtn" onclick="handleAuth()">保存并进入</button>
-        <button class="secondary-btn" id="logoutBtn" style="display:none;" onclick="handleLogout()">退出当前登录</button>
-        <p style="font-size: 11px; color: #bfbfbf; text-align: center; margin-top: 15px;">Key 仅保存在本地浏览器中，不会上传。</p>
+            <div id="vipArea" style="display:none; border-top: 1px solid #d2d2d7; margin-top: 20px; padding-top: 20px;">
+                <div class="input-group">
+                    <label>OpenRouter API Key (VIP 专属)</label>
+                    <input type="password" id="apiKeyInput" placeholder="sk-or-v1-...">
+                </div>
+            </div>
+
+            <button class="apple-btn" onclick="handleAuth()" id="mainBtn" style="margin-top: 10px;">继续</button>
+            <button class="apple-btn" onclick="handleLogout()" id="logoutBtn" style="display:none; margin-top: 10px; background:#e8e8ed; color:#1d1d1f;">退出登录</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 逻辑：更新首页显示状态
-    function updateState() {
+    // 权限与状态逻辑
+    function updateUI() {
         const user = JSON.parse(localStorage.getItem('current_user'));
-        const btnText = document.getElementById('loginBtnText');
-        const welcome = document.getElementById('welcomeUser');
+        const navText = document.getElementById('navUserText');
         const adminCard = document.getElementById('adminCard');
         const vipArea = document.getElementById('vipArea');
-        const pwdItem = document.getElementById('pwdItem');
+        const pwdGroup = document.getElementById('pwdGroup');
         const logoutBtn = document.getElementById('logoutBtn');
-        const loginBtn = document.getElementById('loginBtn');
+        const mainBtn = document.getElementById('mainBtn');
 
         if (user) {
-            btnText.innerText = "账户中心";
-            welcome.innerText = `欢迎, ${user.user} (${user.type})`;
+            navText.innerText = `你好, ${user.user}`;
             adminCard.style.display = (user.user === 'admin') ? 'flex' : 'none';
-            pwdItem.style.display = 'none'; // 登录后不显示密码框
+            pwdGroup.style.display = 'none';
             logoutBtn.style.display = 'block';
-            loginBtn.innerText = "保存配置";
-
-            // 如果是 VIP 或 Admin，显示并填充本地存储的 Key
+            mainBtn.innerText = "保存配置";
+            
             if (user.type === 'VIP用户' || user.user === 'admin') {
                 vipArea.style.display = 'block';
-                document.getElementById('tokenInput').value = localStorage.getItem(`token_${user.user}`) || '';
                 document.getElementById('apiKeyInput').value = localStorage.getItem(`api_${user.user}`) || '';
-            } else {
-                vipArea.style.display = 'none';
             }
         } else {
-            btnText.innerText = "登录 / 账户";
-            welcome.innerText = "";
+            navText.innerText = "登录 / 账户";
             adminCard.style.display = 'none';
-            pwdItem.style.display = 'block';
+            pwdGroup.style.display = 'block';
             vipArea.style.display = 'none';
             logoutBtn.style.display = 'none';
-            loginBtn.innerText = "保存并进入";
+            mainBtn.innerText = "继续";
         }
     }
 
-    // 逻辑：处理登录与保存
     function handleAuth() {
         const user = JSON.parse(localStorage.getItem('current_user'));
-        
         if (!user) {
             const u = document.getElementById('accInput').value;
             const p = document.getElementById('pwdInput').value;
             const db = JSON.parse(localStorage.getItem('users_db')) || [];
             const found = db.find(x => x.user === u && x.pass === p);
-
             if (found) {
                 localStorage.setItem('current_user', JSON.stringify(found));
-                updateState();
-            } else {
-                alert('账号或密码错误');
-            }
+                updateUI();
+            } else { alert('验证失败'); }
         } else {
-            // 保存 VIP 的配置到本地
             if (user.type === 'VIP用户' || user.user === 'admin') {
-                localStorage.setItem(`token_${user.user}`, document.getElementById('tokenInput').value);
                 localStorage.setItem(`api_${user.user}`, document.getElementById('apiKeyInput').value);
             }
             closeModal();
-            alert('配置已保存');
         }
     }
 
-    function handleLogout() {
-        localStorage.removeItem('current_user');
-        updateState();
-        closeModal();
-    }
-
-    function openModal() {
-        document.getElementById('loginModal').style.display = 'flex';
-        const user = JSON.parse(localStorage.getItem('current_user'));
-        if(user) document.getElementById('accInput').value = user.user;
-    }
-
+    function handleLogout() { localStorage.removeItem('current_user'); updateUI(); closeModal(); }
+    function openModal() { document.getElementById('loginModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
-
-    window.onload = updateState;
+    window.onload = updateUI;
 </script>
 </body>
 </html>
