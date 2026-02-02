@@ -2,110 +2,144 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>品牌词清理专家 - Amazon 工具箱</title>
+    <title>Amazon 品牌清理 Pro - 云端/AI 双引擎</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #1890ff; --bg: #f0f2f5; --success: #52c41a; --error: #ff4d4f; --warning: #faad14; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; }
+        :root { --primary: #1890ff; --bg: #f0f2f5; --success: #52c41a; --error: #ff4d4f; --warning: #faad14; --ai: #722ed1; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; }
         .container { width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         
-        /* 导航与配置 */
-        .nav-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        /* 头部导航 */
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .logo { font-size: 18px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .status-tag { font-size: 12px; padding: 2px 8px; border-radius: 12px; background: #eee; color: #888; }
+
+        /* 配置区 */
+        .config-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card-h { font-size: 13px; font-weight: bold; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; }
         
-        .config-row { display: grid; grid-template-columns: 1fr 1.5fr 1fr auto; gap: 15px; align-items: end; }
-        .repo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; }
-        
-        label { font-size: 12px; font-weight: bold; color: #595959; margin-bottom: 4px; display: block; }
-        input, textarea { width: 100%; padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
-        textarea { height: 80px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        label { font-size: 11px; color: #8c8c8c; font-weight: bold; margin-bottom: 4px; display: block; }
+        input, textarea, select { width: 100%; padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
+        textarea { height: 50px; resize: none; }
 
         /* 工作区 */
-        .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
+        .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; overflow: hidden; }
         .panel { background: white; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
-
-        .btn-group { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-        .btn { padding: 8px 18px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; }
+        
+        .toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+        .btn { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
         .btn-blue { background: var(--primary); color: white; }
-        .btn-green { background: var(--success); color: white; }
-        .btn-red { background: #fff1f0; color: var(--error); border: 1px solid #ffa39e; }
+        .btn-ai { background: var(--ai); color: white; }
         .btn-outline { background: white; border: 1px solid #d9d9d9; color: #595959; }
+        .btn-red { background: #fff1f0; color: var(--error); border: 1px solid #ffa39e; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .table-wrap { flex: 1; overflow: auto; border: 1px solid #f0f0f0; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { background: #fafafa; padding: 10px; border-bottom: 2px solid #f0f0f0; position: sticky; top: 0; z-index: 10; }
-        td { padding: 8px; border-bottom: 1px solid #f0f0f0; }
+        .content-box { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        .display-area { flex: 1; background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 10px; font-size: 13px; line-height: 1.6; overflow-y: auto; white-space: pre-wrap; }
         
-        .highlight-del { color: var(--error); text-decoration: line-through; }
+        /* 表格样式 */
+        .table-container { flex: 1; overflow: auto; border: 1px solid #f0f0f0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { background: #fafafa; padding: 10px; border-bottom: 2px solid #f0f0f0; position: sticky; top: 0; z-index: 10; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #f0f0f0; }
+
+        /* 动画 */
+        .spin { width: 12px; height: 12px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: loader 0.8s linear infinite; display: none; }
+        @keyframes loader { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="nav-header">
-        <a href="index.html" style="text-decoration:none; color:var(--primary); font-weight:bold;">🏠 返回工具箱首页</a>
-        <div style="font-weight: bold; font-size: 18px;">🛡️ 品牌词/违规词云端剔除工具</div>
-        <div id="status" style="font-size: 12px; color: #999;">云端同步：未连接</div>
+    <div class="header">
+        <div class="logo">🛡️ Amazon Listing 品牌词/合规词清理系统</div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div id="syncStatus" class="status-tag">GitHub: 未连接</div>
+            <a href="index.html" style="font-size: 12px; color: var(--primary); text-decoration: none;">🏠 返回首页</a>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="config-row">
-            <div><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_xxxx"></div>
-            <div><label>GitHub 仓库 (User/Repo)</label><input type="text" id="ghRepo" placeholder="ShawnHo/Amazon-Store"></div>
-            <div><label>词库文件名 (已锁定)</label><input type="text" value="brand_repo.json" disabled style="background:#f5f5f5;"></div>
-            <button class="btn btn-blue" onclick="syncFromCloud()">🔄 拉取云词库</button>
+    <div class="config-area">
+        <div class="card">
+            <div class="card-h">☁️ GitHub 云端同步 (锁定 brand_repo.json) <button class="btn btn-blue" style="padding: 2px 8px;" onclick="syncCloud()">🔄 同步</button></div>
+            <div class="form-row">
+                <div><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_xxxx"></div>
+                <div><label>仓库名称 (User/Repo)</label><input type="text" id="ghRepo" placeholder="ShawnHo/Amazon-Store"></div>
+            </div>
+            <div class="form-row">
+                <div><label>品牌库 (自动去重)</label><textarea id="brandWords"></textarea></div>
+                <div><label>违规词库</label><textarea id="restrictedWords"></textarea></div>
+            </div>
+            <button class="btn btn-outline" style="width: 100%; height: 32px;" onclick="pushCloud()">📤 推送并备份至云端</button>
         </div>
-        <div class="repo-row">
-            <div><label>⚖️ 品牌收纳库 (自动去重)</label><textarea id="brandWords"></textarea></div>
-            <div><label>🚫 禁售词收纳库 (自动去重)</label><textarea id="restrictedWords"></textarea></div>
-        </div>
-        <div style="text-align: right; margin-top: 10px;">
-            <button class="btn btn-green" onclick="pushToCloud()">📤 保存并更新到云端</button>
+
+        <div class="card">
+            <div class="card-h">🤖 AI 深度清理配置</div>
+            <div class="form-row">
+                <div><label>API 地址</label><input type="text" id="apiHost" value="https://api.deepseek.com"></div>
+                <div><label>API Key</label><input type="password" id="apiKey" placeholder="sk-xxxx"></div>
+            </div>
+            <div>
+                <label>AI 合规指令 (System Prompt)</label>
+                <textarea id="aiPrompt" style="height: 90px;">你是一个亚马逊Listing合规专家。
+你的任务是剔除违规内容，但必须严格遵守亚马逊的【兼容性描述政策】：
+1. 识别并【保留】跟在 "for", "compatible with", "replacement for", "fits", "designed for" 后面的品牌词。
+2. 剔除所有【孤立出现】的品牌词（例如 "This is a Nike shoe" 需删掉 Nike）。
+3. 剔除所有亚马逊禁售词（如农药、保修、FDA等）。
+4. 只返回清洗后的正文，保留原始HTML，禁止解释。</textarea>
+            </div>
         </div>
     </div>
 
     <div class="workspace">
         <div class="panel">
-            <div class="btn-group">
-                <span style="font-weight:bold; line-height:32px;">📝 纯文本剔除</span>
-                <button class="btn btn-blue" style="margin-left:auto" onclick="processText()">🚀 开始剔除</button>
+            <div class="toolbar">
+                <b>📝 单段文案清理</b>
+                <button class="btn btn-blue" style="margin-left: auto;" onclick="runClean('rule')">⚡ 词库清理</button>
+                <button class="btn btn-ai" onclick="runClean('ai')"><div class="spin" id="aiSpin"></div> 🤖 AI 深度清理</button>
                 <button class="btn btn-outline" onclick="clearText()">🧹 清除</button>
             </div>
-            <textarea id="textInput" style="flex:1; height:auto;" placeholder="请在此粘贴需要剔除品牌词的文本..."></textarea>
-            <div id="textOutput" class="table-wrap" style="background:#f9f9f9; padding:10px; margin-top:10px; font-size:13px; line-height:1.6; white-space: pre-wrap;"></div>
+            <div class="content-box">
+                <textarea id="textInput" style="height: 120px;" placeholder="粘贴 Listing 文本进行处理..."></textarea>
+                <div id="textOutput" class="display-area"></div>
+            </div>
         </div>
 
         <div class="panel">
-            <div class="btn-group">
-                <span style="font-weight:bold; line-height:32px;">📊 表格批量剔除</span>
-                <button class="btn btn-outline" style="margin-left:auto" onclick="document.getElementById('fileInput').click()">📤 上传 Excel</button>
-                <button class="btn btn-blue" id="runTableBtn" onclick="processTable()" disabled>🚀 批量剔除</button>
-                <button class="btn btn-green" id="exportBtn" onclick="exportExcel()" disabled>📊 导出结果</button>
-                <button class="btn btn-red" onclick="clearTable()">🧹 清除</button>
-                <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFile(this.files[0])">
+            <div class="toolbar">
+                <b>📊 批量表格处理</b>
+                <button class="btn btn-outline" style="margin-left: auto;" onclick="document.getElementById('fileIn').click()">📤 上传 Excel</button>
+                <button class="btn btn-blue" id="tableBtn" disabled onclick="runTableClean()">🚀 批量清洗并保留兼容性</button>
+                <button class="btn btn-outline" id="exportBtn" disabled onclick="exportExcel()">💾 导出</button>
+                <button class="btn btn-red" onclick="clearTable()">🧹</button>
+                <input type="file" id="fileIn" hidden onchange="handleExcel(this.files[0])">
             </div>
-            <div class="table-wrap"><table id="dataTable"><thead id="tHead"></thead><tbody id="tBody"></tbody></table></div>
+            <div class="table-container">
+                <table id="dataTable"><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    let rawData = [];
-    let currentSHA = "";
+    let rawData = [], currentSHA = "";
+    const EXEMPT_PREFIXES = ["for", "compatible with", "replacement for", "fits", "designed for"];
 
     window.onload = () => {
-        document.getElementById('ghToken').value = localStorage.getItem('sh_gh_token') || '';
-        document.getElementById('ghRepo').value = localStorage.getItem('sh_gh_repo') || '';
-        if(document.getElementById('ghToken').value) syncFromCloud();
+        ['ghToken','ghRepo','apiHost','apiKey'].forEach(k => {
+            document.getElementById(k).value = localStorage.getItem('sh_listing_'+k) || document.getElementById(k).value;
+        });
+        if(document.getElementById('ghToken').value) syncCloud();
     };
 
-    // --- GitHub 云端逻辑 ---
-    async function syncFromCloud() {
+    // --- GitHub 逻辑 ---
+    async function syncCloud() {
         const token = document.getElementById('ghToken').value;
         const repo = document.getElementById('ghRepo').value;
-        if(!token || !repo) return alert("请完整填写 GitHub 配置");
-
+        if(!token || !repo) return;
+        const status = document.getElementById('syncStatus');
         try {
             const res = await fetch(`https://api.github.com/repos/${repo}/contents/brand_repo.json`, {
                 headers: { "Authorization": `token ${token}` }
@@ -113,123 +147,127 @@
             if(res.ok) {
                 const data = await res.json();
                 currentSHA = data.sha;
-                const content = JSON.parse(atob(data.content));
+                const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
                 document.getElementById('brandWords').value = (content.brands || []).join(', ');
                 document.getElementById('restrictedWords').value = (content.restricted || []).join(', ');
-                document.getElementById('status').innerText = "云端同步：已连接";
-                document.getElementById('status').style.color = "var(--success)";
+                status.innerText = "GitHub: 已连接"; status.style.color = "var(--success)";
             }
-        } catch (e) { alert("云端读取失败，请检查配置或文件是否存在"); }
+        } catch(e) { status.innerText = "GitHub: 连接失败"; }
     }
 
-    async function pushToCloud() {
+    async function pushCloud() {
         const token = document.getElementById('ghToken').value;
         const repo = document.getElementById('ghRepo').value;
-        localStorage.setItem('sh_gh_token', token);
-        localStorage.setItem('sh_gh_repo', repo);
-
-        const br = [...new Set(document.getElementById('brandWords').value.split(/[,，\n]/).map(w => w.trim().toLowerCase()).filter(w => w))];
-        const rs = [...new Set(document.getElementById('restrictedWords').value.split(/[,，\n]/).map(w => w.trim().toLowerCase()).filter(w => w))];
-
-        const body = { brands: br, restricted: rs, lastUpdate: new Date().toISOString() };
+        ['ghToken','ghRepo','apiHost','apiKey'].forEach(k => localStorage.setItem('sh_listing_'+k, document.getElementById(k).value));
+        
+        const brands = [...new Set(document.getElementById('brandWords').value.split(/[,，\n]/).map(w=>w.trim().toLowerCase()).filter(w=>w))];
+        const restricted = [...new Set(document.getElementById('restrictedWords').value.split(/[,，\n]/).map(w=>w.trim().toLowerCase()).filter(w=>w))];
+        
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify({brands, restricted, updated: new Date().toISOString()}, null, 2))));
+        
         const res = await fetch(`https://api.github.com/repos/${repo}/contents/brand_repo.json`, {
             method: 'PUT',
             headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message: "Sync brand repo",
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(body, null, 2)))),
-                sha: currentSHA
-            })
+            body: JSON.stringify({ message: "Update Brand Repo", content, sha: currentSHA })
         });
-
-        if(res.ok) {
-            const data = await res.json();
-            currentSHA = data.content.sha;
-            alert("✅ 云端词库已更新！");
+        if(res.ok) { 
+            const data = await res.json(); 
+            currentSHA = data.content.sha; 
+            alert("✅ 云端词库同步成功！"); 
+            syncCloud();
         }
     }
 
-    // --- 核心剔除引擎 ---
-    function performCleanup(text) {
-        if(!text) return "";
+    // --- 核心清理算法 ---
+    function cleanLogic(text) {
+        if (!text) return "";
         let cleaned = String(text);
-        const br = document.getElementById('brandWords').value.split(/[,，]/).map(w => w.trim()).filter(w => w);
-        const rs = document.getElementById('restrictedWords').value.split(/[,，]/).map(w => w.trim()).filter(w => w);
         
-        const allWords = [...new Set([...br, ...rs])];
-        // 按长度降序排列，防止“Apple Watch”中的“Apple”先被替换导致逻辑混乱
-        allWords.sort((a, b) => b.length - a.length);
-
-        allWords.forEach(word => {
-            const reg = new RegExp(`\\b${word}\\b`, 'gi');
-            cleaned = cleaned.replace(reg, ""); // 直接移除
+        const brands = document.getElementById('brandWords').value.split(/[,，]/).map(w=>w.trim()).filter(w=>w);
+        const restricted = document.getElementById('restrictedWords').value.split(/[,，]/).map(w=>w.trim()).filter(w=>w);
+        
+        // 1. 剔除违规词 (强制剔除)
+        restricted.sort((a,b)=>b.length - a.length).forEach(w => {
+            cleaned = cleaned.replace(new RegExp(`\\b${w}\\b`, 'gi'), "");
         });
-        
-        // 清理多余空格
+
+        // 2. 剔除品牌词 (兼容性豁免)
+        const prefixPattern = EXEMPT_PREFIXES.join('|').replace(/ /g, '\\s+');
+        brands.sort((a,b)=>b.length - a.length).forEach(w => {
+            // 利用负向后行断言 (?<!...) 识别前面是否有兼容性前缀
+            const regex = new RegExp(`(?<!\\b(${prefixPattern})\\s+)\\b${w}\\b`, 'gi');
+            cleaned = cleaned.replace(regex, "");
+        });
+
         return cleaned.replace(/\s+/g, ' ').trim();
     }
 
-    // --- 文本处理 ---
-    function processText() {
+    // --- 功能执行 ---
+    async function runClean(mode) {
         const input = document.getElementById('textInput').value;
-        const output = performCleanup(input);
-        document.getElementById('textOutput').innerText = output;
+        if(mode === 'rule') {
+            document.getElementById('textOutput').innerText = cleanLogic(input);
+        } else {
+            const host = document.getElementById('apiHost').value;
+            const key = document.getElementById('apiKey').value;
+            if(!key) return alert("请设置 AI API Key");
+            
+            document.getElementById('aiSpin').style.display = 'inline-block';
+            try {
+                const res = await fetch(`${host}/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [{role:"system", content: document.getElementById('aiPrompt').value}, {role:"user", content: input}]
+                    })
+                });
+                const data = await res.json();
+                document.getElementById('textOutput').innerText = data.choices[0].message.content.trim();
+            } catch(e) { alert("AI 清理失败: " + e.message); }
+            document.getElementById('aiSpin').style.display = 'none';
+        }
     }
 
-    function clearText() {
-        document.getElementById('textInput').value = "";
-        document.getElementById('textOutput').innerText = "";
-    }
-
-    // --- 表格处理 ---
-    function handleFile(file) {
+    function handleExcel(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
             const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
             rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             renderTable();
-            document.getElementById('runTableBtn').disabled = false;
+            document.getElementById('tableBtn').disabled = false;
         };
         reader.readAsArrayBuffer(file);
     }
 
     function renderTable() {
-        const thead = document.getElementById('tHead');
-        const tbody = document.getElementById('tBody');
-        if(rawData.length > 0) {
-            const keys = Object.keys(rawData[0]);
-            thead.innerHTML = `<tr>${keys.map(k => `<th>${k}</th>`).join('')}</tr>`;
-            tbody.innerHTML = rawData.map(row => `<tr>${keys.map(k => `<td>${row[k]||''}</td>`).join('')}</tr>`).join('');
-        }
+        const h = document.getElementById('tHead'), b = document.getElementById('tBody');
+        if(!rawData.length) return;
+        const ks = Object.keys(rawData[0]);
+        h.innerHTML = `<tr>${ks.map(k=>`<th>${k}</th>`).join('')}</tr>`;
+        b.innerHTML = rawData.map(r => `<tr>${ks.map(k=>`<td>${r[k]||''}</td>`).join('')}</tr>`).join('');
     }
 
-    function processTable() {
-        rawData = rawData.map(row => {
-            const newRow = {};
-            for(let key in row) {
-                newRow[key] = performCleanup(row[key]);
-            }
-            return newRow;
+    function runTableClean() {
+        rawData = rawData.map(r => {
+            const newR = {};
+            for(let k in r) newR[k] = cleanLogic(r[k]);
+            return newR;
         });
         renderTable();
         document.getElementById('exportBtn').disabled = false;
-        alert("✅ 表格品牌词已全量剔除！");
+        alert("✅ 表格品牌清理完成 (已应用兼容性保留逻辑)");
     }
 
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(rawData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "CleanedData");
-        XLSX.writeFile(wb, `Cleaned_Listing_${Date.now()}.xlsx`);
+        XLSX.writeFile(wb, `Amazon_Cleaned_${Date.now()}.xlsx`);
     }
 
-    function clearTable() {
-        rawData = [];
-        document.getElementById('tHead').innerHTML = "";
-        document.getElementById('tBody').innerHTML = "";
-        document.getElementById('runTableBtn').disabled = true;
-        document.getElementById('exportBtn').disabled = true;
-    }
+    function clearText() { document.getElementById('textInput').value = ""; document.getElementById('textOutput').innerText = ""; }
+    function clearTable() { rawData = []; renderTable(); document.getElementById('tableBtn').disabled = true; }
 </script>
 </body>
 </html>
