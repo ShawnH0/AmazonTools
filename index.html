@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Shawn 的跨境工具箱 - Ultimate</title>
+    <title>Shawn 的跨境工具箱 - Ultimate Pro</title>
     <style>
-        /* --- 1. Apple 核心变量系统 (对齐与布局的核心) --- */
+        /* --- 1. Apple 核心变量系统 (极致对齐版) --- */
         :root {
-            /* 颜色系统 */
             --f-body-background: #f5f5f7;
             --f-text-primary: #1d1d1f;
             --f-text-secondary: #86868b;
@@ -15,19 +14,16 @@
             --f-accent-orange: #f56300;
             --nav-height: 48px;
             
-            /* 布局核心变量：决定页面宽度的关键 */
-            --site-width: 1100px; /* 内容最大宽度，控制整体视觉平衡 */
+            /* 页面宽度控制：1100px 是视觉最舒适的黄金宽度 */
+            --site-width: 1100px; 
             --card-width: 320px;
             --card-gap: 20px;
             
-            /* * 终极对齐公式：
-             * 计算屏幕剩余空间的一半，如果空间不够则使用默认 22px。
-             * 这个变量将被导航栏、标题、卡片列表同时引用，确保绝对对齐。
-             */
+            /* 绝对居中计算公式：应用于 padding-left 和 padding-right */
             --screen-padding: max(22px, calc((100vw - var(--site-width)) / 2));
         }
 
-        /* --- 2. 基础重置 --- */
+        /* --- 2. 基础样式 --- */
         body, html {
             margin: 0; padding: 0;
             background-color: var(--f-body-background);
@@ -39,41 +35,37 @@
 
         a { text-decoration: none; color: inherit; }
 
-        /* --- 3. Global Nav (完全对齐修正版) --- */
+        /* --- 3. Global Nav (左右对称修复) --- */
         .global-nav {
             position: fixed; top: 0; width: 100%; height: var(--nav-height);
-            background: rgba(255, 255, 255, 0.85); /* 更透亮的背景 */
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             z-index: 9999; 
             border-bottom: 1px solid rgba(0,0,0,0.08);
-            transition: background 0.4s;
         }
         
         .nav-content {
             height: 100%; 
             display: flex; align-items: center; justify-content: space-between;
             font-size: 12px;
-            
-            /* 关键：应用统一的 Padding 变量 */
+            /* 关键修复：左右应用同样的变量 */
             padding-left: var(--screen-padding);
             padding-right: var(--screen-padding);
         }
         
         .nav-logo { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
         .nav-user { color: var(--f-text-primary); cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
-        .nav-user:hover { opacity: 1; }
 
-        /* --- 4. Hero Section --- */
+        /* --- 4. Hero Section (居中对齐) --- */
         .hero-section {
             padding-top: 120px;
             margin-bottom: 50px;
-            /* 关键：应用统一的 Padding 变量 */
             padding-left: var(--screen-padding);
             padding-right: var(--screen-padding);
         }
         .hero-eyebrow { font-size: 21px; font-weight: 600; color: var(--f-accent-orange); margin-bottom: 6px; }
-        .hero-headline { font-size: 56px; line-height: 1.05; font-weight: 700; letter-spacing: -0.015em; margin: 0; max-width: 800px; }
+        .hero-headline { font-size: 56px; line-height: 1.05; font-weight: 700; letter-spacing: -0.015em; margin: 0; }
 
         /* --- 5. 货架系统 --- */
         .rs-cardsshelf {
@@ -82,21 +74,19 @@
         }
 
         .rs-cards-shelf-header {
-            /* 关键：应用统一的 Padding 变量 */
             margin-left: var(--screen-padding);
+            margin-right: var(--screen-padding); /* 确保右侧也有边距 */
             margin-bottom: 24px;
-            padding-right: var(--screen-padding);
         }
         .rs-cards-shelf-title { font-size: 28px; line-height: 1.1; font-weight: 700; margin: 0; }
         .rs-cards-shelf-title span { color: var(--f-text-secondary); margin-left: 8px; }
 
-        /* 滚动容器 */
+        /* 滚动容器 & 左右掩码 */
         .rf-cards-scroller { position: relative; }
         
-        /* 掩码：控制左右渐隐 */
         .rf-cards-scroller-crop {
             overflow: hidden;
-            /* Mask 的起始点也必须跟随 screen-padding 变化 */
+            /* 左右两侧都要有渐隐，实现内容居中的呼吸感 */
             -webkit-mask-image: linear-gradient(to right, 
                 transparent 0%, 
                 black var(--screen-padding), 
@@ -114,19 +104,18 @@
             overflow-y: hidden;
             scrollbar-width: none;
             display: flex;
-            padding-bottom: 50px; /* 阴影空间 */
+            padding-bottom: 50px;
             scroll-behavior: smooth;
         }
         .rf-cards-scroller-content::-webkit-scrollbar { display: none; }
 
         .rf-cards-scroller-platter {
             display: flex;
-            /* 关键：让第一个卡片的起始位置与上方文字对齐 */
             padding-left: var(--screen-padding);
             padding-right: var(--screen-padding);
         }
 
-        /* --- 6. 卡片设计 --- */
+        /* --- 6. 卡片样式 --- */
         .rf-ccard {
             flex: 0 0 var(--card-width);
             margin-right: var(--card-gap);
@@ -136,99 +125,54 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.25, 1), box-shadow 0.3s ease;
-            cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
             height: 380px;
-            overflow: hidden; /* 防止圆角溢出 */
+            overflow: hidden;
         }
 
-        .rf-ccard:hover {
-            transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-            z-index: 2;
-        }
+        .rf-ccard:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+        .rf-ccard-visual { width: 100%; height: 200px; background: #f0f0f2; display: flex; align-items: center; justify-content: center; font-size: 80px; }
+        .rf-ccard-info { padding: 24px; flex-grow: 1; }
+        .rf-ccard-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; color: var(--f-accent-orange); }
+        .rf-ccard-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #000; }
+        .rf-ccard-desc { font-size: 13px; color: var(--f-text-secondary); line-height: 1.4; }
 
-        .rf-ccard-visual {
-            width: 100%;
-            height: 200px;
-            background: #f0f0f2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-        }
-
-        .rf-ccard-info {
-            padding: 24px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .rf-ccard-tag {
-            font-size: 11px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.05em; margin-bottom: 8px; color: var(--f-accent-orange);
-        }
-        .rf-ccard-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #000; letter-spacing: 0.01em; }
-        .rf-ccard-desc { font-size: 13px; color: var(--f-text-secondary); line-height: 1.4; font-weight: 400; }
-        
-        .ai-glow {
-            background: linear-gradient(90deg, #0071e3, #9b51e0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* --- 7. Paddle Nav (箭头升级版) --- */
+        /* --- 7. Paddle Nav (左右双箭头) --- */
         .paddlenav {
             position: absolute; width: 100%; 
-            top: 100px; /* 垂直居中于 200px 高的图片区域 */
+            top: 100px; /* 居中于图片区域 */
             transform: translateY(-50%);
             display: flex; justify-content: space-between; 
-            /* 箭头位置向外推一点，或者刚好卡在 padding 边缘 */
-            padding: 0 max(10px, calc(var(--screen-padding) - 30px)); 
+            /* 箭头始终贴合屏幕内侧 padding 边缘 */
+            padding: 0 calc(var(--screen-padding) - 22px); 
+            box-sizing: border-box;
             pointer-events: none; z-index: 10;
         }
         
         .paddlenav-arrow {
             width: 44px; height: 44px; 
-            /* 毛玻璃 + 纯白半透明背景 */
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(0,0,0,0.05); 
             border-radius: 50%; 
             cursor: pointer;
             pointer-events: auto; 
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12); /* 更柔和的阴影 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
             transition: all 0.3s; 
             opacity: 0; 
-            transform: scale(0.9);
         }
 
-        /* 鼠标悬停整个区域时才显示，且有放大动画 */
-        .rs-cardsshelf:hover .paddlenav-arrow { opacity: 1; transform: scale(1); }
-        .paddlenav-arrow:hover { background: #fff; transform: scale(1.1); box-shadow: 0 8px 16px rgba(0,0,0,0.18); }
+        /* 鼠标移入货架显示左右箭头 */
+        .rs-cardsshelf:hover .paddlenav-arrow { opacity: 1; }
+        .paddlenav-arrow:hover { background: #fff; transform: scale(1.1); }
         
-        /* 箭头图标：更细致的 SVG */
         .paddlenav-arrow svg { width: 14px; height: 14px; fill: none; stroke: #333; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-        /* --- Modal (保持不变) --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.3); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center; z-index: 10001;
-        }
+        /* --- Modal 弹窗 --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 10001; }
         .modal { background: #fff; width: 320px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        .modal h2 { margin-top: 0; font-size: 24px; }
-        .apple-input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #d2d2d7; border-radius: 12px; font-size: 16px; box-sizing: border-box; background: #fafafa; outline: none; }
-        .apple-input:focus { border-color: var(--f-accent-blue); background: #fff; }
-        .apple-btn { width: 100%; padding: 14px; background: var(--f-accent-blue); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .apple-btn:hover { background: #005bb5; }
-
-        /* 移动端适配修正 */
-        @media only screen and (max-width: 768px) {
-            .hero-headline { font-size: 40px; }
-            .paddlenav { display: none; /* 移动端不需要箭头，直接滑 */ }
-        }
+        .apple-input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #d2d2d7; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
+        .apple-btn { width: 100%; padding: 14px; background: var(--f-accent-blue); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -264,43 +208,38 @@
             <div class="rf-cards-scroller-crop">
                 <div class="rf-cards-scroller-content" id="shelf-1">
                     <div class="rf-cards-scroller-platter">
-                        
-                        <a href="listing-ai-rewriter.html" class="rf-ccard">
+                        <a href="#" class="rf-ccard">
                             <div class="rf-ccard-visual">💻</div>
                             <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag ai-glow">Apple Intelligence</div>
+                                <div class="rf-ccard-tag">Intelligence</div>
                                 <div class="rf-ccard-title">AI Listing 优化</div>
-                                <div class="rf-ccard-desc">基于大模型深度学习，批量重写标题、五点及描述。</div>
+                                <div class="rf-ccard-desc">基于大模型深度学习，批量重写标题与五点。</div>
                             </div>
                         </a>
-
-                        <a href="baned-words-filter.html" class="rf-ccard">
+                        <a href="#" class="rf-ccard">
                             <div class="rf-ccard-visual">©️</div>
                             <div class="rf-ccard-info">
                                 <div class="rf-ccard-tag">Compliance</div>
                                 <div class="rf-ccard-title">违规词筛选器</div>
-                                <div class="rf-ccard-desc">全自动检索敏感词汇库，有效规避侵权与下架风险。</div>
+                                <div class="rf-ccard-desc">检索敏感词汇库，有效规避侵权风险。</div>
                             </div>
                         </a>
-
-                        <a href="deduplicator.html" class="rf-ccard">
+                        <a href="#" class="rf-ccard">
                             <div class="rf-ccard-visual">✂️</div>
                             <div class="rf-ccard-info">
                                 <div class="rf-ccard-tag">Efficiency</div>
                                 <div class="rf-ccard-title">文本去重工具</div>
-                                <div class="rf-ccard-desc">自动识别空格换行，精简埋词文案，提升索引效率。</div>
+                                <div class="rf-ccard-desc">自动识别空格，精简埋词文案。</div>
                             </div>
                         </a>
-
-                        <a href="case-converter.html" class="rf-ccard">
+                        <a href="#" class="rf-ccard">
                             <div class="rf-ccard-visual">📝</div>
                             <div class="rf-ccard-info">
                                 <div class="rf-ccard-tag">Utility</div>
                                 <div class="rf-ccard-title">大小写转换</div>
-                                <div class="rf-ccard-desc">一键规范化输入，快速实现全大写或首字母大写转换。</div>
+                                <div class="rf-ccard-desc">一键实现首字母大写规范转换。</div>
                             </div>
                         </a>
-
                     </div>
                 </div>
             </div>
@@ -325,92 +264,35 @@
             <div class="rf-cards-scroller-crop">
                 <div class="rf-cards-scroller-content" id="shelf-2">
                     <div class="rf-cards-scroller-platter">
-                        
-                        <a href="seo-parser.html" class="rf-ccard">
+                        <a href="#" class="rf-ccard">
                             <div class="rf-ccard-visual">🔍</div>
                             <div class="rf-ccard-info">
                                 <div class="rf-ccard-tag">Search</div>
                                 <div class="rf-ccard-title">SEO 解析校验</div>
-                                <div class="rf-ccard-desc">批量解析 Search Terms 字符超限情况，一键导出报告。</div>
+                                <div class="rf-ccard-desc">批量解析 Search Terms 字符超限。</div>
                             </div>
                         </a>
-
-                        <a href="word-frequency.html" class="rf-ccard">
+                        <a href="#" class="rf-ccard">
                             <div class="rf-ccard-visual">📊</div>
                             <div class="rf-ccard-info">
                                 <div class="rf-ccard-tag">Insight</div>
                                 <div class="rf-ccard-title">词频统计分析</div>
-                                <div class="rf-ccard-desc">从竞品评论中挖掘高频词，精准筛选转化关键词。</div>
+                                <div class="rf-ccard-desc">挖掘评论高频词，锁定转化核心。</div>
                             </div>
                         </a>
-
-                        <a href="amazon-sku-aggregator.html" class="rf-ccard">
+                        <a href="#" class="rf-ccard">
                             <div class="rf-ccard-visual">🧮</div>
                             <div class="rf-ccard-info">
                                 <div class="rf-ccard-tag">Finance</div>
                                 <div class="rf-ccard-title">SKU 销量聚合</div>
-                                <div class="rf-ccard-desc">自动将子体汇总至父体销量，简化订单报告处理流程。</div>
+                                <div class="rf-ccard-desc">自动汇总销量，简化报表流程。</div>
                             </div>
                         </a>
-
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <section class="rs-cardsshelf">
-        <div class="rs-cards-shelf-header">
-            <h2 class="rs-cards-shelf-title">多媒体处理<span>。惊艳你的视觉。</span></h2>
-        </div>
-
-        <div class="rf-cards-scroller">
-            <div class="paddlenav">
-                <button class="paddlenav-arrow" onclick="scrollShelf('shelf-3', -1)">
-                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                </button>
-                <button class="paddlenav-arrow" onclick="scrollShelf('shelf-3', 1)">
-                    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                </button>
-            </div>
-
-            <div class="rf-cards-scroller-crop">
-                <div class="rf-cards-scroller-content" id="shelf-3">
-                    <div class="rf-cards-scroller-platter">
-                        
-                        <a href="image-resizer.html" class="rf-ccard">
-                            <div class="rf-ccard-visual">🖼️</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Visual</div>
-                                <div class="rf-ccard-title">主图尺寸缩放</div>
-                                <div class="rf-ccard-desc">批量调整为亚马逊推荐的 1600x1600 白底规格。</div>
-                            </div>
-                        </a>
-
-                        <a href="image-hosting.html" class="rf-ccard">
-                            <div class="rf-ccard-visual">☁️</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Storage</div>
-                                <div class="rf-ccard-title">自动图床工具</div>
-                                <div class="rf-ccard-desc">拖拽上传，即刻生成 GitHub 链接，无需自建服务器。</div>
-                            </div>
-                        </a>
-
-                        <a href="html-editor.html" class="rf-ccard">
-                            <div class="rf-ccard-visual">🎨</div>
-                            <div class="rf-ccard-info">
-                                <div class="rf-ccard-tag">Design</div>
-                                <div class="rf-ccard-title">A+ HTML 编辑器</div>
-                                <div class="rf-ccard-desc">可视化编辑，生成符合亚马逊标准的纯净 HTML 代码。</div>
-                            </div>
-                        </a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
 </main>
 
 <div class="modal-overlay" id="modal">
@@ -424,12 +306,12 @@
 </div>
 
 <script>
+    // 滚动逻辑：每次滚动一张卡片的宽度
     function scrollShelf(elementId, direction) {
         const scroller = document.getElementById(elementId);
         const cardWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-width'));
         const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-gap'));
-        const scrollAmount = cardWidth + gap;
-        scroller.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        scroller.scrollBy({ left: direction * (cardWidth + gap), behavior: 'smooth' });
     }
 
     function toggleModal() {
