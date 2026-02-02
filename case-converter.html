@@ -2,64 +2,122 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大小写转换 - Amazon 运营工具箱</title>
+    <title>大小写转换 - 卖家工具箱</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1890ff; --bg: #f5f7fa; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        
-        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .back-btn { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-blue: #0066cc;
+            --apple-card: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-secondary: #86868b;
+        }
 
-        .main-layout { display: grid; grid-template-columns: 1fr 120px 1fr; gap: 15px; align-items: center; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; }
-        h3 { margin-top: 0; font-size: 16px; display: flex; justify-content: space-between; }
-        
-        textarea { width: 100%; height: 450px; padding: 12px; border: 1px solid #d9d9d9; border-radius: 8px; box-sizing: border-box; resize: none; font-size: 14px; line-height: 1.6; }
-        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.1); }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--apple-bg);
+            margin: 0; padding: 0; height: 100vh;
+            display: flex; flex-direction: column; overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .action-column { display: flex; flex-direction: column; gap: 15px; }
-        button { padding: 10px 5px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 13px; }
-        .btn-action { background: #f0f7ff; color: var(--primary); border: 1px solid #bae7ff; }
-        .btn-action:hover { background: var(--primary); color: white; }
-        .btn-success { background: #52c41a; color: white; }
-        .btn-clear { background: #fff; color: #ff4d4f; border: 1px solid #ff4d4f; }
-        
-        .stat { font-size: 12px; color: #8c8c8c; font-weight: normal; }
+        /* 统一导航栏 */
+        .nav-header {
+            height: 52px; background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 24px; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 100;
+        }
 
-        @media (max-width: 768px) {
+        .home-logo {
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; background: #fff; border: 1px solid #e5e5e7;
+            color: #1d1d1f; text-decoration: none; transition: 0.2s;
+        }
+        .home-logo:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        .container { max-width: 1200px; margin: 0 auto; width: 95%; flex: 1; display: flex; flex-direction: column; padding: 30px 0; overflow: hidden; }
+
+        .main-layout { display: grid; grid-template-columns: 1fr 140px 1fr; gap: 24px; flex: 1; align-items: stretch; }
+
+        .card { 
+            background: var(--apple-card); border-radius: 24px; padding: 24px;
+            display: flex; flex-direction: column; box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+            transition: transform 0.3s ease;
+        }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .card-title { font-size: 17px; font-weight: 600; }
+        .stat-tag { font-size: 11px; background: #f5f5f7; color: var(--apple-secondary); padding: 4px 10px; border-radius: 10px; font-weight: 500; }
+
+        textarea {
+            flex: 1; width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #d2d2d7;
+            background: #fafafa; font-size: 15px; line-height: 1.6; resize: none;
+            box-sizing: border-box; transition: all 0.2s; outline: none;
+        }
+        textarea:focus { background: #fff; border-color: var(--apple-blue); box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1); }
+
+        /* 中间操作按钮列 */
+        .action-column { display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+        
+        .btn-action {
+            height: 44px; padding: 0 12px; border-radius: 12px; border: none;
+            background: #fff; color: var(--apple-blue); font-size: 13px; font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: var(--apple-blue); color: #fff; }
+        .btn-action:active { transform: scale(0.95); }
+
+        /* 底部功能按钮 */
+        .btn-footer {
+            margin-top: 16px; height: 44px; border-radius: 22px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s;
+        }
+        .btn-danger { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+        .btn-primary { background: var(--apple-blue); color: #fff; }
+        .btn-primary:hover { background: #0071e3; }
+        
+        @media (max-width: 850px) {
             .main-layout { grid-template-columns: 1fr; }
-            .action-column { flex-direction: row; justify-content: center; }
-            .action-column button { flex: 1; }
+            .action-column { flex-direction: row; flex-wrap: wrap; }
+            .btn-action { flex: 1; min-width: 100px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="nav-header">
-        <a href="index.html" class="back-btn"><span>🏠</span> 返回首页</a>
-        <div style="font-weight: bold;">英文大小写转换工具</div>
-    </div>
+<div class="nav-header">
+    <a href="index.html" class="home-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    </a>
+    <div style="font-weight: 600;">英文大小写转换专家</div>
+    <div style="width: 36px;"></div> </div>
 
+<div class="container">
     <div class="main-layout">
         <div class="card">
-            <h3>输入原文 <span class="stat" id="inputStat">字符: 0</span></h3>
-            <textarea id="inputText" placeholder="请输入要转换的英文内容..." oninput="updateStats('inputText', 'inputStat')"></textarea>
-            <button class="btn-clear" style="width: 100%; margin-top: 10px;" onclick="clearAll()">🗑️ 一键清空</button>
+            <div class="card-header">
+                <div class="card-title">原始文本</div>
+                <div class="stat-tag" id="inputStat">字符: 0 | 单词: 0</div>
+            </div>
+            <textarea id="inputText" placeholder="粘贴英文内容到这里..." oninput="updateStats('inputText', 'inputStat')"></textarea>
+            <button class="btn-footer btn-danger" onclick="clearAll()">🗑️ 清空所有</button>
         </div>
 
         <div class="action-column">
-            <button class="btn-action" onclick="convert('upper')">>> 全部大写</button>
-            <button class="btn-action" onclick="convert('lower')">>> 全部小写</button>
-            <button class="btn-action" onclick="convert('title')">>> 首字母大写</button>
+            <button class="btn-action" onclick="convert('upper')">UPPERCASE<br>全部大写</button>
+            <button class="btn-action" onclick="convert('lower')">lowercase<br>全部小写</button>
+            <button class="btn-action" onclick="convert('title')">Title Case<br>首字母大写</button>
+            <button class="btn-action" onclick="convert('sentence')">Sentence.<br>句首大写</button>
         </div>
 
         <div class="card">
-            <h3>转换结果 <span class="stat" id="outputStat">字符: 0</span></h3>
-            <textarea id="outputText" readonly placeholder="转换后的结果将显示在这里..."></textarea>
-            <button class="btn-success" style="width: 100%; margin-top: 10px;" onclick="copyResult()">📋 一键复制</button>
+            <div class="card-header">
+                <div class="card-title">转换结果</div>
+                <div class="stat-tag" id="outputStat">字符: 0 | 单词: 0</div>
+            </div>
+            <textarea id="outputText" readonly placeholder="转换后的内容..."></textarea>
+            <button class="btn-footer btn-primary" onclick="copyResult()">📋 拷贝结果</button>
         </div>
     </div>
 </div>
@@ -67,11 +125,13 @@
 <script>
     function updateStats(id, statId) {
         const text = document.getElementById(id).value;
-        document.getElementById(statId).innerText = `字符: ${text.length} | 单词: ${text.trim() === "" ? 0 : text.trim().split(/\s+/).length}`;
+        const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+        document.getElementById(statId).innerText = `字符: ${text.length} | 单词: ${words}`;
     }
 
     function convert(type) {
         const input = document.getElementById('inputText').value;
+        if(!input) return;
         let result = "";
 
         if (type === 'upper') {
@@ -79,24 +139,43 @@
         } else if (type === 'lower') {
             result = input.toLowerCase();
         } else if (type === 'title') {
-            // 首字母大写逻辑：每个单词首字母大写
-            result = input.toLowerCase().replace(/(?<=^|\s)\S/g, l => l.toUpperCase());
+            // 亚马逊风格 Title Case：排除介词和连词
+            const minorWords = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'per', 'the', 'to', 'v', 'vs', 'via', 'with'];
+            result = input.toLowerCase().split(' ').map((word, index) => {
+                if (index > 0 && minorWords.includes(word)) return word;
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }).join(' ');
+        } else if (type === 'sentence') {
+            // 句首大写：识别句号/感叹号后的第一个字母
+            result = input.toLowerCase().replace(/(^\s*\w|[\.\!\?]\s*\w)/g, c => c.toUpperCase());
         }
 
-        document.getElementById('outputText').value = result;
+        const out = document.getElementById('outputText');
+        out.value = result;
         updateStats('outputText', 'outputStat');
+        
+        // 视觉反馈：结果闪烁一下表示已更新
+        out.style.background = "#e8f2ff";
+        setTimeout(() => out.style.background = "#fafafa", 200);
     }
 
-    function copyResult() {
+    async function copyResult() {
         const output = document.getElementById('outputText');
         if (!output.value) return;
-        output.select();
-        document.execCommand('copy');
         
-        const btn = event.target;
-        const originalText = btn.innerText;
-        btn.innerText = "✅ 已复制到剪贴板";
-        setTimeout(() => btn.innerText = originalText, 1500);
+        try {
+            await navigator.clipboard.writeText(output.value);
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✅ 已拷贝至剪贴板";
+            btn.style.background = "#34c759";
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = "var(--apple-blue)";
+            }, 1500);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
     }
 
     function clearAll() {
