@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Amazon 品牌清理 Pro - 云端/AI 双引擎</title>
+    <title>Amazon 品牌清理 Pro - 完整版</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #1890ff; --bg: #f0f2f5; --success: #52c41a; --error: #ff4d4f; --warning: #faad14; --ai: #722ed1; }
@@ -10,14 +10,16 @@
         .container { width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         
         /* 头部导航 */
-        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .logo { font-size: 18px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .header { display: flex; align-items: center; background: white; padding: 12px 20px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); gap: 20px; }
+        .back-link { text-decoration: none; color: #595959; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 5px; padding-right: 20px; border-right: 1px solid #eee; }
+        .back-link:hover { color: var(--primary); }
+        .logo { font-size: 18px; font-weight: bold; color: #333; flex: 1; }
         .status-tag { font-size: 12px; padding: 2px 8px; border-radius: 12px; background: #eee; color: #888; }
 
         /* 配置区 */
         .config-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .card-h { font-size: 13px; font-weight: bold; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; }
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .card-h { font-size: 13px; font-weight: bold; margin-bottom: 12px; color: #333; display: flex; justify-content: space-between; align-items: center; }
         
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         label { font-size: 11px; color: #8c8c8c; font-weight: bold; margin-bottom: 4px; display: block; }
@@ -32,12 +34,12 @@
         .btn { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-ai { background: var(--ai); color: white; }
+        .btn-success { background: var(--success); color: white; }
         .btn-outline { background: white; border: 1px solid #d9d9d9; color: #595959; }
         .btn-red { background: #fff1f0; color: var(--error); border: 1px solid #ffa39e; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .content-box { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-        .display-area { flex: 1; background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 10px; font-size: 13px; line-height: 1.6; overflow-y: auto; white-space: pre-wrap; }
+        .display-area { flex: 1; background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 10px; font-size: 13px; line-height: 1.6; overflow-y: auto; white-space: pre-wrap; margin-top: 10px; }
         
         /* 表格样式 */
         .table-container { flex: 1; overflow: auto; border: 1px solid #f0f0f0; border-radius: 4px; }
@@ -45,7 +47,6 @@
         th { background: #fafafa; padding: 10px; border-bottom: 2px solid #f0f0f0; position: sticky; top: 0; z-index: 10; text-align: left; }
         td { padding: 8px; border-bottom: 1px solid #f0f0f0; }
 
-        /* 动画 */
         .spin { width: 12px; height: 12px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: loader 0.8s linear infinite; display: none; }
         @keyframes loader { 100% { transform: rotate(360deg); } }
     </style>
@@ -54,41 +55,47 @@
 
 <div class="container">
     <div class="header">
-        <div class="logo">🛡️ Amazon Listing 品牌词/合规词清理系统</div>
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <div id="syncStatus" class="status-tag">GitHub: 未连接</div>
-            <a href="index.html" style="font-size: 12px; color: var(--primary); text-decoration: none;">🏠 返回首页</a>
-        </div>
+        <a href="index.html" class="back-link">🏠 返回首页</a>
+        <div class="logo">Amazon Listing 品牌词清理工具</div>
+        <div id="syncStatus" class="status-tag">GitHub: 未连接</div>
     </div>
 
     <div class="config-area">
         <div class="card">
-            <div class="card-h">☁️ GitHub 云端同步 (锁定 brand_repo.json) <button class="btn btn-blue" style="padding: 2px 8px;" onclick="syncCloud()">🔄 同步</button></div>
+            <div class="card-h">
+                <span>☁️ GitHub 云端同步</span>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn btn-outline" style="padding: 2px 8px;" onclick="saveConfig('gh')">💾 保存配置</button>
+                    <button class="btn btn-blue" style="padding: 2px 8px;" onclick="syncCloud()">🔄 同步词库</button>
+                </div>
+            </div>
             <div class="form-row">
                 <div><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_xxxx"></div>
-                <div><label>仓库名称 (User/Repo)</label><input type="text" id="ghRepo" placeholder="ShawnHo/Amazon-Store"></div>
+                <div><label>仓库路径 (User/Repo)</label><input type="text" id="ghRepo" placeholder="ShawnHo/Amazon-Repo"></div>
             </div>
             <div class="form-row">
-                <div><label>品牌库 (自动去重)</label><textarea id="brandWords"></textarea></div>
-                <div><label>违规词库</label><textarea id="restrictedWords"></textarea></div>
+                <div><label>品牌库 (逗号/换行分隔)</label><textarea id="brandWords"></textarea></div>
+                <div><label>违禁词库</label><textarea id="restrictedWords"></textarea></div>
             </div>
-            <button class="btn btn-outline" style="width: 100%; height: 32px;" onclick="pushCloud()">📤 推送并备份至云端</button>
+            <button class="btn btn-outline" style="width: 100%; height: 32px; font-size: 11px;" onclick="pushCloud()">📤 将本地修改推送到 GitHub 备份</button>
         </div>
 
         <div class="card">
-            <div class="card-h">🤖 AI 深度清理配置</div>
+            <div class="card-h">
+                <span>🤖 AI 深度清理配置</span>
+                <button class="btn btn-outline" style="padding: 2px 8px;" onclick="saveConfig('ai')">💾 保存配置</button>
+            </div>
             <div class="form-row">
                 <div><label>API 地址</label><input type="text" id="apiHost" value="https://api.deepseek.com"></div>
                 <div><label>API Key</label><input type="password" id="apiKey" placeholder="sk-xxxx"></div>
             </div>
             <div>
                 <label>AI 合规指令 (System Prompt)</label>
-                <textarea id="aiPrompt" style="height: 90px;">你是一个亚马逊Listing合规专家。
-你的任务是剔除违规内容，但必须严格遵守亚马逊的【兼容性描述政策】：
-1. 识别并【保留】跟在 "for", "compatible with", "replacement for", "fits", "designed for" 后面的品牌词。
-2. 剔除所有【孤立出现】的品牌词（例如 "This is a Nike shoe" 需删掉 Nike）。
-3. 剔除所有亚马逊禁售词（如农药、保修、FDA等）。
-4. 只返回清洗后的正文，保留原始HTML，禁止解释。</textarea>
+                <textarea id="aiPrompt" style="height: 90px;">你是一个亚马逊Listing合规专家。剔除违规内容但必须保留兼容性描述：
+1. 【保留】跟在 "for", "compatible with", "replacement for", "fits" 后面的品牌词。
+2. 【剔除】所有孤立出现的品牌词（如 "This is a Sony TV" 删掉 Sony）。
+3. 【剔除】亚马逊禁售词（农药、保修、FDA等）。
+4. 只返回清洗后的正文，保留HTML，不解释。</textarea>
             </div>
         </div>
     </div>
@@ -99,20 +106,18 @@
                 <b>📝 单段文案清理</b>
                 <button class="btn btn-blue" style="margin-left: auto;" onclick="runClean('rule')">⚡ 词库清理</button>
                 <button class="btn btn-ai" onclick="runClean('ai')"><div class="spin" id="aiSpin"></div> 🤖 AI 深度清理</button>
-                <button class="btn btn-outline" onclick="clearText()">🧹 清除</button>
+                <button class="btn btn-outline" onclick="clearText()">清除</button>
             </div>
-            <div class="content-box">
-                <textarea id="textInput" style="height: 120px;" placeholder="粘贴 Listing 文本进行处理..."></textarea>
-                <div id="textOutput" class="display-area"></div>
-            </div>
+            <textarea id="textInput" style="height: 100px; margin-bottom: 10px;" placeholder="在此输入需要清洗的 Listing 描述..."></textarea>
+            <div id="textOutput" class="display-area"></div>
         </div>
 
         <div class="panel">
             <div class="toolbar">
                 <b>📊 批量表格处理</b>
-                <button class="btn btn-outline" style="margin-left: auto;" onclick="document.getElementById('fileIn').click()">📤 上传 Excel</button>
-                <button class="btn btn-blue" id="tableBtn" disabled onclick="runTableClean()">🚀 批量清洗并保留兼容性</button>
-                <button class="btn btn-outline" id="exportBtn" disabled onclick="exportExcel()">💾 导出</button>
+                <button class="btn btn-outline" style="margin-left: auto;" onclick="document.getElementById('fileIn').click()">上传 Excel</button>
+                <button class="btn btn-blue" id="tableBtn" disabled onclick="runTableClean()">🚀 批量执行</button>
+                <button class="btn btn-success" id="exportBtn" disabled onclick="exportExcel()">💾 导出结果</button>
                 <button class="btn btn-red" onclick="clearTable()">🧹</button>
                 <input type="file" id="fileIn" hidden onchange="handleExcel(this.files[0])">
             </div>
@@ -128,18 +133,27 @@
     const EXEMPT_PREFIXES = ["for", "compatible with", "replacement for", "fits", "designed for"];
 
     window.onload = () => {
-        ['ghToken','ghRepo','apiHost','apiKey'].forEach(k => {
-            document.getElementById(k).value = localStorage.getItem('sh_listing_'+k) || document.getElementById(k).value;
+        ['ghToken','ghRepo','apiHost','apiKey','aiPrompt'].forEach(k => {
+            const val = localStorage.getItem('sh_save_' + k);
+            if(val) document.getElementById(k).value = val;
         });
         if(document.getElementById('ghToken').value) syncCloud();
     };
+
+    // 保存配置到本地
+    function saveConfig(type) {
+        const keys = (type === 'gh') ? ['ghToken','ghRepo'] : ['apiHost','apiKey','aiPrompt'];
+        keys.forEach(k => {
+            localStorage.setItem('sh_save_' + k, document.getElementById(k).value);
+        });
+        alert(`✅ ${type === 'gh' ? 'GitHub' : 'AI'} 配置已保存到本地浏览器`);
+    }
 
     // --- GitHub 逻辑 ---
     async function syncCloud() {
         const token = document.getElementById('ghToken').value;
         const repo = document.getElementById('ghRepo').value;
         if(!token || !repo) return;
-        const status = document.getElementById('syncStatus');
         try {
             const res = await fetch(`https://api.github.com/repos/${repo}/contents/brand_repo.json`, {
                 headers: { "Authorization": `token ${token}` }
@@ -150,59 +164,50 @@
                 const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
                 document.getElementById('brandWords').value = (content.brands || []).join(', ');
                 document.getElementById('restrictedWords').value = (content.restricted || []).join(', ');
-                status.innerText = "GitHub: 已连接"; status.style.color = "var(--success)";
+                const tag = document.getElementById('syncStatus');
+                tag.innerText = "GitHub: 已连接"; tag.style.color = "var(--success)";
             }
-        } catch(e) { status.innerText = "GitHub: 连接失败"; }
+        } catch(e) { console.error("同步失败"); }
     }
 
     async function pushCloud() {
         const token = document.getElementById('ghToken').value;
         const repo = document.getElementById('ghRepo').value;
-        ['ghToken','ghRepo','apiHost','apiKey'].forEach(k => localStorage.setItem('sh_listing_'+k, document.getElementById(k).value));
-        
-        const brands = [...new Set(document.getElementById('brandWords').value.split(/[,，\n]/).map(w=>w.trim().toLowerCase()).filter(w=>w))];
-        const restricted = [...new Set(document.getElementById('restrictedWords').value.split(/[,，\n]/).map(w=>w.trim().toLowerCase()).filter(w=>w))];
-        
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify({brands, restricted, updated: new Date().toISOString()}, null, 2))));
+        const br = [...new Set(document.getElementById('brandWords').value.split(/[,，\n]/).map(w=>w.trim().toLowerCase()).filter(w=>w))];
+        const rs = [...new Set(document.getElementById('restrictedWords').value.split(/[,，\n]/).map(w=>w.trim().toLowerCase()).filter(w=>w))];
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify({brands: br, restricted: rs, updated: new Date().toISOString()}, null, 2))));
         
         const res = await fetch(`https://api.github.com/repos/${repo}/contents/brand_repo.json`, {
             method: 'PUT',
-            headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ message: "Update Brand Repo", content, sha: currentSHA })
+            headers: { "Authorization": `token ${token}` },
+            body: JSON.stringify({ message: "Update via Tool", content, sha: currentSHA })
         });
-        if(res.ok) { 
-            const data = await res.json(); 
-            currentSHA = data.content.sha; 
-            alert("✅ 云端词库同步成功！"); 
-            syncCloud();
+        if(res.ok) {
+            const result = await res.json();
+            currentSHA = result.content.sha;
+            alert("✅ 已成功推送到 GitHub 备份！");
         }
     }
 
-    // --- 核心清理算法 ---
+    // --- 清理逻辑 ---
     function cleanLogic(text) {
         if (!text) return "";
         let cleaned = String(text);
+        const br = document.getElementById('brandWords').value.split(/[,，]/).map(w=>w.trim()).filter(w=>w);
+        const rs = document.getElementById('restrictedWords').value.split(/[,，]/).map(w=>w.trim()).filter(w=>w);
         
-        const brands = document.getElementById('brandWords').value.split(/[,，]/).map(w=>w.trim()).filter(w=>w);
-        const restricted = document.getElementById('restrictedWords').value.split(/[,，]/).map(w=>w.trim()).filter(w=>w);
-        
-        // 1. 剔除违规词 (强制剔除)
-        restricted.sort((a,b)=>b.length - a.length).forEach(w => {
+        rs.sort((a,b)=>b.length - a.length).forEach(w => {
             cleaned = cleaned.replace(new RegExp(`\\b${w}\\b`, 'gi'), "");
         });
 
-        // 2. 剔除品牌词 (兼容性豁免)
         const prefixPattern = EXEMPT_PREFIXES.join('|').replace(/ /g, '\\s+');
-        brands.sort((a,b)=>b.length - a.length).forEach(w => {
-            // 利用负向后行断言 (?<!...) 识别前面是否有兼容性前缀
+        br.sort((a,b)=>b.length - a.length).forEach(w => {
             const regex = new RegExp(`(?<!\\b(${prefixPattern})\\s+)\\b${w}\\b`, 'gi');
             cleaned = cleaned.replace(regex, "");
         });
-
         return cleaned.replace(/\s+/g, ' ').trim();
     }
 
-    // --- 功能执行 ---
     async function runClean(mode) {
         const input = document.getElementById('textInput').value;
         if(mode === 'rule') {
@@ -210,8 +215,7 @@
         } else {
             const host = document.getElementById('apiHost').value;
             const key = document.getElementById('apiKey').value;
-            if(!key) return alert("请设置 AI API Key");
-            
+            if(!key) return alert("请设置 API Key");
             document.getElementById('aiSpin').style.display = 'inline-block';
             try {
                 const res = await fetch(`${host}/v1/chat/completions`, {
@@ -224,25 +228,26 @@
                 });
                 const data = await res.json();
                 document.getElementById('textOutput').innerText = data.choices[0].message.content.trim();
-            } catch(e) { alert("AI 清理失败: " + e.message); }
+            } catch(e) { alert("AI 失败: " + e.message); }
             document.getElementById('aiSpin').style.display = 'none';
         }
     }
 
+    // --- 表格处理 ---
     function handleExcel(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
+        const r = new FileReader();
+        r.onload = (e) => {
             const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
             rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             renderTable();
             document.getElementById('tableBtn').disabled = false;
         };
-        reader.readAsArrayBuffer(file);
+        r.readAsArrayBuffer(file);
     }
 
     function renderTable() {
         const h = document.getElementById('tHead'), b = document.getElementById('tBody');
-        if(!rawData.length) return;
+        if(!rawData.length) { h.innerHTML=""; b.innerHTML=""; return; }
         const ks = Object.keys(rawData[0]);
         h.innerHTML = `<tr>${ks.map(k=>`<th>${k}</th>`).join('')}</tr>`;
         b.innerHTML = rawData.map(r => `<tr>${ks.map(k=>`<td>${r[k]||''}</td>`).join('')}</tr>`).join('');
@@ -256,18 +261,18 @@
         });
         renderTable();
         document.getElementById('exportBtn').disabled = false;
-        alert("✅ 表格品牌清理完成 (已应用兼容性保留逻辑)");
+        alert("✅ 表格品牌清理完成 (已跳过兼容性描述)");
     }
 
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(rawData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "CleanedData");
-        XLSX.writeFile(wb, `Amazon_Cleaned_${Date.now()}.xlsx`);
+        XLSX.writeFile(wb, `Listing_Cleaned_${Date.now()}.xlsx`);
     }
 
     function clearText() { document.getElementById('textInput').value = ""; document.getElementById('textOutput').innerText = ""; }
-    function clearTable() { rawData = []; renderTable(); document.getElementById('tableBtn').disabled = true; }
+    function clearTable() { rawData = []; renderTable(); document.getElementById('tableBtn').disabled = true; document.getElementById('exportBtn').disabled = true; }
 </script>
 </body>
 </html>
