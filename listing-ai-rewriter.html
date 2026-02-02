@@ -2,49 +2,52 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>AI Listing 优化 Pro - Amazon 卖家工具箱</title>
+    <title>Listing AI 重写 - Amazon 卖家工具箱</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         :root { --primary: #1890ff; --bg: #f0f2f5; --success: #52c41a; --error: #ff4d4f; --warning: #faad14; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .container { width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; }
+        .container { width: 100%; max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         
-        /* 导航与配置 */
+        /* 头部与配置 */
         .nav-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .config-card { background: white; border-radius: 12px; padding: 15px 20px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr 1fr 150px auto; gap: 15px; align-items: end; }
+        .config-card { background: white; border-radius: 12px; padding: 15px 20px; margin-bottom: 15px; display: grid; grid-template-columns: 1fr 1fr 150px auto; gap: 15px; align-items: end; }
         .config-item { display: flex; flex-direction: column; gap: 5px; }
         .config-item label { font-size: 12px; color: #8c8c8c; font-weight: bold; }
-        .config-item input, .config-item select { padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; }
+        .config-item input { padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; }
 
-        /* 主体布局：左表右预 */
-        .workspace { display: flex; gap: 20px; flex: 1; overflow: hidden; margin-bottom: 20px; }
-        .main-panel { flex: 2; background: white; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
-        .preview-panel { flex: 1; background: white; border-radius: 12px; padding: 20px; border-left: 4px solid var(--primary); overflow-y: auto; display: none; }
+        /* 工作区布局 */
+        .workspace { display: flex; gap: 20px; flex: 1; overflow: hidden; }
+        .main-panel { flex: 1.8; background: white; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .preview-panel { flex: 1.2; background: white; border-radius: 12px; padding: 20px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
 
-        /* 表格与高亮 */
-        .table-wrap { flex: 1; overflow: auto; border: 1px solid #f0f0f0; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { background: #fafafa; padding: 10px; border-bottom: 2px solid #f0f0f0; position: sticky; top: 0; z-index: 10; }
-        td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        tr.active { background: #e6f7ff; }
-        .char-count { font-size: 10px; color: #bfbfbf; display: block; margin-top: 2px; }
-        .over-limit { color: var(--error) !important; font-weight: bold; }
-
-        /* 状态与进度 */
-        .progress-box { margin-bottom: 15px; }
-        .bar-bg { height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
-        .bar-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s; }
+        /* 操作区域 */
+        .upload-zone { border: 2px dashed #d9d9d9; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
+        .upload-zone:hover { border-color: var(--primary); background: #f0f7ff; }
         
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
-        .btn { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; display: flex; align-items: center; gap: 5px; }
-        .btn-blue { background: var(--primary); }
-        .btn-green { background: var(--success); }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; font-size: 14px; }
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-green { background: var(--success); color: white; }
         .btn-outline { background: white; border: 1px solid #d9d9d9; color: #595959; }
-        .btn:disabled { background: #bfbfbf; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* 表格与检测 */
+        .table-wrap { flex: 1; overflow: auto; border: 1px solid #f0f0f0; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: #fafafa; padding: 12px; border-bottom: 2px solid #f0f0f0; position: sticky; top: 0; z-index: 10; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #f0f0f0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        tr:hover { background: #fafafa; cursor: pointer; }
+        tr.selected { background: #e6f7ff !important; }
+
+        /* 字数预警样式 */
+        .char-tag { font-size: 10px; color: #bfbfbf; display: block; margin-top: 3px; }
+        .warning-text { color: var(--error) !important; font-weight: bold; }
 
         /* 预览内容样式 */
-        .preview-content h4 { border-bottom: 1px solid #eee; padding-bottom: 5px; color: var(--primary); }
-        .html-render { background: #fafafa; padding: 10px; border-radius: 4px; font-size: 13px; border: 1px inset #eee; }
+        .preview-content h4 { border-left: 4px solid var(--primary); padding-left: 10px; margin: 20px 0 10px 0; color: #333; }
+        .render-box { background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid #eee; font-size: 14px; line-height: 1.6; }
+        .preview-list { padding-left: 20px; margin: 0; }
     </style>
 </head>
 <body>
@@ -52,44 +55,49 @@
 <div class="container">
     <div class="nav-header">
         <a href="index.html" style="text-decoration:none; color:var(--primary);">🏠 返回工具箱首页</a>
-        <div style="font-weight: bold;">Listing AI 优化 Pro (并发+检测+预览)</div>
+        <div style="font-weight: bold; font-size: 16px;">AI Listing 优化与自动化处理</div>
     </div>
 
     <div class="config-card">
         <div class="config-item">
-            <label>API Key</label>
+            <label>API Key (需填入后才可开始)</label>
             <input type="password" id="apiKey" placeholder="sk-xxxx">
         </div>
         <div class="config-item">
-            <label>Model Name</label>
+            <label>模型名称</label>
             <input type="text" id="modelName" value="gpt-3.5-turbo">
         </div>
         <div class="config-item">
             <label>并发请求数 (1-5)</label>
             <input type="range" id="concurrency" min="1" max="5" value="2" oninput="this.nextElementSibling.innerText = this.value">
-            <span style="text-align:center; font-size:12px;">2</span>
+            <span style="text-align:center; font-size:12px; font-weight:bold;">2</span>
         </div>
-        <button class="btn btn-outline" onclick="saveConfig()">💾 保存</button>
+        <button class="btn btn-outline" onclick="saveConfig()">💾 保存配置</button>
     </div>
 
     <div class="workspace">
         <div class="main-panel">
-            <div id="dropZone" style="border:2px dashed #d9d9d9; padding:20px; text-align:center; border-radius:8px; cursor:pointer;" onclick="document.getElementById('fileInput').click()">
-                <div style="font-weight:bold;">📤 点击或拖拽上传 Excel 表格</div>
-                <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFile(this.files[0])">
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                <img src="https://img.icons8.com/color/48/ms-excel.png" style="margin-bottom:5px;"><br>
+                <strong>点击或拖拽上传数据表格 (.xlsx)</strong>
+                <p style="font-size:12px; color:#999; margin:5px 0;">请务必使用下方标准模板格式上传</p>
+                <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFileLoad(this.files[0])">
             </div>
 
-            <div class="progress-box" id="progBox" style="display:none; margin-top:15px;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                    <span id="progText">等待开始...</span>
+            <div class="btn-group">
+                <button class="btn btn-outline" onclick="downloadBlankTemplate()">📥 下载空白模板表格</button>
+                <button class="btn btn-blue" id="runBtn" onclick="startAIProcessing()" disabled>🚀 开始批量处理</button>
+                <button class="btn btn-green" id="exportBtn" onclick="exportFinalExcel()" disabled>📊 导出处理结果</button>
+            </div>
+
+            <div id="progBar" style="display:none; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                    <span id="progText">准备中...</span>
                     <span id="progPer">0%</span>
                 </div>
-                <div class="bar-bg"><div class="bar-fill" id="progFill"></div></div>
-            </div>
-
-            <div class="btn-group" style="margin-top:15px;">
-                <button class="btn btn-blue" id="startBtn" onclick="runTask()" disabled>🚀 开始处理</button>
-                <button class="btn btn-green" id="exportBtn" onclick="exportResult()" disabled>📊 导出结果</button>
+                <div style="height:6px; background:#eee; border-radius:3px; overflow:hidden;">
+                    <div id="progFill" style="width:0%; height:100%; background:var(--primary); transition:0.3s;"></div>
+                </div>
             </div>
 
             <div class="table-wrap">
@@ -100,10 +108,12 @@
             </div>
         </div>
 
-        <div class="preview-panel" id="previewPanel">
-            <h3 style="margin-top:0;">🔍 实时预览</h3>
-            <div id="previewDetail" class="preview-content">
-                <p style="color:#8c8c8c;">点击左侧行查看 AI 生成详情...</p>
+        <div class="preview-panel" id="previewArea">
+            <h3 style="margin-top:0; color:#555;">🔍 Listing 实时预览</h3>
+            <div id="previewContent">
+                <div style="text-align:center; color:#999; margin-top:50px;">
+                    请上传文件并选择任意一行数据查看预览
+                </div>
             </div>
         </div>
     </div>
@@ -112,155 +122,177 @@
 <script>
     let rawData = [];
     let headers = [];
-    let currentIndex = 0;
-
+    
+    // 初始化
     window.onload = () => {
-        document.getElementById('apiKey').value = localStorage.getItem('ls_key') || '';
-        document.getElementById('modelName').value = localStorage.getItem('ls_model') || 'gpt-3.5-turbo';
+        document.getElementById('apiKey').value = localStorage.getItem('sh_ls_key') || '';
+        document.getElementById('modelName').value = localStorage.getItem('sh_ls_model') || 'gpt-3.5-turbo';
     };
 
     function saveConfig() {
-        localStorage.setItem('ls_key', document.getElementById('apiKey').value);
-        localStorage.setItem('ls_model', document.getElementById('modelName').value);
-        alert('配置已保存');
+        localStorage.setItem('sh_ls_key', document.getElementById('apiKey').value);
+        localStorage.setItem('sh_ls_model', document.getElementById('modelName').value);
+        alert('API配置已保存');
     }
 
-    function handleFile(file) {
+    // --- 核心功能：下载空白模板 ---
+    function downloadBlankTemplate() {
+        const headerRow = ["Title", "Product Description", "Bullet Point 1", "Bullet Point 2", "Bullet Point 3", "Bullet Point 4", "Bullet Point 5", "Search Terms"];
+        const ws = XLSX.utils.aoa_to_sheet([headerRow]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "ListingTemplate");
+        XLSX.writeFile(wb, "Amazon_Listing_Blank_Template.xlsx");
+    }
+
+    // 处理文件上传
+    function handleFileLoad(file) {
+        if(!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
             const wb = XLSX.read(data, {type:'array'});
-            const sheet = wb.Sheets[wb.SheetNames[0]];
-            headers = XLSX.utils.sheet_to_json(sheet, {header:1})[0];
-            rawData = XLSX.utils.sheet_to_json(sheet);
-            renderTable();
-            document.getElementById('startBtn').disabled = false;
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            headers = XLSX.utils.sheet_to_json(ws, {header:1})[0];
+            rawData = XLSX.utils.sheet_to_json(ws);
+            renderMainTable();
+            document.getElementById('runBtn').disabled = false;
         };
         reader.readAsArrayBuffer(file);
     }
 
-    function renderTable() {
-        const head = document.getElementById('tHead');
-        const body = document.getElementById('tBody');
-        head.innerHTML = `<tr><th>状态</th>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-        body.innerHTML = rawData.map((row, i) => `
-            <tr onclick="showPreview(${i})" id="row-${i}">
-                <td id="status-${i}" style="color:#bfbfbf">待处理</td>
+    function renderMainTable() {
+        const thead = document.getElementById('tHead');
+        const tbody = document.getElementById('tBody');
+        thead.innerHTML = `<tr><th width="80">状态</th>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+        tbody.innerHTML = rawData.map((row, i) => `
+            <tr onclick="updatePreview(${i})" id="row-${i}">
+                <td id="status-${i}" style="color:#999">待处理</td>
                 ${headers.map(h => {
-                    const val = row[h] || '';
-                    return `<td id="cell-${i}-${h}">${val}<span class="char-count" id="count-${i}-${h}">${val.length} 字符</span></td>`;
+                    const val = String(row[h] || '');
+                    return `<td id="cell-${i}-${h}">${val}<span class="char-tag" id="tag-${i}-${h}">${val.length} 字符</span></td>`;
                 }).join('')}
             </tr>
         `).join('');
     }
 
-    // 实时检测字数高亮
-    function updateCellUI(i, h, content) {
-        const cell = document.getElementById(`cell-${i}-${h}`);
-        const countSpan = document.getElementById(`count-${i}-${h}`);
-        const len = content.length;
-        
-        cell.firstChild.textContent = content;
-        countSpan.innerText = `${len} 字符`;
-
-        // 字数规则：Title > 190 报错，Description > 1500 报错
-        if ((h === 'Title' && len > 190) || (h === 'Product Description' && len > 1500)) {
-            countSpan.classList.add('over-limit');
-        } else {
-            countSpan.classList.remove('over-limit');
-        }
+    // 实时字数检测逻辑
+    function checkLimits(h, len) {
+        if (h === 'Title' && len > 190) return true;
+        if (h === 'Product Description' && len > 1500) return true;
+        return false;
     }
 
-    async function runTask() {
-        const key = document.getElementById('apiKey').value;
-        const model = document.getElementById('modelName').value;
-        const concurrency = parseInt(document.getElementById('concurrency').value);
+    // 更新预览区域
+    function updatePreview(index) {
+        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+        document.getElementById(`row-${index}`).classList.add('selected');
+
+        const row = rawData[index];
+        const preview = document.getElementById('previewContent');
         
+        const titleLen = row['Title']?.length || 0;
+        const descLen = row['Product Description']?.length || 0;
+
+        preview.innerHTML = `
+            <h4>📌 标题预览 (${titleLen}/190)</h4>
+            <div class="render-box ${titleLen > 190 ? 'warning-text' : ''}">${row['Title'] || '-'}</div>
+
+            <h4>📝 五点描述 (Bullet Points)</h4>
+            <div class="render-box">
+                <ul class="preview-list">
+                    <li>${row['Bullet Point 1'] || ''}</li>
+                    <li>${row['Bullet Point 2'] || ''}</li>
+                    <li>${row['Bullet Point 3'] || ''}</li>
+                    <li>${row['Bullet Point 4'] || ''}</li>
+                    <li>${row['Bullet Point 5'] || ''}</li>
+                </ul>
+            </div>
+
+            <h4>🌐 产品描述预览 (${descLen}/1500)</h4>
+            <div class="render-box ${descLen > 1500 ? 'warning-text' : ''}">
+                ${row['Product Description'] || '等待生成...'}
+            </div>
+
+            <h4>🔑 搜索词 (Search Terms)</h4>
+            <div class="render-box" style="font-family:monospace; font-size:12px;">${row['Search Terms'] || '-'}</div>
+        `;
+    }
+
+    // AI 处理逻辑 (带并发控制)
+    async function startAIProcessing() {
+        const key = document.getElementById('apiKey').value;
         if(!key) return alert('请输入 API Key');
         
-        document.getElementById('progBox').style.display = 'block';
-        document.getElementById('startBtn').disabled = true;
+        const concurrency = parseInt(document.getElementById('concurrency').value);
+        document.getElementById('progBar').style.display = 'block';
+        document.getElementById('runBtn').disabled = true;
 
         const queue = [...rawData.keys()];
-        const workers = [];
+        const activeWorkers = [];
 
         for (let i = 0; i < concurrency; i++) {
-            workers.push(worker(queue, key, model));
+            activeWorkers.push(processQueue(queue, key));
         }
-        await Promise.all(workers);
-        
-        document.getElementById('progText').innerText = "✅ 所有任务处理完成";
+
+        await Promise.all(activeWorkers);
         document.getElementById('exportBtn').disabled = false;
+        document.getElementById('progText').innerText = "✅ 全部处理完成";
     }
 
-    async function worker(queue, key, model) {
+    async function processQueue(queue, key) {
+        const model = document.getElementById('modelName').value;
         while (queue.length > 0) {
-            const i = queue.shift();
-            document.getElementById(`status-${i}`).innerText = "⚡ 处理中...";
-            document.getElementById(`status-${i}`).style.color = "var(--primary)";
+            const idx = queue.shift();
+            document.getElementById(`status-${idx}`).innerText = "正在重写...";
+            document.getElementById(`status-${idx}`).style.color = "var(--primary)";
 
             for (let h of headers) {
-                if (rawData[i][h]) {
-                    const res = await callAI(key, model, h, rawData[i][h]);
-                    rawData[i][h] = res;
-                    updateCellUI(i, h, res);
+                if (rawData[idx][h]) {
+                    const result = await callListingAI(key, model, h, rawData[idx][h]);
+                    rawData[idx][h] = result;
+                    // 更新单元格内容和字数
+                    const cell = document.getElementById(`cell-${idx}-${h}`);
+                    const tag = document.getElementById(`tag-${idx}-${h}`);
+                    cell.firstChild.textContent = result;
+                    tag.innerText = `${result.length} 字符`;
+                    if(checkLimits(h, result.length)) tag.classList.add('warning-text');
                 }
             }
-            document.getElementById(`status-${i}`).innerText = "✅ 完成";
-            document.getElementById(`status-${i}`).style.color = "var(--success)";
+
+            document.getElementById(`status-${idx}`).innerText = "已完成";
+            document.getElementById(`status-${idx}`).style.color = "var(--success)";
             
-            const done = rawData.length - queue.length;
-            const per = Math.round((done / rawData.length) * 100);
+            const finished = rawData.length - queue.length;
+            const per = Math.round((finished / rawData.length) * 100);
             document.getElementById('progFill').style.width = per + '%';
             document.getElementById('progPer').innerText = per + '%';
+            document.getElementById('progText').innerText = `正在处理第 ${finished}/${rawData.length} 行...`;
         }
     }
 
-    async function callAI(key, model, field, content) {
-        // 此处可以加入你更详细的 Prompt 逻辑
+    async function callListingAI(key, model, field, content) {
+        // 模拟 API 调用逻辑，你可以在此替换为真实的 API 请求
         try {
             const res = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${key}`},
                 body: JSON.stringify({
                     model: model,
-                    messages: [{role: "user", content: `作为亚马逊专家，优化以下${field}：${content}`}]
+                    messages: [{role: "user", content: `作为亚马逊SEO专家，请重构此${field}，要求专业且符合SEO：${content}`}]
                 })
             });
             const data = await res.json();
             return data.choices[0].message.content.trim();
-        } catch (e) { return "Error"; }
+        } catch (e) {
+            return "API Error";
+        }
     }
 
-    function showPreview(i) {
-        document.querySelectorAll('tr').forEach(r => r.classList.remove('active'));
-        document.getElementById(`row-${i}`).classList.add('active');
-        
-        const panel = document.getElementById('previewPanel');
-        const detail = document.getElementById('previewDetail');
-        panel.style.display = 'block';
-        
-        const row = rawData[i];
-        detail.innerHTML = `
-            <h4>📌 标题预览 (${row['Title']?.length || 0})</h4>
-            <p style="font-size:14px; font-weight:bold;">${row['Title'] || '-'}</p>
-            
-            <h4>📝 五点描述</h4>
-            <ul style="padding-left:20px; font-size:13px;">
-                <li>${row['Bullet Point 1'] || ''}</li>
-                <li>${row['Bullet Point 2'] || ''}</li>
-            </ul>
-
-            <h4>🌐 产品描述 (HTML 渲染)</h4>
-            <div class="html-render">${row['Product Description'] || '暂无内容'}</div>
-        `;
-    }
-
-    function exportResult() {
+    function exportFinalExcel() {
         const ws = XLSX.utils.json_to_sheet(rawData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "AI_Optimized");
-        XLSX.writeFile(wb, `Amazon_Listing_AI_${Date.now()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "OptimizedListing");
+        XLSX.writeFile(wb, `Listing_AI_Optimized_${Date.now()}.xlsx`);
     }
 </script>
 
