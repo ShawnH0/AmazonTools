@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shawn's Studio | Design & Engineering</title>
+    <style>
+        /* --- 1. 全局变量与基础设置 --- */
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-grey: #86868b;
+            --apple-white: #f5f5f7;
+            --apple-blue: #0066cc;
+            --nav-bg: rgba(251, 252, 253, 0.8);
+            --ease-apple: cubic-bezier(0.4, 0, 0.2, 1);
+            --blur: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SF Pro Display", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--apple-black);
+            overflow-x: hidden;
+            line-height: 1.1;
+        }
+
+        /* 让所有链接继承父元素颜色，并去掉下划线 */
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* 如果你希望鼠标悬停时有轻微的透明度变化（苹果官网常用效果） */
+        a:hover {
+            opacity: 0.8;
+        }
+
+        /* --- 2. 导航栏 (Glassmorphism) --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 44px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            z-index: 9999;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+            transition: background 0.5s var(--ease-apple);
+        }
+
+        .nav-content {
+            max-width: 1024px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            padding: 0 22px;
+        }
+
+        .logo {
+            font-size: 18px;
+            text-decoration: none;
+            color: var(--apple-black);
+            font-weight: 600;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--apple-black);
+            font-size: 12px;
+            margin-left: 28px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+        }
+
+        /* --- 3. Hero Section (核心视觉) --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 8vw, 80px);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        /* 渐变文字效果 */
+        .gradient-text {
+            background: linear-gradient(90deg, #007aff, #ff2d55, #ffcc00, #007aff);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: move-gradient 8s linear infinite;
+        }
+
+        @keyframes move-gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .hero p {
+            font-size: clamp(19px, 3vw, 28px);
+            color: var(--apple-grey);
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+
+        .cta-group a {
+            font-size: clamp(17px, 2vw, 21px);
+            color: var(--apple-blue);
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .cta-group a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- 4. Bento Grid (便当盒布局) --- */
+        .bento-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .card {
+            background: var(--apple-white);
+            border-radius: 28px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* padding-top: 60px;
+            text-align: center; */
+        }
+
+        .card-content {
+            padding-top: 60px;
+            text-align: center;
+        }
+
+        /* 3. 图标黄金比例构图 */
+        .card-icon-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            /* 利用 Flex 的特性将内容挤向右下角 */
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 15%;
+            /* 底部留出约 1/6 的空白 */
+        }
+
+        .icon-wrapper {
+            /* 响应式图标尺寸 */
+            font-size: clamp(100px, 20vh, 200px);
+
+            /* 增加一个非常淡的阴影，模拟图片立体感 */
+            /* filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1)); */
+            transition: transform 0.6s var(--ease-apple);
+        }
+
+        /* 4. 悬停交互：文字不动，图标产生细微的纵深感 */
+        .card:hover {
+            background: #ffffff;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .card.dark {
+            /* background: #000; */
+            background: radial-gradient(circle at 50% 60%, #1c1c1e 0%, #000000 100%);
+            color: #fff;
+        }
+
+        .card.large {
+            grid-column: span 2;
+        }
+
+        .card h2 {
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 20px;
+            color: var(--apple-grey);
+        }
+
+        .card.dark:hover {
+            background: #1c1c1e;
+            /* 暗黑模式悬停反馈 */
+        }
+
+        .card:active {
+            transform: scale(0.98);
+            /* 点击时的物理按压感 */
+        }
+
+        /* 5. 辅助样式维持 */
+        .card.dark {
+            background: #000;
+            color: #fff;
+        }
+
+        .card.large {
+            grid-column: span 2;
+        }
+
+        .card h2 {
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 20px;
+            color: var(--apple-grey);
+        }
+
+        /* --- 5. 滚动进入动画逻辑 --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1.2s var(--ease-apple), transform 1.2s var(--ease-apple);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 734px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card.large {
+                grid-column: span 1;
+            }
+
+            .card {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav id="navbar">
+        <div class="nav-content">
+            <a href="#" class="logo">Amazon Seller Tools</a>
+            <div class="nav-links">
+                <!-- <a href="#">技术栈</a>
+                <a href="#">摄影集</a>
+                <a href="#">创业思考</a> -->
+                <a href="#">联系我</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1 class="reveal">设计，为了<span class="gradient-text">更美好的生活</span>。</h1>
+            <p class="reveal" style="transition-delay: 0.2s;">追求技术与艺术的交汇点。</p>
+            <div class="cta-group reveal" style="transition-delay: 0.4s;">
+                <a href="#">进一步了解 ></a>
+                <a href="#">观看演示视频 ></a>
+            </div>
+        </section>
+
+        <section class="bento-grid">
+            <a href="listing-ai-rewriter.html" class="card large reveal">
+                <div class="card">
+                    <div class="card-content">
+                        <h2>AI SEO 优化</h2>
+                        <p>基于AI批量重写SEO</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">💻</div>
+                    </div>
+                </div>
+            </a>
+            <div class="card dark reveal">
+                <h2>Full Stack</h2>
+                <p>用代码构建稳健的系统</p>
+            </div>
+            <div class="card reveal">
+                <h2>Photography</h2>
+                <p>捕捉光影，留住永恒</p>
+            </div>
+        </section>
+
+        <section class="hero">
+            <h1 class="reveal">创业，是另一种代码。</h1>
+            <p class="reveal">将想法编译成现实。</p>
+        </section>
+        <section class="bento-grid">
+            <div class="card large reveal">
+                <h2>Amazon Strategy</h2>
+                <p>数据驱动的跨境电商增长方案</p>
+            </div>
+            <div class="card dark reveal">
+                <h2>Full Stack</h2>
+                <p>用代码构建稳健的系统</p>
+            </div>
+            <div class="card reveal">
+                <h2>Photography</h2>
+                <p>捕捉光影，留住永恒</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- 交互逻辑 ---
+
+        // 1. 滚动显现动画 (Scroll Reveal)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -100px 0px" // 提前一点点触发，感觉更自然
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // 2. 导航栏随滚动改变透明度
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.style.background = "rgba(255, 255, 255, 0.95)";
+            } else {
+                nav.style.background = "rgba(251, 252, 253, 0.8)";
+            }
+        });
+
+        // 3. 简单的视差效果（可选）
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            // 文字轻微视差滚动
+            hero.style.transform = `translateY(${scrolled * 0.15}px)`;
+            hero.style.opacity = 1 - (scrolled / 700);
+        });
+    </script>
+</body>
+
+</html>
