@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Shawn's SEO Pro v12 - 结构化重构版</title>
+    <title>Shawn's SEO Pro v11</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -11,47 +11,100 @@
             --apple-red: #ff3b30; --apple-warning: #ff9500; --apple-card: #ffffff;
             --apple-text: #1d1d1f; --apple-secondary: #86868b;
         }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--apple-bg); margin: 0; color: var(--apple-text); height: 100vh; display: flex; flex-direction: column; }
-        .nav-header { height: 52px; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1000; }
+
+        body {
+            font-family: 'Inter', -apple-system, "PingFang SC", sans-serif;
+            background: var(--apple-bg); margin: 0; padding: 0;
+            color: var(--apple-text); height: 100vh; display: flex; flex-direction: column;
+        }
+
+        /* 导航 */
+        .nav-header {
+            height: 52px; background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 24px; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1000;
+        }
+
+        .home-logo {
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; background: #fff; border: 1px solid #e5e5e7;
+            color: #1d1d1f; text-decoration: none;
+        }
+
         .container { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; gap: 20px; }
-        .input-section { background: var(--apple-card); border-radius: 20px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); flex-shrink: 0; }
-        textarea { width: 100%; height: 140px; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7; background: #fafafa; font-size: 13px; line-height: 1.5; outline: none; transition: 0.3s; }
+
+        .input-section {
+            background: var(--apple-card); border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04); flex-shrink: 0;
+        }
+
+        textarea {
+            width: 100%; height: 140px; padding: 16px; border-radius: 12px;
+            border: 1px solid #d2d2d7; background: #fafafa; font-size: 13px;
+            line-height: 1.5; resize: none; box-sizing: border-box; outline: none;
+        }
         textarea:focus { background: #fff; border-color: var(--apple-blue); box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1); }
+
         .btn-group { display: flex; gap: 12px; margin-top: 15px; }
-        .btn { padding: 8px 18px; border-radius: 18px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn {
+            padding: 8px 18px; border-radius: 18px; font-size: 13px; font-weight: 500;
+            border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        }
         .btn-primary { background: var(--apple-blue); color: white; }
         .btn-success { background: var(--apple-green); color: white; }
-        .btn-ghost { background: #f2f2f7; color: #1d1d1f; }
-        /* 表格样式 */
-        .output-section { background: var(--apple-card); border-radius: 20px; flex: 1; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
+        .btn-ghost { background: #f5f5f7; color: var(--apple-red); }
+
+        /* 表格区域 */
+        .output-section {
+            background: var(--apple-card); border-radius: 20px; flex: 1;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+        }
+
         .table-wrap { flex: 1; overflow: auto; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1600px; }
-        th { position: sticky; top: 0; background: rgba(250,250,252,0.95); backdrop-filter: blur(10px); z-index: 10; padding: 14px; text-align: left; font-size: 12px; font-weight: 600; color: var(--apple-secondary); border-bottom: 1px solid #e5e5e7; }
-        td { padding: 16px 12px; border-bottom: 1px solid #f2f2f2; font-size: 13px; vertical-align: top; outline: none; }
-        /* 进度条与警告 */
+        
+        th {
+            position: sticky; top: 0; background: rgba(250,250,252,0.95);
+            backdrop-filter: blur(10px); z-index: 10;
+            padding: 14px; text-align: left; font-size: 12px; font-weight: 600;
+            color: var(--apple-secondary); border-bottom: 1px solid #e5e5e7;
+        }
+
+        td {
+            padding: 16px 12px; border-bottom: 1px solid #f2f2f2;
+            font-size: 13px; vertical-align: top; outline: none;
+        }
+
+        /* 字符进度条 */
         .char-count-wrap { margin-top: 8px; height: 3px; background: #eee; border-radius: 2px; overflow: hidden; }
         .char-progress { height: 100%; width: 0; transition: 0.3s; }
         .char-text { font-size: 10px; color: #86868b; margin-top: 4px; display: block; }
+
         .state-normal { background: var(--apple-green); }
+        .state-near { background: var(--apple-warning); }
         .state-over { background: var(--apple-red); }
-        .warning-label { color: var(--apple-red); font-weight: bold; background: #fff1f0; padding: 2px 4px; border-radius: 4px; border: 1px solid #ffa39e; }
+        .warning-text { color: var(--apple-red) !important; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <div class="nav-header">
-    <div style="font-weight: 600;">Shawn's SEO Pro v12</div>
-    <div class="btn-group">
-        <button class="btn btn-ghost" onclick="clearData()">🗑️ 重置数据</button>
-    </div>
+    <a href="#" class="home-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    </a>
+    <div style="font-weight: 600;">SEO 解析 & 长度校验专家 v11</div>
+    <div style="width: 36px;"></div>
 </div>
 
 <div class="container">
     <div class="input-section">
-        <textarea id="rawInput" placeholder="在此粘贴 AI 生成的文案内容..."></textarea>
+        <textarea id="rawInput" placeholder="在此粘贴 AI 生成的文案内容...支持多个产品连续粘贴。"></textarea>
         <div class="btn-group">
-            <button class="btn btn-primary" onclick="parseContent()">⚡ 结构化解析</button>
+            <button class="btn btn-primary" onclick="parseContent()">⚡ 立即解析</button>
             <button class="btn btn-success" onclick="exportToExcel()">📊 导出 Excel</button>
+            <button class="btn btn-ghost" onclick="clearData()">🗑️ 清空</button>
         </div>
     </div>
 
@@ -60,12 +113,15 @@
             <table id="seoTable">
                 <thead>
                     <tr>
-                        <th style="width: 60px;">ID</th>
+                        <th style="width: 100px;">序号</th>
                         <th style="width: 150px;">产品名称</th>
                         <th style="width: 250px;">Title (200)</th>
                         <th style="width: 220px;">Search Terms (250)</th>
-                        <th>Bullet 1-5 (500)</th>
-                        <th>Bullet 2</th><th>Bullet 3</th><th>Bullet 4</th><th>Bullet 5</th>
+                        <th>Bullet 1 (500)</th>
+                        <th>Bullet 2 (500)</th>
+                        <th>Bullet 3 (500)</th>
+                        <th>Bullet 4 (500)</th>
+                        <th>Bullet 5 (500)</th>
                         <th style="width: 350px;">Description (2000)</th>
                     </tr>
                 </thead>
@@ -77,7 +133,6 @@
 
 <script>
 const LIMITS = { title: 200, terms: 250, bullet: 500, desc: 2000 };
-const ERROR_TEXT = "⚠️ 未识别，请检查原文";
 
 window.onload = () => {
     const savedInput = localStorage.getItem('shawn_seo_raw');
@@ -85,144 +140,153 @@ window.onload = () => {
     renderSavedTable();
 };
 
-/** * 核心优化：createCell 现在携带 field 元数据
- */
-function createCell(content, limit, fieldName) {
+function checkLength(td, limit) {
+    const text = td.innerText.replace(/[\n\r]/g, "").trim();
+    const len = text.length;
+    const progress = td.querySelector('.char-progress');
+    const textLabel = td.querySelector('.char-text');
+    
+    let percent = Math.min((len / limit) * 100, 100);
+    if(progress) {
+        progress.style.width = percent + '%';
+        progress.className = 'char-progress ' + (len > limit ? 'state-over' : (len > limit * 0.9 ? 'state-near' : 'state-normal'));
+    }
+    if(textLabel) {
+        textLabel.innerText = `${len} / ${limit}`;
+        textLabel.className = 'char-text ' + (len > limit ? 'warning-text' : '');
+    }
+    saveTableState();
+}
+
+function bindCellEvents() {
+    document.querySelectorAll('#tableBody td[contenteditable="true"]').forEach(td => {
+        const limit = parseInt(td.dataset.limit) || 9999;
+        td.oninput = () => checkLength(td, limit);
+        checkLength(td, limit);
+    });
+}
+
+function createCell(content, limit) {
     const td = document.createElement('td');
     td.contentEditable = "true";
     td.dataset.limit = limit;
-    td.dataset.field = fieldName; // 【新增元数据】
+    td.innerText = content.trim();
     
-    // 处理异常内容显示
-    const isEmpty = !content || content.trim() === "";
-    const isError = content === ERROR_TEXT;
-    
-    td.innerHTML = `<div class="content-text ${isError ? 'warning-label' : ''}">${content || (fieldName === 'productName' ? 'New Item' : ERROR_TEXT)}</div>
-                    <div class="char-count-wrap" contenteditable="false"><div class="char-progress"></div></div>
-                    <span class="char-text" contenteditable="false">0 / ${limit}</span>`;
-    
+    const uiWrap = document.createElement('div');
+    uiWrap.contentEditable = "false";
+    uiWrap.innerHTML = `<div class="char-count-wrap"><div class="char-progress"></div></div><span class="char-text">0 / ${limit}</span>`;
+    td.appendChild(uiWrap);
     return td;
-}
-
-function checkLength(td) {
-    const limit = parseInt(td.dataset.limit);
-    const textElement = td.querySelector('.content-text');
-    const text = textElement.innerText.replace(/[\n\r]/g, "").trim();
-    const len = text.length;
-    
-    // 自动清除错误标记（如果用户输入了内容）
-    if(len > 0 && text !== ERROR_TEXT) textElement.classList.remove('warning-label');
-
-    const progress = td.querySelector('.char-progress');
-    const label = td.querySelector('.char-text');
-    
-    if(progress && label) {
-        let percent = Math.min((len / limit) * 100, 100);
-        progress.style.width = percent + '%';
-        progress.className = 'char-progress ' + (len > limit ? 'state-over' : 'state-normal');
-        label.innerText = `${len} / ${limit}`;
-        label.className = 'char-text ' + (len > limit ? 'warning-label' : '');
-    }
-    saveTableState();
 }
 
 function parseContent() {
     const fullText = document.getElementById('rawInput').value.trim();
     if (!fullText) return;
-    localStorage.setItem('shawn_seo_raw', fullText);
     
+    localStorage.setItem('shawn_seo_raw', fullText);
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = ''; 
+
+    // --- 修复后的解析逻辑 ---
+    // 1. 查找所有形如 "1. " "2. " 的起始索引
     const startIndices = [];
     const entryRegex = /^\d+\.\s/gm;
     let m;
-    while ((m = entryRegex.exec(fullText)) !== null) startIndices.push(m.index);
-    
-    const sections = startIndices.map((start, i) => fullText.substring(start, startIndices[i+1] || fullText.length));
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
+    while ((m = entryRegex.exec(fullText)) !== null) {
+        startIndices.push(m.index);
+    }
+
+    // 2. 切分块
+    const sections = [];
+    for (let i = 0; i < startIndices.length; i++) {
+        const end = startIndices[i + 1] || fullText.length;
+        sections.push(fullText.substring(startIndices[i], end));
+    }
 
     sections.forEach((section, index) => {
-        const productName = (section.split('\n')[0] || "").replace(/^\d+\.\s*/, "").trim();
-        const getMatch = (reg) => {
-            const res = section.match(reg);
-            return (res && res[1] && res[1].trim()) ? res[1].trim() : ERROR_TEXT;
-        };
+        // A. 提取产品名 (第一行)
+        const lines = section.split('\n');
+        const firstLine = lines[0] || "";
+        const productName = firstLine.replace(/^\d+\.\s*/, "").trim() || `Item ${index+1}`;
 
-        const title = getMatch(/Title:\s*([\s\S]*?)(?=\nSearch Terms:|\n\[|\nProduct Description:|$)/i);
-        const terms = getMatch(/Search Terms:\s*([\s\S]*?)(?=\n\[|\nProduct Description:|$)/i);
+        // B. 提取 Title 和 Search Terms (非贪婪)
+        const titleMatch = section.match(/Title:\s*([\s\S]*?)(?=\nSearch Terms:|\n\[|\nProduct Description:|$)/i);
+        const termsMatch = section.match(/Search Terms:\s*([\s\S]*?)(?=\n\[|\nProduct Description:|$)/i);
         
+        // C. 提取五点描述 (非贪婪)
         const bulletRegex = /\[(.*?)\]\s*([\s\S]*?)(?=\n\[|\nProduct Description:|$)/gi;
         let bullets = [];
         let bMatch;
         while ((bMatch = bulletRegex.exec(section)) !== null && bullets.length < 5) {
             bullets.push(`[${bMatch[1]}] ${bMatch[2].trim()}`);
         }
-        while(bullets.length < 5) bullets.push(ERROR_TEXT);
+        while(bullets.length < 5) bullets.push("");
 
-        const desc = getMatch(/Product Description:\s*([\s\S]*)$/i);
+        // D. 提取 Description (核心修复：前瞻断言排除下一个产品)
+        // 逻辑：找到 Product Description: 之后的内容，直到遇到下一个 [ 或者结束
+        const descMatch = section.match(/Product Description:\s*([\s\S]*)$/i);
+        let description = descMatch ? descMatch[1].trim() : "";
 
+        // 构建行
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${index + 1}</td>`;
-        tr.appendChild(createCell(productName, 9999, 'productName'));
-        tr.appendChild(createCell(title, LIMITS.title, 'title'));
-        tr.appendChild(createCell(terms, LIMITS.terms, 'searchTerms'));
-        bullets.forEach((b, i) => tr.appendChild(createCell(b, LIMITS.bullet, `bullet_${i+1}`)));
-        tr.appendChild(createCell(desc, LIMITS.desc, 'description'));
+        const tdIdx = document.createElement('td'); tdIdx.innerText = index + 1;
+        tr.appendChild(tdIdx);
+        tr.appendChild(createCell(productName, 9999));
+        tr.appendChild(createCell(titleMatch ? titleMatch[1] : "", LIMITS.title));
+        tr.appendChild(createCell(termsMatch ? termsMatch[1] : "", LIMITS.terms));
+        bullets.forEach(b => tr.appendChild(createCell(b, LIMITS.bullet)));
+        tr.appendChild(createCell(description, LIMITS.desc));
         tbody.appendChild(tr);
     });
 
-    document.querySelectorAll('#tableBody td[contenteditable="true"]').forEach(td => {
-        td.oninput = () => checkLength(td);
-        checkLength(td);
-    });
+    bindCellEvents();
+    saveTableState();
 }
 
 function saveTableState() {
-    const rows = [];
+    const data = [];
     document.querySelectorAll('#tableBody tr').forEach(tr => {
-        const rowData = {};
-        tr.querySelectorAll('td[data-field]').forEach(td => {
-            rowData[td.dataset.field] = td.querySelector('.content-text').innerText;
-        });
-        rows.push(rowData);
+        const row = Array.from(tr.cells).map(td => td.firstChild.textContent); // 只取文本内容，不取UI组件
+        data.push(row);
     });
-    localStorage.setItem('shawn_seo_table_v12', JSON.stringify(rows));
+    localStorage.setItem('shawn_seo_table_v11', JSON.stringify(data));
 }
 
 function renderSavedTable() {
-    const data = JSON.parse(localStorage.getItem('shawn_seo_table_v12') || "[]");
+    const savedData = localStorage.getItem('shawn_seo_table_v11');
+    if (!savedData) return;
+    const data = JSON.parse(savedData);
     const tbody = document.getElementById('tableBody');
-    data.forEach((row, index) => {
+    tbody.innerHTML = '';
+    
+    data.forEach(row => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${index + 1}</td>`;
-        tr.appendChild(createCell(row.productName, 9999, 'productName'));
-        tr.appendChild(createCell(row.title, LIMITS.title, 'title'));
-        tr.appendChild(createCell(row.searchTerms, LIMITS.terms, 'searchTerms'));
-        for(let i=1; i<=5; i++) tr.appendChild(createCell(row[`bullet_${i}`], LIMITS.bullet, `bullet_${i}`));
-        tr.appendChild(createCell(row.description, LIMITS.desc, 'description'));
+        row.forEach((text, i) => {
+            if (i === 0) {
+                const td = document.createElement('td'); td.innerText = text; tr.appendChild(td);
+            } else {
+                const limits = [0, 9999, LIMITS.title, LIMITS.terms, LIMITS.bullet, LIMITS.bullet, LIMITS.bullet, LIMITS.bullet, LIMITS.bullet, LIMITS.desc];
+                tr.appendChild(createCell(text, limits[i]));
+            }
+        });
         tbody.appendChild(tr);
     });
-    document.querySelectorAll('#tableBody td[contenteditable="true"]').forEach(td => {
-        td.oninput = () => checkLength(td);
-        checkLength(td);
-    });
+    bindCellEvents();
 }
 
-/** * 精准爆破清除，不伤及无辜（配置信息）
- */
 function clearData() {
-    if(confirm("确定清空当前预览数据吗？（保留系统配置）")) {
-        localStorage.removeItem('shawn_seo_raw');
-        localStorage.removeItem('shawn_seo_table_v12');
+    if(confirm("确定清空吗？")) {
+        localStorage.clear();
         location.reload();
     }
 }
 
 function exportToExcel() {
-    const data = JSON.parse(localStorage.getItem('shawn_seo_table_v12') || "[]");
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "SEO_Data");
-    XLSX.writeFile(wb, `Shawn_Listing_v12_${new Date().toISOString().slice(0,10)}.xlsx`);
+    const table = document.getElementById('seoTable');
+    const clone = table.cloneNode(true);
+    clone.querySelectorAll('.char-count-wrap, .char-text').forEach(el => el.remove());
+    const wb = XLSX.utils.table_to_book(clone);
+    XLSX.writeFile(wb, `Shawn_Amazon_SEO_v11_${new Date().toLocaleDateString()}.xlsx`);
 }
 </script>
 </body>
