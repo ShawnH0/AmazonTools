@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Baned Brand Filter</title>
+    <title>Shawn's Listing Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -11,10 +11,14 @@
             --apple-blue: #0066cc; 
             --apple-gray: #86868b;
             --apple-border: rgba(0,0,0,0.1);
+            --apple-green: #34c759;
+            --apple-red: #ff3b30;
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            /* 统一全页面 Apple 官网风格字体 */
+            /* 统一全页面 Apple 风格字体 */
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Myriad Set Pro", "SF Pro Icons", "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background-color: var(--apple-bg); 
             margin: 0; 
@@ -25,7 +29,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 顶部导航栏优化 */
+        /* 顶部导航栏 - 状态右移，Logo 样式对齐 */
         .nav-header {
             height: 48px; 
             background: rgba(251, 251, 253, 0.8);
@@ -34,7 +38,7 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center;
-            padding: 0 10%; 
+            padding: 0 5%; 
             border-bottom: 1px solid var(--apple-border); 
             z-index: 100;
         }
@@ -55,7 +59,7 @@
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .capability-tags { display: flex; gap: 8px; }
@@ -63,45 +67,66 @@
             font-size: 11px; padding: 2px 8px; border-radius: 4px; 
             border: 1px solid #d2d2d7; color: var(--apple-gray); font-weight: 500;
         }
-        .cap-tag.active { border-color: #34c759; color: #34c759; background: rgba(52, 199, 89, 0.05); }
+        .cap-tag.active { border-color: var(--apple-green); color: var(--apple-green); background: rgba(52, 199, 89, 0.05); }
 
-        /* 面板设计 */
-        .container { max-width: 1200px; margin: 0 auto; width: 92%; flex: 1; display: flex; flex-direction: column; padding: 30px 0; overflow: hidden; }
-        .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; flex: 1; overflow: hidden; }
+        /* 工作区布局 */
+        .container { max-width: 1400px; margin: 0 auto; width: 94%; flex: 1; display: flex; flex-direction: column; padding: 24px 0; overflow: hidden; }
+        .workspace { display: grid; grid-template-columns: 450px 1fr; gap: 24px; flex: 1; overflow: hidden; }
         
         .panel { 
             background: #fff; border-radius: 18px; padding: 24px; 
             display: flex; flex-direction: column; overflow: hidden; 
             border: 1px solid var(--apple-border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        .section-title { font-size: 19px; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.02em; }
+        .section-title { font-size: 17px; font-weight: 600; margin-bottom: 16px; letter-spacing: -0.022em; }
         
         textarea {
-            width: 100%; border-radius: 12px; border: 1px solid #d2d2d7;
-            font-family: inherit; font-size: 14px; line-height: 1.5; padding: 12px; box-sizing: border-box;
+            width: 100%; border-radius: 10px; border: 1px solid #d2d2d7;
+            font-family: inherit; font-size: 14px; line-height: 1.5; padding: 12px;
             background: #fff; outline: none; transition: border-color 0.3s; resize: none;
         }
         textarea:focus { border-color: var(--apple-blue); }
 
         .display-area { 
             flex: 1; margin-top: 16px; padding: 16px; background: #fbfbfd; 
-            border-radius: 12px; font-size: 14px; overflow-y: auto;
+            border-radius: 10px; font-size: 14px; overflow-y: auto;
             border: 1px solid var(--apple-border); color: #1d1d1f; line-height: 1.6;
+            position: relative;
         }
 
+        /* 按钮样式 */
         .btn {
-            padding: 8px 16px; border-radius: 18px; font-size: 12px; font-weight: 400;
+            padding: 7px 14px; border-radius: 12px; font-size: 12px; font-weight: 500;
             border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
         .btn-blue { background: var(--apple-blue); color: #fff; }
         .btn-blue:hover { background: #0071e3; }
         .btn-gray { background: #e8e8ed; color: #1d1d1f; }
         .btn-gray:hover { background: #d2d2d7; }
+        .btn-purple { background: #af52de; color: #fff; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-card { background: #fff; width: 500px; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        /* 表格样式优化 */
+        .table-container { flex: 1; overflow: auto; border: 1px solid var(--apple-border); border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+        th { background: #f5f5f7; padding: 12px; font-weight: 600; border-bottom: 1px solid var(--apple-border); position: sticky; top: 0; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f2f2f7; color: #333; }
+        tr:hover { background: #fafafa; }
+
+        /* 配置弹窗 */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-card { background: #fff; width: 550px; border-radius: 20px; padding: 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.15); }
+        .modal-card h2 { margin-top: 0; font-size: 21px; }
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 11px; color: var(--apple-gray); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+        .modal-input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #d2d2d7; font-size: 13px; outline: none; }
+        
+        .ai-badge { position: absolute; top: 8px; right: 8px; font-size: 10px; background: #af52de; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+        .spinner { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -120,7 +145,7 @@
             <span id="tag-gh" class="cap-tag">GitHub 同步</span>
             <span id="tag-ai" class="cap-tag">AI 清洗</span>
         </div>
-        <button class="btn btn-gray" style="border-radius: 12px;" onclick="openModal()">设置</button>
+        <button class="btn btn-gray" onclick="openModal()">⚙️ 设置中心</button>
     </div>
 </div>
 
@@ -128,9 +153,12 @@
     <div class="workspace">
         <div class="panel">
             <div class="section-title">单段文案清洗</div>
-            <textarea id="textInput" style="height: 160px;" placeholder="在此粘贴原始描述..."></textarea>
+            <textarea id="textInput" style="height: 180px;" placeholder="在此粘贴 Amazon Listing 文案 (测试: Nikon Camera Sony TV)..."></textarea>
             <div style="display:flex; gap:10px; margin-top:16px;">
-                <button class="btn btn-blue" onclick="execClean('ai')">AI 深度清理</button>
+                <button class="btn btn-blue" onclick="execClean('rule')">⚡ 规则清洗</button>
+                <button class="btn btn-purple" id="btnAiExec" onclick="execClean('ai')">
+                    <span id="aiBtnText">🤖 AI 深度清理</span>
+                </button>
                 <button class="btn btn-gray" onclick="clearAll()">重置</button>
             </div>
             <div id="textOutput" class="display-area">等待指令...</div>
@@ -139,13 +167,14 @@
         <div class="panel">
             <div class="section-title">批量 Excel 处理</div>
             <div style="display:flex; gap:10px; margin-bottom:16px;">
-                <button class="btn btn-gray" onclick="document.getElementById('fIn').click()">上传表格</button>
-                <button class="btn btn-blue" id="btnExport" disabled onclick="exportRes()">导出结果</button>
+                <button class="btn btn-gray" onclick="document.getElementById('fIn').click()">📤 上传表格</button>
+                <button class="btn btn-blue" id="btnTableExec" disabled onclick="execTableClean()">执行清洗</button>
+                <button class="btn btn-gray" id="btnExport" disabled onclick="exportRes()">💾 导出 Excel</button>
                 <input type="file" id="fIn" hidden onchange="handleExcel(this.files[0])">
             </div>
-            <div style="flex:1; overflow:auto; border:1px solid var(--apple-border); border-radius:12px;">
-                <table id="dataTable" style="width:100%; font-size:12px; border-collapse:collapse; text-align: left;">
-                    <thead style="background:#f5f5f7;"><tr id="tHead"></tr></thead>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead id="tHead"></thead>
                     <tbody id="tBody"></tbody>
                 </table>
             </div>
@@ -153,27 +182,196 @@
     </div>
 </div>
 
-<script>
-    // 优化 2: 解决首尾剔除不统一的问题
-    const DEFAULT_PROMPT = `You are an Amazon Compliance Expert. 
-STRICT RULE:
-1. REMOVE any brand names that appear alone, including at the VERY BEGINNING and the VERY END of the text.
-2. KEEP brands ONLY if they are part of a compatibility phrase (e.g., "for [Brand]", "compatible with [Brand]").
-3. "Nikon Camera" -> "Camera", "Sony TV" -> "TV". Even if "Nikon" is the first word or "TV" is the last word.
-4. Output ONLY the cleaned text. No conversational filler. No Chinese.`;
+<div class="modal-overlay" id="modal">
+    <div class="modal-card">
+        <div class="section-title">系统配置管理</div>
+        <div class="config-grid">
+            <div>
+                <div class="input-group"><label>供应商</label>
+                    <select id="apiProvider" class="modal-input" onchange="toggleProvider()">
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="openai">OpenAI</option>
+                    </select>
+                </div>
+                <div class="input-group"><label>API Key</label><input type="password" id="apiKey" class="modal-input"></div>
+                <div class="input-group"><label>模型名称</label><input type="text" id="apiModel" class="modal-input"></div>
+            </div>
+            <div>
+                <div class="input-group"><label>GitHub Token</label><input type="password" id="ghToken" class="modal-input"></div>
+                <div class="input-group"><label>GitHub Repo</label><input type="text" id="ghRepo" class="modal-input" placeholder="user/repo"></div>
+                <div class="input-group"><label>JSON Path</label><input type="text" id="ghPath" class="modal-input" placeholder="data/brands.json"></div>
+            </div>
+        </div>
+        <div class="input-group">
+            <label>禁售品牌库 (用逗号分隔，首尾词强制剔除)</label>
+            <textarea id="customBrands" class="modal-input" style="height:60px;"></textarea>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:24px;">
+            <button class="btn btn-purple" style="flex:1; justify-content:center;" onclick="syncCloud('upload')">📤 同步至云端</button>
+            <button class="btn btn-gray" style="flex:1; justify-content:center;" onclick="syncCloud('download')">📥 从云端拉取</button>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:12px;">
+            <button class="btn btn-blue" style="flex:2; height:40px; justify-content:center;" onclick="saveConfig()">保存配置</button>
+            <button class="btn btn-gray" style="flex:1; justify-content:center;" onclick="closeModal()">取消</button>
+        </div>
+    </div>
+</div>
 
-    // ... 其余 JavaScript 逻辑 (execClean, handleExcel 等) 保持 v5 的补刀逻辑 ...
-    // 特别是 localRuleClean 函数中，确保正则使用了 ^ 和 $ 来处理首尾。
+<script>
+    // --- 严密的 AI 指令 ---
+    const DEFAULT_PROMPT = `As an Amazon Compliance Expert, clean the text strictly:
+1. REMOVE any brand names if they appear alone, ESPECIALLY at the VERY START and VERY END of the string.
+2. KEEP brands ONLY if they follow: "for", "compatible with", "replacement for", "fits".
+3. Example: "Nikon Camera Sony" -> "Camera". (Nikon removed from start, Sony removed from end).
+4. Output ONLY cleaned text. No HTML markdown codes like \`\`\`. No explanations. No Chinese.`;
+
+    let rawData = [];
+    let config = {};
+    let isProcessing = false;
+    let ghFileSha = "";
+
+    window.onload = () => { loadConfig(); refreshCapabilityUI(); };
+
+    function loadConfig() {
+        ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo', 'ghPath'].forEach(f => {
+            config[f] = localStorage.getItem('sh_v6_' + f) || '';
+            document.getElementById(f).value = config[f];
+        });
+        if(!config.apiModel) document.getElementById('apiModel').value = 'deepseek-chat';
+    }
+
+    function saveConfig() {
+        ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo', 'ghPath'].forEach(f => {
+            config[f] = document.getElementById(f).value.trim();
+            localStorage.setItem('sh_v6_' + f, config[f]);
+        });
+        refreshCapabilityUI();
+        closeModal();
+    }
+
+    function refreshCapabilityUI() {
+        document.getElementById('tag-gh').className = (config.ghToken && config.ghRepo) ? 'cap-tag active' : 'cap-tag';
+        document.getElementById('tag-ai').className = config.apiKey.length > 5 ? 'cap-tag active' : 'cap-tag';
+    }
+
+    // --- 本地逻辑：强化首尾匹配 ---
     function localRuleClean(text) {
-        let brands = (localStorage.getItem('sh_cloud_v5_customBrands') || "").split(/[,，]/).map(s => s.trim()).filter(s => s.length > 1);
+        let brands = config.customBrands.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 1);
         if (!brands.length) return text;
-        
-        // 使用 (^|\b) 确保匹配开头，$ 确保匹配结尾
+        // 正则解释：(^|\b) 匹配行首或单词边界 | (\b|$) 匹配单词边界或行尾
         let brandRegex = new RegExp(`(^|\\b)(${brands.join('|')})(\\b|$)`, 'gi');
         return text.replace(brandRegex, "").replace(/\s+/g, ' ').trim();
     }
-    
-    // 省略部分重复的 API 调用代码以适应展示...
+
+    // --- AI 处理流程 ---
+    async function execClean(mode) {
+        const input = document.getElementById('textInput').value.trim();
+        const outBox = document.getElementById('textOutput');
+        if (!input || isProcessing) return;
+
+        if (mode === 'rule') {
+            outBox.innerText = localRuleClean(input);
+        } else {
+            if(!config.apiKey) return alert("请先在设置中配置 API Key");
+            setAiLoading(true);
+            try {
+                const url = config.apiProvider === 'deepseek' ? 'https://api.deepseek.com/v1/chat/completions' : 
+                            config.apiProvider === 'openrouter' ? 'https://openrouter.ai/api/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                    body: JSON.stringify({
+                        model: config.apiModel,
+                        messages: [{ role: "system", content: DEFAULT_PROMPT }, { role: "user", content: input }],
+                        temperature: 0.0
+                    })
+                });
+                const data = await response.json();
+                let result = data.choices[0].message.content.replace(/^["']|["']$/g, '');
+                
+                // AI 后的本地补刀，确保首尾绝对干净
+                result = localRuleClean(result);
+                outBox.innerHTML = `<div class="ai-badge">${config.apiModel}</div>${result}`;
+            } catch (e) { outBox.innerText = "错误: " + e.message; }
+            finally { setAiLoading(false); }
+        }
+    }
+
+    // --- Excel 批量操作 ---
+    function handleExcel(f) {
+        const r = new FileReader();
+        r.onload = (e) => {
+            const wb = XLSX.read(e.target.result, {type: 'binary'});
+            rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            const keys = Object.keys(rawData[0]);
+            document.getElementById('tHead').innerHTML = `<tr>${keys.map(k => `<th>${k}</th>`).join('')}</tr>`;
+            document.getElementById('tBody').innerHTML = rawData.slice(0, 10).map(row => 
+                `<tr>${keys.map(k => `<td>${String(row[k] || '').substring(0,50)}</td>`).join('')}</tr>`
+            ).join('');
+            document.getElementById('btnTableExec').disabled = false;
+        };
+        r.readAsBinaryString(f);
+    }
+
+    function execTableClean() {
+        rawData = rawData.map(row => {
+            const nr = {...row};
+            for(let k in nr) if(typeof nr[k] === 'string') nr[k] = localRuleClean(nr[k]);
+            return nr;
+        });
+        document.getElementById('btnExport').disabled = false;
+        alert("批量规则清洗完毕！");
+    }
+
+    function exportRes() {
+        const ws = XLSX.utils.json_to_sheet(rawData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Cleaned");
+        XLSX.writeFile(wb, `Cleaned_Listing_${new Date().getTime()}.xlsx`);
+    }
+
+    // --- 云同步逻辑 ---
+    async function syncCloud(mode) {
+        if(!config.ghToken || !config.ghRepo) return alert("请先配置 GitHub 令牌和仓库");
+        const url = `https://api.github.com/repos/${config.ghRepo}/contents/${config.ghPath}`;
+        const headers = { 'Authorization': `token ${config.ghToken}`, 'Content-Type': 'application/json' };
+        try {
+            const getRes = await fetch(url, { headers });
+            if(getRes.ok) { const d = await getRes.json(); ghFileSha = d.sha; }
+            
+            if(mode === 'download') {
+                const d = await (await fetch(url, { headers })).json();
+                const content = JSON.parse(decodeURIComponent(escape(atob(d.content))));
+                document.getElementById('customBrands').value = content.brands.join(', ');
+                alert("已拉取最新云端词库");
+            } else {
+                const brandsArr = document.getElementById('customBrands').value.split(/[,，]/).map(s => s.trim()).filter(s => s);
+                const body = {
+                    message: "Sync from Shawn's Pro Tool",
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify({ brands: brandsArr, date: new Date().toISOString() })))),
+                    sha: ghFileSha
+                };
+                await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+                alert("同步成功！");
+            }
+        } catch(e) { alert("同步失败: " + e.message); }
+    }
+
+    function setAiLoading(l) {
+        isProcessing = l;
+        document.getElementById('btnAiExec').disabled = l;
+        document.getElementById('aiBtnText').innerHTML = l ? `<div class="spinner"></div> 处理中...` : `🤖 AI 深度清理`;
+    }
+
+    function openModal() { document.getElementById('modal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function clearAll() { document.getElementById('textInput').value = ""; document.getElementById('textOutput').innerText = ""; }
+    function toggleProvider() {
+        const p = document.getElementById('apiProvider').value;
+        document.getElementById('apiModel').value = p === 'deepseek' ? 'deepseek-chat' : 'gpt-4o-mini';
+    }
 </script>
 </body>
 </html>
