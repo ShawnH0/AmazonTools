@@ -19,86 +19,93 @@
 
         * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--sf-bg); margin: 0; color: var(--sf-text);
             height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* Apple Style Navigation */
+        /* 苹果风格导航栏 */
         .nav-header {
-            height: 52px; background: rgba(255, 255, 255, 0.7);
+            height: 52px; background: rgba(255, 255, 255, 0.75);
             backdrop-filter: saturate(180%) blur(20px);
             display: flex; justify-content: center; align-items: center;
             border-bottom: 1px solid var(--sf-border); z-index: 1000; position: sticky; top: 0;
         }
         .nav-content { width: 96%; max-width: 1400px; display: flex; justify-content: space-between; align-items: center; }
-        .nav-title { font-size: 19px; font-weight: 600; letter-spacing: -0.5px; }
+        
+        .nav-left { display: flex; align-items: center; gap: 16px; }
+        .home-logo {
+            width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; background: #fff; border: 1px solid #e5e5e7;
+            color: #1d1d1f; text-decoration: none; transition: 0.2s;
+        }
+        .home-logo:hover { background: #f5f5f7; transform: scale(1.05); }
+        .nav-title { font-size: 18px; font-weight: 600; letter-spacing: -0.4px; }
 
-        /* Main Layout */
+        /* 主体布局 */
         .main-container {
             flex: 1; display: flex; flex-direction: column; align-items: center;
-            padding: 40px 0; overflow-y: auto; background: var(--sf-secondary-bg);
+            padding: 30px 0; overflow-y: auto; background: var(--sf-secondary-bg);
         }
-        .content-width { width: 94%; max-width: 1280px; }
+        .content-width { width: 94%; max-width: 1400px; }
 
-        /* Card Elements */
+        /* 卡片设计 */
         .glass-card {
-            background: #ffffff; border-radius: 24px; padding: 32px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.04); border: 1px solid var(--sf-border);
-            margin-bottom: 30px;
+            background: #ffffff; border-radius: 20px; padding: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--sf-border);
+            margin-bottom: 24px;
         }
 
-        .section-header { margin-bottom: 24px; }
-        .section-header h2 { font-size: 24px; font-weight: 600; margin: 0; letter-spacing: -0.5px; }
-
-        /* Input Area */
+        /* 输入框 */
         textarea {
-            width: 100%; height: 160px; padding: 20px; border-radius: 16px;
-            border: 1px solid #d2d2d7; background: #fff; font-size: 15px;
-            line-height: 1.6; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: inherit;
+            width: 100%; height: 150px; padding: 18px; border-radius: 14px;
+            border: 1px solid #d2d2d7; background: #fff; font-size: 14px;
+            line-height: 1.6; outline: none; transition: all 0.3s;
+            font-family: inherit; resize: none;
         }
         textarea:focus { border-color: var(--sf-accent); box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1); }
 
-        /* Button System */
-        .btn-group { display: flex; gap: 14px; margin-top: 24px; }
+        /* 按钮系统 */
+        .btn-group { display: flex; gap: 12px; margin-top: 20px; }
         .btn {
-            padding: 10px 22px; border-radius: 20px; font-size: 14px; font-weight: 500;
-            border: none; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+            padding: 0 20px; height: 38px; border-radius: 19px; font-size: 13px; font-weight: 500;
+            border: none; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
         }
         .btn-primary { background: var(--sf-accent); color: white; }
-        .btn-primary:hover { background: #0077ed; transform: scale(1.02); }
+        .btn-primary:hover { background: #0071e3; }
         .btn-secondary { background: #e8e8ed; color: var(--sf-text); }
         .btn-secondary:hover { background: #d2d2d7; }
-        .btn-danger { background: rgba(255, 59, 48, 0.1); color: var(--sf-error); }
+        .btn-danger { background: #f5f5f7; color: var(--sf-error); border: 1px solid transparent; }
+        .btn-danger:hover { background: #fff1f0; border-color: rgba(255, 59, 48, 0.2); }
 
-        /* Table Area */
-        .table-container { border-radius: 20px; overflow: hidden; border: 1px solid var(--sf-border); background: white; }
+        /* 表格设计 */
+        .table-container { border-radius: 18px; overflow: hidden; border: 1px solid var(--sf-border); background: white; }
         .table-scroll { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1500px; }
-        th {
-            background: #fafafa; padding: 16px; text-align: left; font-size: 12px;
-            font-weight: 600; color: var(--sf-label); text-transform: uppercase;
-            border-bottom: 1px solid var(--sf-border);
-        }
-        td { padding: 20px 16px; border-bottom: 1px solid #f5f5f7; font-size: 14px; vertical-align: top; }
-        tr:hover { background: #fbfbfd; }
-
-        /* Field Badge */
-        .field-label { font-size: 10px; color: var(--sf-label); margin-bottom: 4px; display: block; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; min-width: 1600px; table-layout: fixed; }
         
-        /* Progress Indicators */
-        .progress-bar-wrap { height: 4px; background: #eee; border-radius: 2px; margin-top: 10px; overflow: hidden; }
-        .progress-bar { height: 100%; width: 0%; transition: width 0.4s ease; }
-        .count-info { font-size: 11px; color: var(--sf-label); margin-top: 6px; display: block; }
+        th {
+            background: #fbfbfd; padding: 14px 16px; text-align: left; font-size: 11px;
+            font-weight: 600; color: var(--sf-label); text-transform: uppercase;
+            border-bottom: 1px solid var(--sf-border); position: sticky; top: 0; z-index: 10;
+        }
+        td { padding: 18px 16px; border-bottom: 1px solid #f5f5f7; font-size: 13px; vertical-align: top; }
+        
+        /* 字符校验与标签 */
+        .field-label { font-size: 9px; color: var(--sf-label); margin-bottom: 6px; display: block; font-weight: 700; opacity: 0.7; }
+        .cell-content { line-height: 1.5; outline: none; min-height: 20px; }
+        
+        .progress-bar-wrap { height: 3px; background: #eee; border-radius: 2px; margin-top: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; transition: width 0.3s ease; }
+        .count-info { font-size: 10px; color: var(--sf-label); margin-top: 5px; display: block; }
 
         .bg-normal { background: var(--sf-success); }
+        .bg-warn { background: #ff9500; }
         .bg-error { background: var(--sf-error); }
         .text-error { color: var(--sf-error); font-weight: 600; }
 
         .error-tag { 
-            color: var(--sf-error); background: #fff1f0; padding: 2px 6px; 
-            border-radius: 4px; border: 1px solid rgba(255, 59, 48, 0.2); font-size: 12px;
+            color: var(--sf-error); background: #fff1f0; padding: 2px 5px; 
+            border-radius: 4px; font-weight: 600;
         }
     </style>
 </head>
@@ -106,21 +113,23 @@
 
 <div class="nav-header">
     <div class="nav-content">
-        <div class="nav-title">SEO Content Structure Pro</div>
-        <button class="btn btn-danger" onclick="clearAppData()">Reset System</button>
-    </div>
+        <div class="nav-left">
+            <a href="index.html" class="home-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </a>
+            <div class="nav-title">SEO Content Structure Pro</div>
+        </div>
+        <div style="width: 34px;"></div> </div>
 </div>
 
 <div class="main-container">
     <div class="content-width">
         <div class="glass-card">
-            <div class="section-header">
-                <h2>Raw Content</h2>
-            </div>
             <textarea id="rawInput" placeholder="在此粘贴 1. 产品名... Title: ... Search Terms: ... 等待解析"></textarea>
             <div class="btn-group">
-                <button class="btn btn-primary" onclick="processParsing()">⚡ 立即解析内容</button>
-                <button class="btn btn-secondary" onclick="exportData()">📊 导出为 Excel</button>
+                <button class="btn btn-primary" onclick="processParsing()">⚡ 立即解析</button>
+                <button class="btn btn-secondary" onclick="exportData()">📊 导出 Excel</button>
+                <button class="btn btn-danger" onclick="clearAppData()">🗑️ 清空数据</button>
             </div>
         </div>
 
@@ -129,13 +138,16 @@
                 <table id="seoTable">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">#</th>
-                            <th style="width: 150px;">Product Name</th>
-                            <th style="width: 250px;">Listing Title</th>
-                            <th style="width: 200px;">Search Terms</th>
-                            <th>Bullet Points 1-5</th>
-                            <th>Bullet 2</th><th>Bullet 3</th><th>Bullet 4</th><th>Bullet 5</th>
-                            <th style="width: 300px;">Description</th>
+                            <th style="width: 50px;">ID</th>
+                            <th style="width: 140px;">Product Name</th>
+                            <th style="width: 260px;">Title (200)</th>
+                            <th style="width: 220px;">Search Terms (250)</th>
+                            <th style="width: 180px;">Bullet 1 (500)</th>
+                            <th style="width: 180px;">Bullet 2</th>
+                            <th style="width: 180px;">Bullet 3</th>
+                            <th style="width: 180px;">Bullet 4</th>
+                            <th style="width: 180px;">Bullet 5</th>
+                            <th style="width: 320px;">Description (2000)</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -147,15 +159,14 @@
 
 <script>
 const LIMITS = { title: 200, terms: 250, bullet: 500, desc: 2000 };
-const ERROR_MARK = "⚠️ 缺失内容，请检查原文";
+const ERROR_MARK = "⚠️ 缺失内容";
 
 window.onload = () => {
-    const savedText = localStorage.getItem('shawn_v13_raw');
+    const savedText = localStorage.getItem('shawn_v14_raw');
     if (savedText) document.getElementById('rawInput').value = savedText;
     renderFromStorage();
 };
 
-// 核心功能：创建结构化单元格
 function createStructCell(content, limit, fieldKey) {
     const td = document.createElement('td');
     td.contentEditable = "true";
@@ -172,9 +183,8 @@ function createStructCell(content, limit, fieldKey) {
         <span class="count-info" contenteditable="false">0 / ${limit}</span>
     `;
 
-    // 绑定实时校验
     td.oninput = () => updateCellUI(td);
-    setTimeout(() => updateCellUI(td), 10); // 延迟初始化进度条
+    setTimeout(() => updateCellUI(td), 10);
     return td;
 }
 
@@ -183,7 +193,6 @@ function updateCellUI(td) {
     const contentDiv = td.querySelector('.cell-content');
     const text = contentDiv.innerText.replace(/[\n\r]/g, "").trim();
     
-    // 如果用户开始输入，移除错误标签
     if(text !== ERROR_MARK) contentDiv.classList.remove('error-tag');
 
     const bar = td.querySelector('.progress-bar');
@@ -192,7 +201,11 @@ function updateCellUI(td) {
 
     const percent = Math.min((len / limit) * 100, 100);
     bar.style.width = percent + '%';
-    bar.className = 'progress-bar ' + (len > limit ? 'bg-error' : 'bg-normal');
+    
+    // 苹果色阶：绿色 -> 橙色 -> 红色
+    if (len > limit) bar.className = 'progress-bar bg-error';
+    else if (len > limit * 0.9) bar.className = 'progress-bar bg-warn';
+    else bar.className = 'progress-bar bg-normal';
     
     info.innerText = `${len} / ${limit}`;
     info.className = 'count-info ' + (len > limit ? 'text-error' : '');
@@ -202,17 +215,16 @@ function updateCellUI(td) {
 
 function processParsing() {
     const input = document.getElementById('rawInput').value.trim();
-    if (!input) { alert("请先粘贴内容"); return; }
+    if (!input) return;
     
-    localStorage.setItem('shawn_v13_raw', input);
+    localStorage.setItem('shawn_v14_raw', input);
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
 
-    // 增强型切分逻辑
     const startIndices = [];
     const entryRegex = /^\d+\.\s/gm;
-    let match;
-    while ((match = entryRegex.exec(input)) !== null) startIndices.push(match.index);
+    let m;
+    while ((m = entryRegex.exec(input)) !== null) startIndices.push(m.index);
 
     const blocks = startIndices.length > 0 
         ? startIndices.map((s, i) => input.substring(s, startIndices[i+1] || input.length))
@@ -220,7 +232,7 @@ function processParsing() {
 
     blocks.forEach((block, idx) => {
         const lines = block.split('\n');
-        const pName = lines[0].replace(/^\d+\.\s*/, "").trim() || "Undefined Item";
+        const pName = lines[0].replace(/^\d+\.\s*/, "").trim() || "Item";
         
         const extract = (regex) => {
             const m = block.match(regex);
@@ -241,7 +253,7 @@ function processParsing() {
         const desc = extract(/Product Description:\s*([\s\S]*)$/i);
 
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${idx + 1}</td>`;
+        tr.innerHTML = `<td style="color:#86868b; font-weight:600;">${idx + 1}</td>`;
         tr.appendChild(createStructCell(pName, 9999, 'name'));
         tr.appendChild(createStructCell(title, LIMITS.title, 'title'));
         tr.appendChild(createStructCell(terms, LIMITS.terms, 'terms'));
@@ -262,40 +274,39 @@ function saveCurrentState() {
         });
         rows.push(row);
     });
-    localStorage.setItem('shawn_v13_table', JSON.stringify(rows));
+    localStorage.setItem('shawn_v14_table', JSON.stringify(rows));
 }
 
 function renderFromStorage() {
-    const data = JSON.parse(localStorage.getItem('shawn_v13_table') || "[]");
+    const data = JSON.parse(localStorage.getItem('shawn_v14_table') || "[]");
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
-    
     data.forEach((row, idx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${idx + 1}</td>`;
-        tr.appendChild(createStructCell(row.name, 9999, 'name'));
-        tr.appendChild(createStructCell(row.title, LIMITS.title, 'title'));
-        tr.appendChild(createStructCell(row.terms, LIMITS.terms, 'terms'));
-        for(let i=1; i<=5; i++) tr.appendChild(createStructCell(row[`b${i}`], LIMITS.bullet, `b${i}`));
-        tr.appendChild(createStructCell(row.desc, LIMITS.desc, 'desc'));
+        tr.innerHTML = `<td style="color:#86868b; font-weight:600;">${idx + 1}</td>`;
+        tr.appendChild(createStructCell(row.name || "", 9999, 'name'));
+        tr.appendChild(createStructCell(row.title || "", LIMITS.title, 'title'));
+        tr.appendChild(createStructCell(row.terms || "", LIMITS.terms, 'terms'));
+        for(let i=1; i<=5; i++) tr.appendChild(createStructCell(row[`b${i}`] || "", LIMITS.bullet, `b${i}`));
+        tr.appendChild(createStructCell(row.desc || "", LIMITS.desc, 'desc'));
         tbody.appendChild(tr);
     });
 }
 
 function clearAppData() {
-    if(confirm("确定重置吗？这会清空解析数据，但保留设置中心配置。")) {
-        localStorage.removeItem('shawn_v13_raw');
-        localStorage.removeItem('shawn_v13_table');
+    if(confirm("确定清空数据吗？")) {
+        localStorage.removeItem('shawn_v14_raw');
+        localStorage.removeItem('shawn_v14_table');
         location.reload();
     }
 }
 
 function exportData() {
-    const data = JSON.parse(localStorage.getItem('shawn_v13_table') || "[]");
+    const data = JSON.parse(localStorage.getItem('shawn_v14_table') || "[]");
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "SEO_Analysis");
-    XLSX.writeFile(wb, `SEO_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "SEO_Data");
+    XLSX.writeFile(wb, `SEO_Export_${new Date().toLocaleDateString()}.xlsx`);
 }
 </script>
 </body>
