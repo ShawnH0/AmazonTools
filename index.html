@@ -1,285 +1,709 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Shawn Tools | Apple Operations Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shawn's Studio | Design & Engineering</title>
     <style>
+        /* --- 1. 全局变量与基础设置 --- */
         :root {
-            --apple-bg: #f5f5f7;
-            --apple-text: #1d1d1f;
-            --apple-subtext: #86868b;
+            --apple-black: #1d1d1f;
+            --apple-grey: #86868b;
+            --apple-white: #f5f5f7;
             --apple-blue: #0066cc;
-            --card-white: #ffffff;
-            
-            /* --- 核心对齐逻辑 --- */
-            --content-width: 1100px;
-            /* 侧边距公式：保持标题和内容在宽屏下依然垂直对齐 */
-            --side-gap: max(22px, calc((100vw - var(--content-width)) / 2));
-            --card-gap: 22px;
+            --nav-bg: rgba(251, 252, 253, 0.8);
+            --ease-apple: cubic-bezier(0.4, 0, 0.2, 1);
+            --blur: 20px;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
-            background-color: var(--apple-bg);
-            color: var(--apple-text);
-            margin: 0; padding: 0;
-            overflow-x: hidden;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SF Pro Display", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 顶部导航 --- */
-        .nav {
-            position: fixed; top: 0; width: 100%; height: 48px;
-            background: rgba(251, 251, 253, 0.8);
-            backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
-            z-index: 9999; border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .nav-content { width: 100%; padding: 0 var(--side-gap); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; height: 100%; }
-        
-        /* --- Hero --- */
-        .hero { padding: 120px var(--side-gap) 40px; box-sizing: border-box; }
-        .hero h2 { font-size: 21px; color: #f56300; margin-bottom: 8px; font-weight: 600; }
-        .hero h1 { font-size: 56px; font-weight: 700; margin: 0; letter-spacing: -0.02em; line-height: 1.1; }
-
-        /* --- 货架标题 --- */
-        .section-header { padding: 60px var(--side-gap) 10px; box-sizing: border-box; }
-        .section-header h2 { font-size: 28px; font-weight: 600; margin: 0; }
-        .section-header h2 span { color: var(--apple-subtext); }
-
-        /* --- 终极货架结构 --- */
-        .shelf-container {
-            position: relative;
-            width: 100%;
-            margin-bottom: 20px;
+        body {
+            background-color: #ffffff;
+            color: var(--apple-black);
+            overflow-x: hidden;
+            line-height: 1.1;
         }
 
-        /* 第一层：裁剪与渐隐 (The Mask) */
-        .scroll-mask {
-            position: relative;
-            width: 100%;
-            overflow: hidden; /* 生死线：绝对裁剪溢出 */
-            -webkit-mask-image: linear-gradient(to right, 
-                transparent 0%, 
-                black var(--side-gap), 
-                black calc(100% - var(--side-gap)), 
-                transparent 100%);
-            mask-image: linear-gradient(to right, 
-                transparent 0%, 
-                black var(--side-gap), 
-                black calc(100% - var(--side-gap)), 
-                transparent 100%);
+        /* 让所有链接继承父元素颜色，并去掉下划线 */
+        a {
+            color: inherit;
+            text-decoration: none;
         }
 
-        /* 第二层：蓝色视口区 (The Viewport) */
-        .scroll-viewport {
-            width: 100%;
-            padding: 0 var(--side-gap); /* 保证第一张卡片对齐标题 */
+        /* 如果你希望鼠标悬停时有轻微的透明度变化（苹果官网常用效果） */
+        a:hover {
+            opacity: 0.8;
+        }
+
+        /* --- 2. 导航栏 (Glassmorphism) --- */
+        :root {
+            --nav-height: 44px;
+            --apple-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 基础重置 */
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            display: flex;
         }
 
-        /* 第三层：滚动容器 (The Wrapper) */
-        .scroll-wrapper {
-            display: flex;
-            overflow-x: auto;
-            padding: 20px 0 60px; /* 彻底取消左右 padding，防止露白 */
-            scroll-behavior: smooth;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch; /* iOS 惯性滑动 */
-            scroll-snap-type: x proximity;
+        /* 导航栏主体 */
+        .global-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: rgba(251, 252, 253, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            z-index: 9999;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
         }
-        .scroll-wrapper::-webkit-scrollbar { display: none; }
 
-        /* --- 卡片设计 --- */
+        .nav-content {
+            max-width: 1024px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 22px;
+        }
+
+        /* Logo 样式 */
+        .logo {
+            font-family: "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-decoration: none;
+            letter-spacing: -0.01em;
+        }
+
+        /* 导航项容器 */
+        .nav-links {
+            display: flex;
+            height: 100%;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+        }
+
+        /* 一级导航字体：小巧、精致、负间距 */
+        .nav-item>a {
+            font-family: "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            font-size: 12px;
+            letter-spacing: -0.01em;
+            color: #1d1d1f;
+            text-decoration: none;
+            padding: 0 16px;
+            opacity: 0.8;
+            transition: opacity 0.4s var(--apple-ease);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 下拉菜单容器 */
+        .dropdown-menu {
+            position: absolute;
+            top: var(--nav-height);
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            height: 0;
+            overflow: hidden;
+            visibility: hidden;
+            transition: height 0.5s var(--apple-ease), visibility 0s 0.5s;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-content {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 22px;
+        }
+
+        /* 下拉菜单字体：大号、加粗、排版紧凑 */
+        .sub-links {
+            list-style: none;
+        }
+
+        .sub-links li {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .sub-links li a {
+            font-family: "SF Pro Display", sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            color: #1d1d1f;
+            text-decoration: none;
+            display: inline-block;
+            padding: 10px 0;
+            transition: color 0.3s ease, transform 0.3s var(--apple-ease);
+        }
+
+        .sub-links li a:hover {
+            color: #0066cc;
+            transform: translateX(10px);
+        }
+
+        /* 交互逻辑 */
+        .nav-item:hover .dropdown-menu {
+            height: 300px;
+            visibility: visible;
+            transition: height 0.5s var(--apple-ease), visibility 0s 0s;
+        }
+
+        .nav-links:hover .nav-item>a {
+            opacity: 0.4;
+        }
+
+        .nav-item:hover>a {
+            opacity: 1 !important;
+        }
+
+        /* 滚动淡入效果 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s var(--apple-ease);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- 3. Hero Section (核心视觉) --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 8vw, 80px);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        /* 渐变文字效果 */
+        .gradient-text {
+            background: linear-gradient(90deg, #007aff, #ff2d55, #ffcc00, #007aff);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: move-gradient 8s linear infinite;
+        }
+
+        @keyframes move-gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .hero p {
+            font-size: clamp(19px, 3vw, 28px);
+            color: var(--apple-grey);
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+
+        .cta-group a {
+            font-size: clamp(17px, 2vw, 21px);
+            color: var(--apple-blue);
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .cta-group a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- 4. Bento Grid (便当盒布局) --- */
+        .bento-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 15px;
+        }
+
         .card {
-            flex: 0 0 310px; height: 380px; margin-right: var(--card-gap);
-            background: var(--card-white); border-radius: 28px; padding: 30px;
-            text-decoration: none; color: inherit; display: flex; flex-direction: column;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-sizing: border-box; scroll-snap-align: start;
-        }
-        .card:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-        .card-tag { font-size: 11px; font-weight: 700; color: #f56300; margin-bottom: 8px; text-transform: uppercase; }
-        .ai-glow { background: linear-gradient(90deg, #0071e3, #9b51e0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .card-title { font-size: 24px; font-weight: 600; margin: 0; line-height: 1.1; }
-        .card-desc { font-size: 15px; color: var(--apple-subtext); margin-top: 12px; line-height: 1.4; }
-        .card-icon { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 80px; }
-
-        /* --- 按钮定位逻辑 --- */
-        .arrow-btn {
-            position: absolute; width: 44px; height: 44px; top: 50%; transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(0,0,0,0.05); border-radius: 50%; cursor: pointer; z-index: 100; opacity: 0; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .shelf-container:hover .arrow-btn { opacity: 1; }
-        .arrow-btn svg { width: 18px; height: 18px; fill: none; stroke: #333; stroke-width: 2.5; }
-        
-        /* 针对大屏：箭头永远贴着 1100px 内容区的两边缘 */
-        .arrow-left { left: calc(var(--side-gap) - 22px); }
-        .arrow-right { right: calc(var(--side-gap) - 22px); }
-
-        @media (min-width: 1200px) {
-            .arrow-left { left: calc(50% - (var(--content-width) / 2) - 22px); }
-            .arrow-right { right: calc(50% - (var(--content-width) / 2) - 22px); }
+            background: var(--apple-white);
+            border-radius: 28px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* padding-top: 60px;
+            text-align: center; */
         }
 
-        /* --- 弹窗样式 --- */
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .modal { background: #fff; width: 340px; padding: 40px; border-radius: 24px; position: relative; }
-        .apple-input { width: 100%; padding: 14px; border: 1px solid #d2d2d7; border-radius: 12px; background: #f5f5f7; box-sizing: border-box; font-size: 16px; margin-bottom: 15px; outline: none; }
-        .apple-btn-primary { width: 100%; padding: 14px; background: var(--apple-blue); color: #fff; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        .card-content {
+            padding-top: 60px;
+            text-align: center;
+        }
+
+        /* --- 背景卡片统一规范 (强制填充版) --- */
+        .card-background {
+            /* 核心修改 1：强制宽度填满 100%，高度自动缩放 */
+            /* 这样无论卡片多宽，图片都会拉伸到边缘，消除白边 */
+            background-size: 100% auto;
+
+            /* 核心修改 2：如果图片高度缩放后不足 500px，则改用 cover 保底 */
+            /* 浏览器会自动选择最优填充方式 */
+            background-size: cover;
+
+            /* 锁定底部中心，确保云朵在最下面 */
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            /* 严禁平铺 */
+
+            /* 视觉保底：设置背景色为图片边缘的主色（白色） */
+            /* 这样即使有 0.1px 的渲染缝隙，透出来的也是白色，视觉上完全隐形 */
+            background-color: #ffffff !important;
+
+            /* 基础尺寸 */
+            width: 100%;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            /* 移除所有可能导致边缘断层的边框和投影 */
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        /* 悬停交互：为了防止拉伸过程中边缘露白，缩放比例稍微设大一点 */
+        .card-background:hover {
+            background-size: 108% auto;
+            /* 或者使用更平滑的容器位移 */
+            transform: translateY(-5px);
+            transition: all 0.6s var(--ease-apple);
+        }
+
+        /* 修正卡片链接的容器防止溢出 */
+        .card.large.reveal {
+            padding: 0;
+            /* 确保外层没有 padding 挤压背景 */
+            background: transparent;
+        }
+
+        /* 5. 确保内部内容在背景之上 */
+        .card-content {
+            position: relative;
+            z-index: 2;
+            padding-top: 60px;
+            text-align: center;
+        }
+
+        /* 3. 图标黄金比例构图 */
+        .card-icon-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            /* 利用 Flex 的特性将内容挤向右下角 */
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 8%;
+            /* 底部留出约 1/6 的空白 */
+        }
+
+        .icon-wrapper {
+            /* 响应式图标尺寸 */
+            font-size: clamp(100px, 20vh, 200px);
+
+            /* 增加一个非常淡的阴影，模拟图片立体感 */
+            /* filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1)); */
+            transition: transform 0.6s var(--ease-apple);
+        }
+
+        /* 4. 悬停交互：文字不动，图标产生细微的纵深感 */
+        .card:hover {
+            background: #ffffff;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05);
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .card.dark {
+            /* background: #000; */
+            background: radial-gradient(circle at 50% 60%, #1c1c1e 0%, #000000 100%);
+            color: #fff;
+        }
+
+        .card.large {
+            grid-column: span 2;
+        }
+
+        /* 1. 消除内层 div 的默认阴影 */
+        .card.large.reveal .card {
+            box-shadow: none !important;
+            /* 强制取消内层阴影 */
+            background: transparent;
+            /* 确保背景不冲突 */
+            border: none;
+            /* 如果有边框也一并去掉 */
+        }
+
+        /* 2. 消除或重新定义交互时的阴影 */
+        .card.large.reveal:hover {
+            /* 如果你完全不想要阴影，设为 none */
+            box-shadow: none !important;
+            /* 或者只保留一个非常淡的 Apple 风格位移，而不是厚重的阴影 */
+            transform: translateY(-4px);
+            transition: transform 0.3s ease;
+        }
+
+        /* 3. 确保外层 a 标签作为容器的干净样式 */
+        .card.large.reveal {
+            box-shadow: none;
+            /* 初始状态也不要阴影 */
+            text-decoration: none;
+            display: block;
+        }
+
+        .card h2 {
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 20px;
+            color: var(--apple-grey);
+        }
+
+        .card.dark:hover {
+            background: #1c1c1e;
+            /* 暗黑模式悬停反馈 */
+        }
+
+        .card:active {
+            transform: scale(0.98);
+            /* 点击时的物理按压感 */
+        }
+
+        /* 5. 辅助样式维持 */
+        .card.dark {
+            background: #000;
+            color: #fff;
+        }
+
+        .card.large {
+            grid-column: span 2;
+        }
+
+        .card h2 {
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 20px;
+            color: var(--apple-grey);
+        }
+
+        /* --- 5. 滚动进入动画逻辑 --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 1.2s var(--ease-apple), transform 1.2s var(--ease-apple);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 734px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card.large {
+                grid-column: span 1;
+            }
+
+            .card {
+                height: 450px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div class="nav">
-    <div class="nav-content">
-        <span style="font-weight:600">ShawnTools </span>
-        <span onclick="toggleModal()" style="font-size:12px; cursor:pointer" id="userTag">账户</span>
-    </div>
-</div>
+    <nav class="global-nav">
+        <div class="nav-content">
+            <a href="#" class="logo">Amazon Seller Tools</a>
 
-<div class="hero">
-    <h2>Shawn's Operations Hub</h2>
-    <h1>工具利其事，<br>爆款旺新年。</h1>
-</div>
+            <div class="nav-links">
+                <div class="nav-item">
+                    <a href="ai-tools.html">AI 工具</a>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <ul class="sub-links">
+                                <li style="--i:1"><a href="listing-ai-rewriter.html">AI SEO 优化</a></li>
+                                <li style="--i:2"><a href="baned-words-filter.html">违规词筛选器</a></li>
+                                <li style="--i:3"><a href="#">关键词实验室</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-<div class="section-header"><h2>AI 与 文本工具<span>。智能且高效。</span></h2></div>
-<div class="shelf-container">
-    <button class="arrow-btn arrow-left" onclick="move('row1', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-    <button class="arrow-btn arrow-right" onclick="move('row1', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-    <div class="scroll-mask">
-        <div class="scroll-viewport">
-            <div class="scroll-wrapper" id="row1">
-                <a href="listing-ai-rewriter.html" class="card">
-                    <div class="card-tag ai-glow">Apple Intelligence</div>
-                    <h3 class="card-title">AI Listing 优化</h3>
-                    <p class="card-desc">基于 AI 批量重写标题、五点及描述。</p>
-                    <div class="card-icon">💻</div>
-                </a>
-                <a href="baned-words-filter.html" class="card">
-                    <div class="card-tag">Compliance</div>
-                    <h3 class="card-title">违规词筛选器</h3>
-                    <p class="card-desc">全自动检索敏感词汇，规避侵权风险。</p>
-                    <div class="card-icon">©️</div>
-                </a>
-                <a href="deduplicator.html" class="card">
-                    <div class="card-tag">Efficiency</div>
-                    <h3 class="card-title">文本去重工具</h3>
-                    <p class="card-desc">自动识别空格换行，精简文案内容。</p>
-                    <div class="card-icon">✂️</div>
-                </a>
-                <a href="case-converter.html" class="card">
-                    <div class="card-tag">Writing</div>
-                    <h3 class="card-title">大小写转换</h3>
-                    <p class="card-desc">一键实现全大写、首字母大写转换。</p>
-                    <div class="card-icon">📝</div>
-                </a>
+                <div class="nav-item">
+                    <a href="#">数据服务</a>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-content">
+                            <ul class="sub-links">
+                                <li style="--i:1"><a href="#">销量追踪</a></li>
+                                <li style="--i:2"><a href="#">竞品监控</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-item"><a href="#">关于我们</a></div>
             </div>
         </div>
-    </div>
-</div>
+    </nav>
 
-<div class="section-header"><h2>数据与解析工具<span>。深入业务核心。</span></h2></div>
-<div class="shelf-container">
-    <button class="arrow-btn arrow-left" onclick="move('row2', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-    <button class="arrow-btn arrow-right" onclick="move('row2', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-    <div class="scroll-mask">
-        <div class="scroll-viewport">
-            <div class="scroll-wrapper" id="row2">
-                <a href="seo-parser.html" class="card">
-                    <div class="card-tag">Search</div>
-                    <h3 class="card-title">SEO 解析校验</h3>
-                    <p class="card-desc">批量解析字符超限，一键导出 Excel。</p>
-                    <div class="card-icon">🔍</div>
-                </a>
-                <a href="word-frequency.html" class="card">
-                    <div class="card-tag">Insight</div>
-                    <h3 class="card-title">词频统计分析</h3>
-                    <p class="card-desc">深度挖掘高频词，精准筛选关键词。</p>
-                    <div class="card-icon">📊</div>
-                </a>
-                <a href="amazon-sku-aggregator.html" class="card">
-                    <div class="card-tag">Operation</div>
-                    <h3 class="card-title">SKU 销量聚合</h3>
-                    <p class="card-desc">处理订单报告，子体汇总父体销量。</p>
-                    <div class="card-icon">🧮</div>
-                </a>
+    <main>
+        <section class="hero">
+            <h1 class="reveal">设计，为了<span class="gradient-text">更美好的生活</span>。</h1>
+            <p class="reveal" style="transition-delay: 0.2s;">追求技术与艺术的交汇点。</p>
+            <div class="cta-group reveal" style="transition-delay: 0.4s;">
+                <a href="#">进一步了解 ></a>
+                <a href="#">观看演示视频 ></a>
             </div>
-        </div>
-    </div>
-</div>
+        </section>
 
-<div class="section-header"><h2>多媒体处理<span>。惊艳你的视觉。</span></h2></div>
-<div class="shelf-container">
-    <button class="arrow-btn arrow-left" onclick="move('row3', -1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-    <button class="arrow-btn arrow-right" onclick="move('row3', 1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-    <div class="scroll-mask">
-        <div class="scroll-viewport">
-            <div class="scroll-wrapper" id="row3">
-                <a href="image-resizer.html" class="card">
-                    <div class="card-tag">Visual</div>
-                    <h3 class="card-title">主图尺寸缩放</h3>
-                    <p class="card-desc">批量调整为 1600x1600 白底规格。</p>
-                    <div class="card-icon">🖼️</div>
-                </a>
-                <a href="image-hosting.html" class="card">
-                    <div class="card-tag">Storage</div>
-                    <h3 class="card-title">自动图床工具</h3>
-                    <p class="card-desc">一键上传至图床，获取 Raw 链接。</p>
-                    <div class="card-icon">☁️</div>
-                </a>
-                <a href="html-editor.html" class="card">
-                    <div class="card-tag">Design</div>
-                    <h3 class="card-title">HTML 编辑器</h3>
-                    <p class="card-desc">生成符合亚马逊标准的可视化代码。</p>
-                    <div class="card-icon">🎨</div>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+        <section class="bento-grid">
+            <a href="listing-ai-rewriter.html" class="card large reveal">
+                <div class="card card-background" style="background-image: url('images/background 1.png');">
+                    <div class="card-content">
+                        <h2>AI SEO 优化</h2>
+                        <p>基于AI批量重写SEO</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">💻</div>
+                    </div>
+                </div>
+            </a>
+            <a href="baned-words-filter.html" class="card reveal">
+                <div class="card card-background" style="background-image: url('images/background 2.png');">
+                    <div class="card-content">
+                        <h2>违规词筛选器</h2>
+                        <p>自动检索敏感词汇</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">©️</div>
+                    </div>
+                </div>
+            </a>
+            <a href="image-hosting.html" class="card reveal">
+                <div class="card card-background" style="background-image: url('images/background 3.png');">
+                    <div class="card-content">
+                        <h2>图床工具</h2>
+                        <p>批量上传图片至图床</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">☁️</div>
+                    </div>
+                </div>
+            </a>
+        </section>
+        <section class="hero">
+            <h1 class="reveal">把时间，用在<span class="gradient-text">重要的事情</span>上。</h1>
+            <p class="reveal">其余的，交给工具。</p>
+        </section>
+        <section class="bento-grid">
+            <a href="seo-parser.html" class="card large reveal">
+                <div class="card card-background" style="background-image: url('images/background 4.png');">
+                    <div class="card-content">
+                        <h2>SEO 解析校验</h2>
+                        <p>批量解析字符超限 一键导出Excel</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">🔍</div>
+                    </div>
+                </div>
+            </a>
+            <a href="deduplicator.html" class="card reveal">
+                <div class="card card-background" style="background-image: url('images/background 5.png');">
+                    <div class="card-content">
+                        <h2>文本去重工具</h2>
+                        <p>自动识别空格换行 精简文案内容</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">✂️</div>
+                    </div>
+                </div>
+            </a>
+            <a href="case-converter.html" class="card reveal">
+                <div class="card card-background" style="background-image: url('images/background 6.png');">
+                    <div class="card-content">
+                        <h2>大小写转换</h2>
+                        <p>一键实现全大写 首字母大写转换</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">📝</div>
+                    </div>
+                </div>
+            </a>
+        </section>
+        <section class="hero">
+            <h1 class="reveal"><span class="gradient-text">每一个细节</span>，都是有理由的。</h1>
+            <p class="reveal">看得见的简洁，看不见的力量。</p>
+        </section>
+        <section class="bento-grid">
+            <a href="image-resizer.html" class="card large reveal">
+                <div class="card card-background" style="background-image: url('images/background 2.png');">
+                    <div class="card-content">
+                        <h2>图片尺寸调整</h2>
+                        <p>批量调整图片尺寸并导出</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">🖼️</div>
+                    </div>
+                </div>
+            </a>
+            <a href="word-frequency.html" class="card reveal">
+                <div class="card card-background" style="background-image: url('images/background 3.png');">
+                    <div class="card-content">
+                        <h2>词频统计分析</h2>
+                        <p>深度挖掘高频词，精准筛选关键词</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">📊</div>
+                    </div>
+                </div>
+            </a>
+            <a href="amazon-sku-aggregator.html" class="card reveal">
+                <div class="card card-background" style="background-image: url('images/background 5.png');">
+                    <div class="card-content">
+                        <h2>SKU 销量聚合</h2>
+                        <p>处理订单报告，汇总父体销量</p>
+                    </div>
+                    <div class="card-icon-container">
+                        <div class="icon-wrapper">🧮</div>
+                    </div>
+                </div>
+            </a>
+        </section>
+    </main>
 
-<div class="modal-overlay" id="modal">
-    <div class="modal">
-        <h2 style="margin-top:0">账户</h2>
-        <input type="text" id="acc" class="apple-input" placeholder="账号">
-        <input type="password" id="pwd" class="apple-input" placeholder="密码">
-        <button class="apple-btn-primary" onclick="handleAuth()">继续</button>
-        <p style="text-align:center; font-size:13px; color:var(--apple-subtext); cursor:pointer; margin-top:15px" onclick="toggleModal()">取消</p>
-    </div>
-</div>
+    <script>
+        // --- 交互逻辑 ---
+        document.addEventListener('DOMContentLoaded', () => {
 
-<script>
-    function move(id, d) { 
-        const wrapper = document.getElementById(id);
-        const cardStep = 310 + 22; 
-        wrapper.scrollBy({ left: d * cardStep, behavior: 'smooth' }); 
-    }
+            // --- 1. 滚动淡入 (Scroll Reveal) ---
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
 
-    function toggleModal() { 
-        const m = document.getElementById('modal');
-        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-    }
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    function handleAuth() {
-        const acc = document.getElementById('acc').value;
-        const pwd = document.getElementById('pwd').value;
-        if (acc === 'admin' && pwd === 'admin') { 
-            localStorage.setItem('current_user', JSON.stringify({user: 'Shawn', type: 'Founder'}));
-            location.reload();
-        } else { alert('账号或密码不正确'); }
-    }
+            // --- 2. 导航切换重置动画 ---
+            const navItems = document.querySelectorAll('.nav-item');
 
-    window.onload = () => {
-        const u = JSON.parse(localStorage.getItem('current_user'));
-        if(u) document.getElementById('userTag').innerText = `你好, ${u.user}`;
-    }
-</script>
+            navItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    const listItems = item.querySelectorAll('.sub-links li');
 
+                    listItems.forEach((li, index) => {
+                        // 重置状态
+                        li.style.transition = 'none';
+                        li.style.opacity = '0';
+                        li.style.transform = 'translateY(-20px)';
+
+                        // 强制重绘
+                        li.offsetHeight;
+
+                        // 重新播放 Apple 阶梯动画
+                        // index * 0.06 是延迟系数，实现逐行弹出的感觉
+                        li.style.transition = `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.06 + 0.1}s`;
+                        li.style.opacity = '1';
+                        li.style.transform = 'translateY(0)';
+                    });
+                });
+            });
+        });
+
+        // 1. 滚动显现动画 (Scroll Reveal)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -100px 0px" // 提前一点点触发，感觉更自然
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // 2. 导航栏随滚动改变透明度
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.style.background = "rgba(255, 255, 255, 0.95)";
+            } else {
+                nav.style.background = "rgba(251, 252, 253, 0.8)";
+            }
+        });
+
+        // 3. 简单的视差效果（可选）
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            // 文字轻微视差滚动
+            hero.style.transform = `translateY(${scrolled * 0.15}px)`;
+            hero.style.opacity = 1 - (scrolled / 700);
+        });
+    </script>
 </body>
-</html>
 
+</html>
