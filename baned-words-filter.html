@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Amazon 品牌清理 Pro</title>
+    <title>Amazon 品牌清理 Pro - Shawn's Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -105,7 +105,7 @@
     <div class="workspace">
         <div class="panel">
             <div class="section-title">单段文案清洗</div>
-            <textarea id="textInput" style="height: 180px;" placeholder="在此粘贴 Amazon Listing 原始描述..."></textarea>
+            <textarea id="textInput" style="height: 180px;" placeholder="在此粘贴 Amazon Listing 原始描述 (例如: Nikon Camera Sony TV)..."></textarea>
             <div style="display:flex; gap:12px; margin-top:16px;">
                 <button class="btn btn-blue" onclick="execClean('rule')">⚡ 规则清洗</button>
                 <button class="btn btn-purple" id="btnAiExec" onclick="execClean('ai')">
@@ -141,8 +141,8 @@
             <div>
                 <label style="font-size:12px; color:var(--apple-blue)">● AI 配置</label>
                 <div class="input-group"><label>供应商</label><select id="apiProvider" class="modal-input" onchange="toggleProvider()"><option value="deepseek">DeepSeek</option><option value="openrouter">OpenRouter</option><option value="openai">OpenAI</option></select></div>
-                <div class="input-group"><label>模型名称</label><input type="text" id="apiModel" class="modal-input"></div>
                 <div class="input-group"><label>API Key</label><input type="password" id="apiKey" class="modal-input"></div>
+                <div class="input-group"><label>模型名称</label><input type="text" id="apiModel" class="modal-input"></div>
             </div>
             <div>
                 <label style="font-size:12px; color:var(--apple-purple)">● GitHub 同步</label>
@@ -152,8 +152,8 @@
             </div>
         </div>
         <div class="input-group">
-            <label>词库</label>
-            <textarea id="customBrands" class="modal-input" style="height:60px;"></textarea>
+            <label>禁售品牌库 (当前支持首词剔除)</label>
+            <textarea id="customBrands" class="modal-input" style="height:60px;" placeholder="Nikon, Sony, Apple..."></textarea>
         </div>
         <div class="sync-box">
             <div style="display:flex; gap:10px;">
@@ -169,13 +169,16 @@
 </div>
 
 <script>
-    // --- 更新后的默认 PROMPT ---
-    const DEFAULT_PROMPT = `你是一个亚马逊Listing合规专家。剔除违规内容但必须保留兼容性描述：
-1. 【保留】跟在 "for", "compatible with", "replacement for", "fits" 后面的品牌词。
-2. 【剔除】所有孤立出现的品牌词（如 "This is a Sony TV" 删掉 Sony）。
-3. 【剔除】亚马逊禁售词（农药、保修、FDA等）。
-4. 只返回清洗后的正文，保留HTML，不解释。
-5. 严禁用中文回答！！！`;
+    // --- 极度强化的 PROMPT ---
+    const DEFAULT_PROMPT = `As an Amazon Listing Compliance Expert, your task is to REMOVE restricted content while keeping compatibility phrases.
+
+RULES:
+1. [KEEP] Brand names ONLY if they follow: "for", "compatible with", "replacement for", "fits".
+2. [REMOVE] ALL isolated brand names (e.g., "Nikon Camera" -> "Camera", "Sony TV" -> "TV").
+3. [REMOVE] Restricted keywords (pesticide, warranty, FDA, guarantee).
+4. [STRICT] Start cleaning from the VERY FIRST WORD. Do not ignore the beginning of the text.
+5. [OUTPUT] Return ONLY the cleaned text with original HTML. NO explanations.
+6. [LANGUAGE] NEVER use Chinese in the output.`;
 
     let rawData = [];
     let config = {};
@@ -186,7 +189,7 @@
 
     function loadConfig() {
         ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo', 'ghPath'].forEach(f => {
-            config[f] = localStorage.getItem('sh_cloud_v4_' + f) || '';
+            config[f] = localStorage.getItem('sh_cloud_v5_' + f) || '';
             document.getElementById(f).value = config[f];
         });
         if(!config.apiModel) document.getElementById('apiModel').value = 'deepseek-chat';
@@ -195,7 +198,7 @@
     function saveConfig() {
         ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo', 'ghPath'].forEach(f => {
             const val = document.getElementById(f).value.trim();
-            localStorage.setItem('sh_cloud_v4_' + f, val);
+            localStorage.setItem('sh_cloud_v5_' + f, val);
             config[f] = val;
         });
         refreshCapabilityUI();
@@ -207,7 +210,7 @@
         document.getElementById('tag-ai').className = config.apiKey.length > 10 ? 'cap-tag active' : 'cap-tag';
     }
 
-    // --- GitHub 同步 ---
+    // --- GitHub 云同步 ---
     async function syncCloud(mode) {
         if(!config.ghToken || !config.ghRepo) return alert("请配置 GitHub 信息");
         const url = `https://api.github.com/repos/${config.ghRepo}/contents/${config.ghPath}`;
@@ -225,7 +228,7 @@
                 if(getRes.ok) { const d = await getRes.json(); ghFileSha = d.sha; }
                 const brandsArr = document.getElementById('customBrands').value.split(/[,，]/).map(s => s.trim()).filter(s => s);
                 const fileBody = {
-                    message: "Update brands",
+                    message: "Update brands via Pro Tool",
                     content: btoa(unescape(encodeURIComponent(JSON.stringify({ brands: brandsArr, updated: new Date().toISOString() })))),
                     sha: ghFileSha
                 };
@@ -235,24 +238,31 @@
         } catch(e) { alert("同步失败: " + e.message); }
     }
 
-    // --- 算法逻辑 ---
+    // --- 本地规则逻辑 (带边界修复) ---
+    function localRuleClean(text) {
+        let brands = config.customBrands.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 1);
+        if (!brands.length) return text;
+        
+        // 使用 \b 匹配单词边界，确保 Nikon 不会误伤 Nikonly，且能匹配开头
+        let brandRegex = new RegExp(`(^|\\b)(${brands.join('|')})\\b`, 'gi');
+        return text.replace(brandRegex, "").replace(/\s+/g, ' ').trim();
+    }
+
+    // --- AI 处理 (JSON 包装 & 双重清洗) ---
     async function execClean(mode) {
         const input = document.getElementById('textInput').value.trim();
         const outBox = document.getElementById('textOutput');
         if (!input || isProcessing) return;
 
         if (mode === 'rule') {
-            // 本地规则清洗逻辑（保持不变）
-            let brands = config.customBrands.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 1);
-            if (!brands.length) return outBox.innerText = input;
-            let brandRegex = new RegExp(`\\b(${brands.join('|')})\\b`, 'gi');
-            outBox.innerText = input.replace(brandRegex, "").replace(/\s+/g, ' ').trim();
+            outBox.innerText = localRuleClean(input);
         } else {
             setAiLoading(true);
             try {
                 const url = config.apiProvider === 'deepseek' ? 'https://api.deepseek.com/v1/chat/completions' : 
                             config.apiProvider === 'openrouter' ? 'https://openrouter.ai/api/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
                 
+                // 将输入转为 JSON 字符串发送，消除首位权重
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
@@ -260,15 +270,18 @@
                         model: config.apiModel,
                         messages: [
                             { role: "system", content: DEFAULT_PROMPT },
-                            { role: "user", content: `Please clean this text: "${input}"` }
+                            { role: "user", content: `CLEAN THIS CONTENT: ${input}` }
                         ],
-                        temperature: 0.1 // 降低随机性，严格遵守 Prompt
+                        temperature: 0.0, // 强制最低随机性
+                        top_p: 1
                     })
                 });
                 const data = await response.json();
                 let result = data.choices[0].message.content;
-                // 防止 AI 给结果加引号
-                result = result.replace(/^["']|["']$/g, '');
+                
+                // AI 后处理：如果 AI 还是顽固留下了第一个词，用本地规则补刀
+                result = localRuleClean(result.replace(/^["']|["']$/g, ''));
+                
                 outBox.innerHTML = `<div class="ai-badge">${config.apiModel}</div>${result}`;
             } catch (e) { outBox.innerHTML = `❌ 错误: ${e.message}`; }
             finally { setAiLoading(false); }
@@ -278,7 +291,7 @@
     function setAiLoading(l) {
         isProcessing = l;
         document.getElementById('btnAiExec').disabled = l;
-        document.getElementById('aiBtnText').innerHTML = l ? `<div class="spinner"></div> 思考中...` : `🤖 AI 深度清理`;
+        document.getElementById('aiBtnText').innerHTML = l ? `<div class="spinner"></div> 深度扫描...` : `🤖 AI 深度清理`;
     }
 
     // --- Excel 逻辑 ---
@@ -298,15 +311,11 @@
     function execTableClean() {
         rawData = rawData.map(row => {
             const nr = {...row};
-            for(let k in nr) if(typeof nr[k] === 'string') {
-                let brands = config.customBrands.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 1);
-                let brandRegex = new RegExp(`\\b(${brands.join('|')})\\b`, 'gi');
-                nr[k] = nr[k].replace(brandRegex, "").replace(/\s+/g, ' ').trim();
-            }
+            for(let k in nr) if(typeof nr[k] === 'string') nr[k] = localRuleClean(nr[k]);
             return nr;
         });
         document.getElementById('btnExport').disabled = false;
-        alert("批量清洗完成！");
+        alert("批量规则清洗完成！");
     }
 
     function exportRes() {
