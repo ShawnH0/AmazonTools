@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Shawn's Listing Pro v10</title>
+    <title>Shawn's Listing Pro v9</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -10,33 +10,56 @@
             --apple-bg: #f5f5f7; --apple-blue: #0066cc; --apple-gray: #86868b;
             --apple-border: rgba(0,0,0,0.1); --apple-green: #34c759; --apple-red: #ff3b30;
         }
+
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background-color: var(--apple-bg); margin: 0; height: 100vh; display: flex; flex-direction: column; color: #1d1d1f; }
-        .nav-header { height: 48px; background: rgba(251, 251, 253, 0.8); backdrop-filter: blur(20px); display: flex; justify-content: space-between; align-items: center; padding: 0 5%; border-bottom: 1px solid var(--apple-border); z-index: 100; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            background-color: var(--apple-bg); margin: 0; height: 100vh;
+            display: flex; flex-direction: column; color: #1d1d1f;
+        }
+
+        /* 导航栏 */
+        .nav-header {
+            height: 48px; background: rgba(251, 251, 253, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 5%; border-bottom: 1px solid var(--apple-border); z-index: 100;
+        }
         .nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #1d1d1f; font-weight: 600; font-size: 14px; }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+
+        /* 布局 */
         .container { max-width: 1440px; margin: 0 auto; width: 96%; flex: 1; display: flex; flex-direction: column; padding: 20px 0; overflow: hidden; }
-        .workspace { display: grid; grid-template-columns: 380px 1fr; gap: 20px; flex: 1; overflow: hidden; }
-        .panel { background: #fff; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--apple-border); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .workspace { display: grid; grid-template-columns: 400px 1fr; gap: 20px; flex: 1; overflow: hidden; }
+        .panel { background: #fff; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--apple-border); }
         .section-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+        
         textarea { width: 100%; border-radius: 10px; border: 1px solid #d2d2d7; font-family: inherit; font-size: 13px; padding: 12px; resize: none; outline: none; }
-        .display-area { flex: 1; margin-top: 10px; padding: 12px; background: #fbfbfd; border-radius: 10px; font-size: 13px; overflow-y: auto; border: 1px solid var(--apple-border); line-height: 1.6; }
-        .violation-box { height: 90px; margin-top: 10px; padding: 10px; background: #fff1f0; border: 1px solid #ffa39e; border-radius: 8px; font-size: 12px; color: var(--apple-red); overflow-y: auto; }
-        .btn-group { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .btn { padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 500; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
+        .display-area { flex: 1; margin-top: 12px; padding: 12px; background: #fbfbfd; border-radius: 10px; font-size: 13px; overflow-y: auto; border: 1px solid var(--apple-border); position: relative; }
+
+        /* 违规词展示区 */
+        .violation-box { height: 100px; margin-top: 10px; padding: 10px; background: #fff1f0; border: 1px solid #ffa39e; border-radius: 8px; font-size: 12px; color: var(--apple-red); overflow-y: auto; }
+
+        /* 按钮 */
+        .btn-group { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .btn { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 500; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
         .btn-blue { background: var(--apple-blue); color: #fff; }
         .btn-purple { background: #af52de; color: #fff; }
         .btn-gray { background: #f2f2f7; color: #1d1d1f; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .table-wrap { flex: 1; overflow: auto; border: 1px solid var(--apple-border); border-radius: 10px; margin-top: 10px; background: #fff; }
+
+        /* 表格样式 */
+        .table-wrap { flex: 1; overflow: auto; border: 1px solid var(--apple-border); border-radius: 10px; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
-        th { background: #f5f5f7; padding: 10px; text-align: left; position: sticky; top: 0; border-bottom: 1px solid var(--apple-border); z-index: 5; }
+        th { background: #f5f5f7; padding: 10px; text-align: left; position: sticky; top: 0; border-bottom: 1px solid var(--apple-border); }
         td { padding: 8px 10px; border-bottom: 1px solid #f2f2f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-card { background: #fff; width: 550px; border-radius: 20px; padding: 30px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        .modal-close { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 24px; color: var(--apple-gray); }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 11px; color: var(--apple-gray); margin-bottom: 6px; font-weight: 600; }
-        .modal-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d2d2d7; font-size: 13px; outline: none; }
+
+        /* 弹窗模型 */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-card { background: #fff; width: 550px; border-radius: 20px; padding: 25px; position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 20px; color: var(--apple-gray); }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 11px; color: var(--apple-gray); margin-bottom: 4px; font-weight: 600; }
+        .modal-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #d2d2d7; font-size: 12px; outline: none; }
+        
         .spinner { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
@@ -44,35 +67,46 @@
 <body>
 
 <div class="nav-header">
-    <a href="#" class="nav-brand"><b>Shawn's Listing Pro</b></a>
-    <div class="nav-right"><button class="btn btn-gray" onclick="openModal()">⚙️ 设置中心</button></div>
+    <a href="index.html" class="nav-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        Shawn's Listing Pro
+    </a>
+    <div class="nav-right">
+        <button class="btn btn-gray" onclick="openModal()">⚙️ 设置中心</button>
+    </div>
 </div>
 
 <div class="container">
     <div class="workspace">
         <div class="panel">
-            <div class="section-title">单段文案清洗</div>
-            <textarea id="singleInput" style="height: 120px;" placeholder="粘贴需要清洗的描述..."></textarea>
+            <div class="section-title">单段清洗</div>
+            <textarea id="singleInput" style="height: 120px;" placeholder="粘贴文案..."></textarea>
             <div class="btn-group">
                 <button class="btn btn-blue" onclick="singleClean('rule')">⚡ 规则清洗</button>
                 <button class="btn btn-purple" id="btnAiSingle" onclick="singleClean('ai')">🤖 AI 清洗</button>
             </div>
-            <div id="singleOutput" class="display-area">等待处理...</div>
-            <div id="singleViolations" class="violation-box">识别到的违规词...</div>
+            <div id="singleOutput" class="display-area">处理结果将在此显示...</div>
+            <div id="singleViolations" class="violation-box" title="从文中识别出的违规词">识别到的违规词将在此列出...</div>
         </div>
 
         <div class="panel">
-            <div class="section-title">批量处理中心 <span id="batchStatus" style="font-weight: normal; font-size: 11px; color: var(--apple-gray);">未上传</span></div>
+            <div class="section-title">
+                批量处理中心
+                <span id="batchStatus" style="font-size: 10px; color: var(--apple-gray);">未上传文件</span>
+            </div>
             <div class="btn-group">
                 <button class="btn btn-gray" onclick="document.getElementById('fIn').click()">📤 上传 Excel</button>
                 <input type="file" id="fIn" hidden accept=".xlsx, .xls, .csv" onchange="handleExcel(this.files[0])">
+                
                 <button class="btn btn-blue batch-btn" disabled onclick="batchClean('rule')">⚡ 规则批量清洗</button>
                 <button class="btn btn-purple batch-btn" id="btnAiBatch" disabled onclick="batchClean('ai')">🤖 AI 批量清洗</button>
                 <button class="btn btn-gray" id="btnExport" disabled onclick="exportExcel()">💾 导出</button>
                 <button class="btn btn-gray" id="btnReset" disabled onclick="resetData()">撤销</button>
             </div>
-            <div class="table-wrap"><table id="batchTable"><thead id="tHead"></thead><tbody id="tBody"></tbody></table></div>
-            <div id="batchViolations" class="violation-box">全表提取违规词...</div>
+            <div class="table-wrap">
+                <table id="batchTable"><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
+            </div>
+            <div id="batchViolations" class="violation-box">批量清洗出的全表违规词库...</div>
         </div>
     </div>
 </div>
@@ -81,176 +115,195 @@
     <div class="modal-card">
         <div class="modal-close" onclick="closeModal()">×</div>
         <div class="section-title">配置管理</div>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="input-group"><label>供应商</label>
+            <div class="input-group">
+                <label>供应商</label>
                 <select id="apiProvider" class="modal-input" onchange="updateModelOptions()">
                     <option value="deepseek">DeepSeek</option>
                     <option value="openai">OpenAI</option>
                     <option value="openrouter">OpenRouter</option>
                 </select>
             </div>
-            <div class="input-group"><label>AI 模型</label><select id="apiModel" class="modal-input"></select></div>
+            <div class="input-group">
+                <label>选择模型</label>
+                <select id="apiModel" class="modal-input"></select>
+            </div>
         </div>
+
         <div class="input-group"><label>API Key</label><input type="password" id="apiKey" class="modal-input"></div>
-        <div class="input-group"><label>禁售词库 (逗号隔开)</label><textarea id="customBrands" class="modal-input" style="height:60px;"></textarea></div>
-        <button class="btn btn-blue" style="width:100%; height:40px; justify-content:center; margin-top:10px;" onclick="saveConfig()">保存配置</button>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="input-group"><label>GitHub Token</label><input type="password" id="ghToken" class="modal-input"></div>
+            <div class="input-group"><label>Repo (user/repo)</label><input type="text" id="ghRepo" class="modal-input"></div>
+        </div>
+
+        <div class="input-group"><label>禁售品牌词库 (逗号分隔)</label><textarea id="customBrands" class="modal-input" style="height:60px;"></textarea></div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btn-purple" style="flex:1; justify-content:center;" onclick="syncCloud('upload')">📤 同步至云端</button>
+            <button class="btn btn-gray" style="flex:1; justify-content:center;" onclick="syncCloud('download')">📥 从云端拉取</button>
+        </div>
+        <button class="btn btn-blue" style="width:100%; height:36px; justify-content:center; margin-top:15px;" onclick="saveConfig()">保存并应用</button>
     </div>
 </div>
 
 <script>
     const MODELS = {
         deepseek: ['deepseek-chat', 'deepseek-reasoner'],
-        openai: ['gpt-4o-mini', 'gpt-4o'],
-        openrouter: ['anthropic/claude-3-haiku', 'google/gemini-flash-1.5']
+        openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
+        openrouter: ['anthropic/claude-3-haiku', 'google/gemini-flash-1.5', 'meta-llama/llama-3-8b']
     };
+
     let originalData = [], processedData = [], config = {};
 
     window.onload = () => { loadConfig(); updateModelOptions(); };
 
     function loadConfig() {
-        ['apiKey', 'apiProvider', 'apiModel', 'customBrands'].forEach(f => {
-            config[f] = localStorage.getItem('sh_v10_' + f) || '';
+        ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo'].forEach(f => {
+            config[f] = localStorage.getItem('sh_v9_' + f) || '';
             if(document.getElementById(f)) document.getElementById(f).value = config[f];
         });
     }
 
     function saveConfig() {
-        ['apiKey', 'apiProvider', 'apiModel', 'customBrands'].forEach(f => {
+        ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo'].forEach(f => {
             const val = document.getElementById(f).value.trim();
             config[f] = val;
-            localStorage.setItem('sh_v10_' + f, val);
+            localStorage.setItem('sh_v9_' + f, val);
         });
         closeModal();
     }
 
     function updateModelOptions() {
-        const p = document.getElementById('apiProvider').value;
-        const mSelect = document.getElementById('apiModel');
-        mSelect.innerHTML = MODELS[p].map(m => `<option value="${m}">${m}</option>`).join('');
-        if(config.apiModel && MODELS[p].includes(config.apiModel)) mSelect.value = config.apiModel;
+        const provider = document.getElementById('apiProvider').value;
+        const modelSelect = document.getElementById('apiModel');
+        modelSelect.innerHTML = MODELS[provider].map(m => `<option value="${m}">${m}</option>`).join('');
+        modelSelect.value = config.apiModel || MODELS[provider][0];
     }
 
-    // --- 核心逻辑 ---
+    // --- 核心清洗算法与违规词提取 ---
     function cleanLogic(text) {
         if(!text || typeof text !== 'string') return text;
-        let brands = config.customBrands.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 0);
+        let brands = config.customBrands.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 1);
         if(!brands.length) return text;
-        let regex = new RegExp(`(^|\\b)(${brands.join('|')})(\\b|$)`, 'gi');
-        return text.replace(regex, "").replace(/\s+/g, ' ').trim();
-    }
-
-    function extractViolations(oldT, newT) {
-        if(!oldT || !newT) return [];
-        const oldSet = oldT.toLowerCase().match(/\b\w+\b/g) || [];
-        const newSet = new Set((newT.toLowerCase().match(/\b\w+\b/g) || []));
-        return oldSet.filter(w => !newSet.has(w) && w.length > 1);
-    }
-
-    // --- Excel 读取修复 ---
-    function handleExcel(file) {
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = e.target.result;
-                // 关键点：强制读取为原始格式并处理空值
-                const workbook = XLSX.read(data, { type: 'binary', raw: false, defval: "" });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // 先获取原始数组
-
-                if(json.length < 1) throw new Error("表格没有内容");
-
-                const headers = json[0];
-                const rows = json.slice(1).filter(r => r.length > 0); // 过滤空行
-
-                originalData = rows.map(r => {
-                    let obj = {};
-                    headers.forEach((h, i) => obj[h || `Column_${i}`] = r[i] || "");
-                    return obj;
-                });
-
-                processedData = JSON.parse(JSON.stringify(originalData));
-                renderTable(headers, processedData);
-                document.querySelectorAll('.batch-btn').forEach(b => b.disabled = false);
-                document.getElementById('batchStatus').innerText = `已成功载入 ${originalData.length} 行数据`;
-            } catch (err) {
-                alert("读取失败: " + err.message);
-            }
-        };
-        reader.readAsBinaryString(file);
-    }
-
-    function renderTable(headers, data) {
-        const tHead = document.getElementById('tHead');
-        const tBody = document.getElementById('tBody');
-        if(!headers) headers = Object.keys(data[0] || {});
         
-        tHead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-        tBody.innerHTML = data.slice(0, 15).map(row => 
-            `<tr>${headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>`
-        ).join('');
+        // 规则：保护 compatible with 等短语，删除独立品牌词
+        let brandRegex = new RegExp(`(^|\\b)(${brands.join('|')})(\\b|$)`, 'gi');
+        return text.replace(brandRegex, "").replace(/\s+/g, ' ').trim();
+    }
+
+    function extractViolations(oldText, newText) {
+        if(!oldText || !newText) return [];
+        const oldWords = oldText.toLowerCase().split(/[^a-zA-Z0-9]/).filter(w => w.length > 1);
+        const newWords = new Set(newText.toLowerCase().split(/[^a-zA-Z0-9]/));
+        return oldWords.filter(w => !newWords.has(w));
+    }
+
+    // --- 单段清洗 ---
+    async function singleClean(mode) {
+        const input = document.getElementById('singleInput').value.trim();
+        if(!input) return;
+        
+        let result = "";
+        if(mode === 'rule') {
+            result = cleanLogic(input);
+            updateSingleUI(input, result);
+        } else {
+            // AI 逻辑在此集成...
+            result = await aiCall(input); 
+            updateSingleUI(input, result);
+        }
+    }
+
+    function updateSingleUI(oldT, newT) {
+        document.getElementById('singleOutput').innerText = newT;
+        const viols = [...new Set(extractViolations(oldT, newT))];
+        document.getElementById('singleViolations').innerText = viols.length ? "识别到违规词: " + viols.join(', ') : "未发现明显违规词";
     }
 
     // --- 批量清洗 ---
-    async function batchClean(mode) {
-        const viols = new Set();
-        const status = document.getElementById('batchStatus');
-        const btn = mode === 'ai' ? document.getElementById('btnAiBatch') : null;
-        if(btn) btn.innerHTML = `<div class="spinner"></div> AI 处理中...`;
+    function handleExcel(f) {
+        const r = new FileReader();
+        r.onload = (e) => {
+            const wb = XLSX.read(e.target.result, {type: 'binary'});
+            originalData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            processedData = JSON.parse(JSON.stringify(originalData));
+            renderTable(processedData);
+            document.querySelectorAll('.batch-btn').forEach(b => b.disabled = false);
+            document.getElementById('batchStatus').innerText = `已载入 ${originalData.length} 行数据`;
+        };
+        r.readAsBinaryString(f);
+    }
 
-        for(let i=0; i<processedData.length; i++) {
-            status.innerText = `正在处理第 ${i+1}/${processedData.length} 行...`;
+    function renderTable(data) {
+        if(!data.length) return;
+        const keys = Object.keys(data[0]);
+        document.getElementById('tHead').innerHTML = `<tr>${keys.map(k => `<th>${k}</th>`).join('')}</tr>`;
+        document.getElementById('tBody').innerHTML = data.slice(0, 10).map(row => 
+            `<tr>${keys.map(k => `<td>${row[k] || ''}</td>`).join('')}</tr>`
+        ).join('');
+    }
+
+    async function batchClean(mode) {
+        const allViolations = new Set();
+        const btn = mode === 'ai' ? document.getElementById('btnAiBatch') : null;
+        if(btn) btn.disabled = true;
+
+        for(let i=0; i < processedData.length; i++) {
             for(let key in processedData[i]) {
-                const oldV = String(processedData[i][key]);
-                let newV = mode === 'rule' ? cleanLogic(oldV) : await aiCall(oldV);
-                extractViolations(oldV, newV).forEach(v => viols.add(v));
-                processedData[i][key] = newV;
+                const oldVal = String(processedData[i][key]);
+                let newVal = "";
+                
+                if(mode === 'rule') {
+                    newVal = cleanLogic(oldVal);
+                } else {
+                    newVal = await aiCall(oldVal); // 警告：批量AI需注意频率限制
+                }
+                
+                extractViolations(oldVal, newVal).forEach(v => allViolations.add(v));
+                processedData[i][key] = newVal;
             }
         }
 
-        renderTable(null, processedData);
-        document.getElementById('batchViolations').innerText = "提取违规词: " + [...viols].join(', ');
+        renderTable(processedData);
+        document.getElementById('batchViolations').innerText = "全表提取违规词: " + [...allViolations].join(', ');
         document.getElementById('btnExport').disabled = false;
         document.getElementById('btnReset').disabled = false;
-        if(btn) btn.innerHTML = `🤖 AI 批量清洗`;
-        status.innerText = `清洗完成！共处理 ${processedData.length} 行`;
+        if(btn) btn.disabled = false;
+        alert("批量清洗完成！");
     }
 
     async function aiCall(text) {
-        if(!text || !config.apiKey) return text;
+        if(!config.apiKey) return text;
         try {
-            const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            const res = await fetch('https://api.deepseek.com/v1/chat/completions', { // 简化版地址
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
                 body: JSON.stringify({
                     model: config.apiModel,
-                    messages: [{role:"system", content:"Remove brands. Output cleaned text only."}, {role:"user", content: text}]
+                    messages: [{role: "system", content: "Remove standalone brand names from text. Keep 'for [brand]'. Output only cleaned text."}, {role: "user", content: text}],
+                    temperature: 0
                 })
             });
-            const d = await res.json();
-            return d.choices[0].message.content.trim();
-        } catch(e) { return text; }
-    }
-
-    function singleClean(mode) {
-        const input = document.getElementById('singleInput').value;
-        const out = document.getElementById('singleOutput');
-        if(mode === 'rule') {
-            const res = cleanLogic(input);
-            out.innerText = res;
-            const v = extractViolations(input, res);
-            document.getElementById('singleViolations').innerText = "提取词: " + v.join(', ');
-        }
+            const data = await res.json();
+            return data.choices[0].message.content.trim();
+        } catch (e) { return text; }
     }
 
     function exportExcel() {
         const ws = XLSX.utils.json_to_sheet(processedData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "CleanedData");
-        XLSX.writeFile(wb, `Cleaned_Listing_${Date.now()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Cleaned");
+        XLSX.writeFile(wb, `Batch_Cleaned_${Date.now()}.xlsx`);
     }
 
-    function resetData() { processedData = JSON.parse(JSON.stringify(originalData)); renderTable(null, processedData); }
+    function resetData() {
+        processedData = JSON.parse(JSON.stringify(originalData));
+        renderTable(processedData);
+        document.getElementById('batchViolations').innerText = "";
+    }
+
     function openModal() { document.getElementById('modal').style.display = 'flex'; }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
 </script>
