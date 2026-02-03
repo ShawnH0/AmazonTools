@@ -2,103 +2,83 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>关键词去重 - 卖家工具箱</title>
+    <title>Shawn's 关键词去重 - 卖家专业版</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --apple-bg: #f5f5f7;
-            --apple-blue: #0066cc;
-            --apple-card: #ffffff;
-            --apple-text: #1d1d1f;
-            --apple-secondary: #86868b;
+            --apple-bg: #f5f5f7; --apple-blue: #0066cc; --apple-card: #ffffff;
+            --apple-text: #1d1d1f; --apple-secondary: #86868b;
+            --apple-green: #34c759; --apple-red: #ff3b30; --apple-warning: #ff9500;
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--apple-bg);
-            margin: 0; padding: 0; height: 100vh;
-            display: flex; flex-direction: column; overflow: hidden;
-            color: var(--apple-text);
+            font-family: 'Inter', -apple-system, sans-serif; background: var(--apple-bg);
+            margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--apple-text);
         }
 
-        /* 统一导航栏 */
         .nav-header {
-            height: 52px; background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            height: 52px; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px);
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 24px; border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 100;
         }
 
         .home-logo {
             width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            border-radius: 10px; background: #fff; border: 1px solid #e5e5e7;
-            color: #1d1d1f; text-decoration: none; transition: 0.2s;
-        }
-        .home-logo:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-
-        /* 系统配置按钮（保持视觉统一） */
-        .api-status-btn {
-            padding: 6px 14px; border-radius: 18px; font-size: 13px; font-weight: 500;
-            background: rgba(52, 199, 89, 0.1); color: #34c759; border: none;
+            border-radius: 10px; background: #fff; border: 1px solid #e5e5e7; color: #1d1d1f; text-decoration: none;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; width: 95%; flex: 1; display: flex; flex-direction: column; padding: 24px 0; overflow: hidden; }
+        .container { max-width: 1400px; margin: 0 auto; width: 95%; flex: 1; display: flex; flex-direction: column; padding: 20px 0; overflow: hidden; }
 
-        /* 顶部的选项栏 */
+        /* 选项栏重构 */
         .options-bar {
             background: var(--apple-card); padding: 16px 24px; border-radius: 20px;
-            margin-bottom: 20px; display: flex; gap: 30px; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            margin-bottom: 16px; display: flex; gap: 30px; align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap;
         }
 
-        .option-item { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
-        
-        select {
-            padding: 6px 12px; border-radius: 10px; border: 1px solid #d2d2d7;
-            background: #fff; outline: none; font-size: 13px;
-        }
+        .option-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+        select { padding: 5px 10px; border-radius: 8px; border: 1px solid #d2d2d7; outline: none; }
 
-        /* 主体布局 */
+        .mode-preset {
+            background: #f2f2f7; padding: 4px; border-radius: 10px; display: flex; gap: 4px;
+        }
+        .mode-btn {
+            padding: 4px 12px; border-radius: 7px; border: none; font-size: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .mode-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--apple-blue); font-weight: 600; }
+
+        /* 工作区 */
         .workspace { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
-        
         .panel { 
-            background: var(--apple-card); border-radius: 24px; padding: 24px;
+            background: var(--apple-card); border-radius: 24px; padding: 20px;
             display: flex; flex-direction: column; box-shadow: 0 8px 30px rgba(0,0,0,0.04);
         }
 
-        .panel-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
-        }
-        .panel-title { font-size: 17px; font-weight: 600; }
-        .stat-tag { font-size: 12px; background: #f5f5f7; color: var(--apple-secondary); padding: 4px 10px; border-radius: 12px; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .panel-title { font-size: 16px; font-weight: 600; }
+        .info-tag { font-size: 11px; background: #f5f5f7; color: var(--apple-secondary); padding: 4px 10px; border-radius: 12px; }
 
         textarea {
             flex: 1; width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #d2d2d7;
-            background: #fafafa; font-size: 14px; line-height: 1.6; resize: none;
-            box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: 'SF Mono', Menlo, monospace;
+            background: #fafafa; font-size: 14px; line-height: 1.6; resize: none; box-sizing: border-box;
+            transition: 0.3s; font-family: 'SF Mono', Menlo, monospace;
         }
-        textarea:focus {
-            background: #fff; border-color: var(--apple-blue);
-            box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1); outline: none;
-        }
+        textarea:focus { background: #fff; border-color: var(--apple-blue); box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1); outline: none; }
 
-        /* 底部操作 */
-        .btn-group { display: flex; gap: 12px; margin-top: 20px; }
-        
-        .btn {
-            padding: 10px 20px; border-radius: 22px; font-size: 14px; font-weight: 500;
-            border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
-        }
+        /* Amazon 进度条 */
+        .amazon-meter { margin-top: 15px; padding: 12px; background: #f9f9fb; border-radius: 14px; border: 1px solid #efeff4; }
+        .meter-bar-bg { height: 6px; background: #e5e5e7; border-radius: 3px; margin: 8px 0; overflow: hidden; }
+        .meter-bar-fill { height: 100%; width: 0%; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .state-normal { background: var(--apple-green); }
+        .state-over { background: var(--apple-red); }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 8px 18px; border-radius: 18px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
         .btn-primary { background: var(--apple-blue); color: #fff; }
-        .btn-primary:hover { background: #0077ed; }
         .btn-secondary { background: #f5f5f7; color: var(--apple-text); }
-        .btn-secondary:hover { background: #e8e8ed; }
-        .btn-danger { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+        .btn-danger { background: rgba(255, 59, 48, 0.08); color: #ff3b30; }
 
-        /* 动画 */
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        .processing { animation: pulse 1s infinite; }
+        .highlight-msg { font-size: 12px; color: var(--apple-blue); font-weight: 500; }
     </style>
 </head>
 <body>
@@ -107,24 +87,34 @@
     <a href="index.html" class="home-logo">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
     </a>
-    <div style="font-weight: 600;">文本去重 & 关键词优化</div>
-    <button class="api-status-btn">本地处理模式</button>
+    <div style="font-weight: 600;">Shawn's Keywords Optimizer</div>
+    <div class="highlight-msg" id="detectMsg">智能识别就绪</div>
 </div>
 
 <div class="container">
     <div class="options-bar">
         <div class="option-item">
-            <span style="color:var(--apple-secondary)">识别分隔符</span>
+            <span>预设模式</span>
+            <div class="mode-preset">
+                <button class="mode-btn active" onclick="setMode('general', this)">通用去重</button>
+                <button class="mode-btn" onclick="setMode('amazon', this)">Amazon ST 模式</button>
+            </div>
+        </div>
+        <div class="option-item">
+            <span>分隔符</span>
             <select id="separator" onchange="handleProcess()">
-                <option value="auto">自动智能识别</option>
+                <option value="auto">自动识别 (空格/换行/逗号)</option>
                 <option value="space">仅空格</option>
                 <option value="line">仅换行</option>
-                <option value="comma">仅逗号</option>
             </select>
         </div>
         <div class="option-item">
-            <input type="checkbox" id="ignoreCase" checked onchange="handleProcess()" style="width:16px; height:16px; cursor:pointer;">
-            <label for="ignoreCase" style="cursor:pointer">忽略大小写</label>
+            <input type="checkbox" id="ignoreCase" checked onchange="handleProcess()">
+            <label for="ignoreCase">忽略大小写</label>
+        </div>
+        <div class="option-item">
+            <input type="checkbox" id="smartDedupe" onchange="handleProcess()">
+            <label for="smartDedupe" title="词序不同也视为重复，如 wireless charger 和 charger wireless">词序无关去重 🔥</label>
         </div>
     </div>
 
@@ -132,22 +122,32 @@
         <div class="panel">
             <div class="panel-header">
                 <div class="panel-title">原始数据</div>
-                <div class="stat-tag" id="beforeStat">数量: 0</div>
+                <div class="info-tag" id="beforeStat">数量: 0</div>
             </div>
-            <textarea id="inputText" placeholder="在此粘贴关键词..." oninput="handleProcess()"></textarea>
+            <textarea id="inputText" placeholder="在此粘贴原始关键词清单..." oninput="handleProcess()"></textarea>
             <div class="btn-group">
-                <button class="btn btn-danger" onclick="clearAll()">🗑️ 清空</button>
+                <button class="btn btn-danger" onclick="clearAll()">🗑️ 清空内容</button>
             </div>
         </div>
 
         <div class="panel">
             <div class="panel-header">
-                <div class="panel-title">去重结果</div>
-                <div class="stat-tag" id="afterStat">数量: 0 | 字符: 0</div>
+                <div class="panel-title">优化结果</div>
+                <div class="info-tag" id="removeStat">移除重复: 0</div>
             </div>
             <textarea id="outputText" readonly placeholder="清洗后的结果..."></textarea>
+            
+            <div class="amazon-meter">
+                <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600;">
+                    <span>Amazon Search Terms 长度校验</span>
+                    <span id="charCountDisplay">0 / 250</span>
+                </div>
+                <div class="meter-bar-bg"><div id="meterFill" class="meter-bar-fill"></div></div>
+                <div style="font-size:10px; color:var(--apple-secondary);" id="meterHint">建议保持在 250 字符以内以确保索引</div>
+            </div>
+
             <div class="btn-group">
-                <button class="btn btn-primary" onclick="copyResult()">📋 复制结果</button>
+                <button class="btn btn-primary" onclick="copyResult(this)">📋 复制结果</button>
                 <button class="btn btn-secondary" onclick="downloadTXT()">💾 导出 TXT</button>
             </div>
         </div>
@@ -155,58 +155,109 @@
 </div>
 
 <script>
+    function setMode(type, btn) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const ignoreCase = document.getElementById('ignoreCase');
+        const smartDedupe = document.getElementById('smartDedupe');
+        const separator = document.getElementById('separator');
+
+        if (type === 'amazon') {
+            ignoreCase.checked = true;
+            smartDedupe.checked = true;
+            separator.value = "auto";
+        }
+        handleProcess();
+    }
+
     function handleProcess() {
         const input = document.getElementById('inputText').value;
         const separatorType = document.getElementById('separator').value;
         const ignoreCase = document.getElementById('ignoreCase').checked;
+        const smartDedupe = document.getElementById('smartDedupe').checked;
         
         if (!input.trim()) {
-            updateResult("", 0);
-            document.getElementById('beforeStat').innerText = `数量: 0`;
+            updateUI("", 0, 0, "等待输入");
             return;
         }
 
+        // 5️⃣ 极端输入兜底：增强型正则，包含制表符、全角空格
         let regex;
         if (separatorType === "space") regex = /[ ]+/;
         else if (separatorType === "line") regex = /[\n\r]+/;
-        else if (separatorType === "comma") regex = /[,，]+/;
-        else regex = /[ \n\r,，]+/;
+        else regex = /[ \n\r\t,，\u3000]+/;
+
+        // 3️⃣ 自动识别分隔符显示
+        const detected = separatorType === "auto" ? "空格/换行/逗号" : separatorType;
+        document.getElementById('detectMsg').innerText = `已识别分隔符：${detected}`;
 
         const words = input.split(regex).filter(w => w.trim() !== "");
-        document.getElementById('beforeStat').innerText = `单词数: ${words.length}`;
+        document.getElementById('beforeStat').innerText = `原始单词: ${words.length}`;
 
         const seen = new Set();
         const result = [];
 
         words.forEach(word => {
-            const compareWord = ignoreCase ? word.toLowerCase() : word;
-            if (!seen.has(compareWord)) {
-                seen.add(compareWord);
+            let compareKey = ignoreCase ? word.toLowerCase() : word;
+            
+            // 2️⃣ 去重策略升级：词序无关校验
+            if (smartDedupe) {
+                // 将短语拆分、排序后再组合，如 "charger wireless" -> "charger wireless"
+                compareKey = compareKey.split(/\s+/).sort().join(" ");
+            }
+
+            if (!seen.has(compareKey)) {
+                seen.add(compareKey);
                 result.push(word);
             }
         });
 
+        // 亚马逊 ST 推荐用空格分隔
         const output = result.join(" ");
-        updateResult(output, result.length);
+        const removedCount = words.length - result.length;
+        updateUI(output, result.length, removedCount);
     }
 
-    function updateResult(text, count) {
+    function updateUI(text, count, removed, msg) {
         document.getElementById('outputText').value = text;
-        document.getElementById('afterStat').innerText = `去重后: ${count} | 字符: ${text.length}`;
+        document.getElementById('removeStat').innerText = `移除重复: ${removed}`;
+        
+        // 8️⃣ Amazon Search Terms 实时提醒
+        const len = text.length;
+        const display = document.getElementById('charCountDisplay');
+        const fill = document.getElementById('meterFill');
+        const hint = document.getElementById('meterHint');
+
+        display.innerText = `${len} / 250`;
+        const percent = Math.min((len / 250) * 100, 100);
+        fill.style.width = percent + '%';
+
+        if (len > 250) {
+            fill.className = 'meter-bar-fill state-over';
+            display.style.color = 'var(--apple-red)';
+            hint.innerText = "❌ 已超过 Amazon 限制，请精简关键词！";
+            hint.style.color = 'var(--apple-red)';
+        } else {
+            fill.className = 'meter-bar-fill state-normal';
+            display.style.color = 'var(--apple-text)';
+            hint.innerText = "✅ 长度符合 Amazon Search Terms 规范";
+            hint.style.color = 'var(--apple-secondary)';
+        }
     }
 
-    function copyResult() {
+    // 7️⃣ 修复 copyResult 的 context 问题
+    function copyResult(btnElement) {
         const output = document.getElementById('outputText');
         output.select();
         document.execCommand('copy');
         
-        const btn = event.currentTarget;
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = "✅ 已复制";
-        btn.style.background = "#34c759";
+        const originalHtml = btnElement.innerHTML;
+        btnElement.innerHTML = "✅ 已复制";
+        btnElement.style.background = "var(--apple-green)";
         setTimeout(() => {
-            btn.innerHTML = originalHtml;
-            btn.style.background = "var(--apple-blue)";
+            btnElement.innerHTML = originalHtml;
+            btnElement.style.background = "var(--apple-blue)";
         }, 1500);
     }
 
@@ -215,7 +266,7 @@
         if(!text) return;
         const blob = new Blob([text], {type: "text/plain"});
         const anchor = document.createElement("a");
-        anchor.download = "cleaned_keywords.txt";
+        anchor.download = `Cleaned_Keywords_${new Date().getTime()}.txt`;
         anchor.href = window.URL.createObjectURL(blob);
         anchor.click();
     }
