@@ -29,7 +29,6 @@
         .cap-tag { 
             font-size: 11px; padding: 3px 10px; border-radius: 6px; 
             border: 1px solid #e5e5e7; color: var(--apple-gray); font-weight: 500;
-            transition: 0.3s;
         }
         .cap-tag.active { border-color: var(--apple-green); color: var(--apple-green); background: rgba(52, 199, 89, 0.08); }
 
@@ -60,7 +59,7 @@
         .ai-badge {
             position: absolute; top: 12px; right: 12px; font-size: 10px;
             background: var(--apple-purple); color: white; padding: 3px 8px; border-radius: 6px;
-            font-weight: 600; letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
         .btn {
@@ -68,23 +67,26 @@
             border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
         }
         .btn-blue { background: var(--apple-blue); color: #fff; }
-        .btn-blue:hover { background: #0055bb; }
         .btn-purple { background: var(--apple-purple); color: #fff; }
         .btn-gray { background: #f2f2f7; color: #1d1d1f; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* 配置弹窗 */
+        /* 配置弹窗增强 */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-card { background: #fff; width: 520px; border-radius: 30px; padding: 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); }
-        .modal-card h2 { margin: 0 0 24px 0; font-size: 22px; font-weight: 700; }
+        .modal-card { background: #fff; width: 600px; border-radius: 30px; padding: 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .input-group { margin-bottom: 18px; }
         .input-group label { display: block; font-size: 11px; font-weight: 700; color: var(--apple-gray); margin-bottom: 6px; text-transform: uppercase; }
-        .modal-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #d2d2d7; box-sizing: border-box; font-size: 14px; }
-        
-        select.modal-input { appearance: none; background: url("data:image/svg+xml,...") no-repeat right 12px center; }
+        .modal-input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #d2d2d7; box-sizing: border-box; font-size: 13px; }
 
-        /* Loading 动画 */
-        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .sync-box { 
+            background: #f5f5f7; padding: 15px; border-radius: 15px; margin-top: 10px;
+            border: 1px dashed #d2d2d7;
+        }
+
+        /* 动画 */
+        .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -95,7 +97,7 @@
         <div style="background:var(--apple-blue); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800;">S</div>
         <span style="font-weight:700; font-size:18px; letter-spacing:-0.5px;">CleanListing Pro</span>
         <div class="capability-tags">
-            <span id="tag-local" class="cap-tag">词库清洗</span>
+            <span id="tag-gh" class="cap-tag">GitHub 云同步</span>
             <span id="tag-ai" class="cap-tag">AI 清洗</span>
         </div>
     </div>
@@ -106,7 +108,7 @@
     <div class="workspace">
         <div class="panel">
             <div class="section-title">单段文案清洗</div>
-            <textarea id="textInput" style="height: 180px;" placeholder="在此粘贴 Amazon Listing 原始描述 (支持 HTML)..."></textarea>
+            <textarea id="textInput" style="height: 180px;" placeholder="在此粘贴 Amazon Listing 原始描述..."></textarea>
             <div style="display:flex; gap:12px; margin-top:16px;">
                 <button class="btn btn-blue" onclick="execClean('rule')">⚡ 规则清洗</button>
                 <button class="btn btn-purple" id="btnAiExec" onclick="execClean('ai')">
@@ -125,12 +127,12 @@
             <div style="display:flex; gap:12px; margin-bottom:16px;">
                 <button class="btn btn-gray" onclick="document.getElementById('fIn').click()">📤 上传表格</button>
                 <button class="btn btn-blue" id="btnTableExec" disabled onclick="execTableClean()">执行批量清洗</button>
-                <button class="btn btn-gray" id="btnExport" disabled onclick="exportRes()">💾 导出结果</button>
+                <button class="btn btn-gray" id="btnExport" disabled onclick="exportRes()">💾 导出</button>
                 <input type="file" id="fIn" hidden onchange="handleExcel(this.files[0])">
             </div>
-            <div style="flex:1; overflow:auto; border:1px solid rgba(0,0,0,0.05); border-radius:14px; background:#fcfcfd;">
-                <table id="dataTable" style="width:100%; font-size:12px; border-collapse:collapse; text-align:left;">
-                    <thead style="background:#f5f5f7; position:sticky; top:0; z-index:10;"><tr id="tHead"></tr></thead>
+            <div style="flex:1; overflow:auto; border:1px solid rgba(0,0,0,0.05); border-radius:14px;">
+                <table id="dataTable" style="width:100%; font-size:12px; border-collapse:collapse;">
+                    <thead style="background:#f5f5f7; position:sticky; top:0;"><tr id="tHead"></tr></thead>
                     <tbody id="tBody"></tbody>
                 </table>
             </div>
@@ -140,29 +142,61 @@
 
 <div class="modal-overlay" id="modal">
     <div class="modal-card">
-        <h2>系统配置</h2>
-        <div class="input-group">
-            <label>AI 供应商</label>
-            <select id="apiProvider" class="modal-input" onchange="toggleProvider()">
-                <option value="deepseek">DeepSeek (性价比最高)</option>
-                <option value="openrouter">OpenRouter (模型最全)</option>
-                <option value="openai">OpenAI (标准接口)</option>
-            </select>
+        <h2>系统配置管理</h2>
+        
+        <div class="config-grid">
+            <div>
+                <label style="font-size:12px; color:var(--apple-blue)">● AI 深度模型配置</label>
+                <div class="input-group">
+                    <label>供应商</label>
+                    <select id="apiProvider" class="modal-input" onchange="toggleProvider()">
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="openai">OpenAI</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>API Key</label>
+                    <input type="password" id="apiKey" class="modal-input">
+                </div>
+                <div class="input-group">
+                    <label>模型名称</label>
+                    <input type="text" id="apiModel" class="modal-input">
+                </div>
+            </div>
+
+            <div>
+                <label style="font-size:12px; color:var(--apple-purple)">● GitHub 词库同步</label>
+                <div class="input-group">
+                    <label>GitHub Token (Repo 权限)</label>
+                    <input type="password" id="ghToken" class="modal-input" placeholder="ghp_xxx">
+                </div>
+                <div class="input-group">
+                    <label>仓库路径 (User/Repo)</label>
+                    <input type="text" id="ghRepo" class="modal-input" placeholder="ShawnHo/AmazonTools">
+                </div>
+                <div class="input-group">
+                    <label>文件路径</label>
+                    <input type="text" id="ghPath" class="modal-input" placeholder="data/brands.json">
+                </div>
+            </div>
         </div>
+
         <div class="input-group">
-            <label>API Key</label>
-            <input type="password" id="apiKey" class="modal-input" placeholder="sk-...">
-        </div>
-        <div class="input-group">
-            <label>模型名称</label>
-            <input type="text" id="apiModel" class="modal-input" placeholder="deepseek-chat">
-        </div>
-        <div class="input-group">
-            <label>本地屏蔽品牌库 (逗号分隔)</label>
+            <label>当前词库内容 (对应 GitHub brands 字段)</label>
             <textarea id="customBrands" class="modal-input" style="height:80px;" placeholder="Apple, Sony, Nike..."></textarea>
         </div>
-        <div style="display:flex; gap:12px; margin-top:20px;">
-            <button class="btn btn-blue" style="flex:1; justify-content:center;" onclick="saveConfig()">保存并应用</button>
+
+        <div class="sync-box">
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-purple" style="flex:1; justify-content:center;" id="btnDownload" onclick="syncCloud('download')">📥 从云端下载词库</button>
+                <button class="btn btn-gray" style="flex:1; justify-content:center;" id="btnUpload" onclick="syncCloud('upload')">📤 上传至云端仓库</button>
+            </div>
+            <p style="font-size:10px; color:var(--apple-gray); margin-top:8px; text-align:center;">* 上传将覆盖 GitHub 上的文件，请谨慎操作</p>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:24px;">
+            <button class="btn btn-blue" style="flex:1; justify-content:center; height:44px;" onclick="saveConfig()">保存并应用本地配置</button>
             <button class="btn btn-gray" onclick="closeModal()">取消</button>
         </div>
     </div>
@@ -172,26 +206,22 @@
     let rawData = [];
     let config = {};
     let isProcessing = false;
+    let ghFileSha = ""; // GitHub 要求的文校验码
 
-    window.onload = () => {
-        loadConfig();
-        refreshCapabilityUI();
-    };
+    window.onload = () => { loadConfig(); refreshCapabilityUI(); };
 
     function loadConfig() {
-        const fields = ['apiKey', 'apiProvider', 'apiModel', 'customBrands'];
-        fields.forEach(f => {
-            config[f] = localStorage.getItem('sh_v3_' + f) || '';
+        ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo', 'ghPath'].forEach(f => {
+            config[f] = localStorage.getItem('sh_cloud_' + f) || '';
             document.getElementById(f).value = config[f];
         });
-        if(!config.apiModel) document.getElementById('apiModel').value = 'deepseek-chat';
+        if(!config.ghPath) document.getElementById('ghPath').value = 'data/brands.json';
     }
 
     function saveConfig() {
-        const fields = ['apiKey', 'apiProvider', 'apiModel', 'customBrands'];
-        fields.forEach(f => {
+        ['apiKey', 'apiProvider', 'apiModel', 'customBrands', 'ghToken', 'ghRepo', 'ghPath'].forEach(f => {
             const val = document.getElementById(f).value.trim();
-            localStorage.setItem('sh_v3_' + f, val);
+            localStorage.setItem('sh_cloud_' + f, val);
             config[f] = val;
         });
         refreshCapabilityUI();
@@ -199,164 +229,144 @@
     }
 
     function refreshCapabilityUI() {
-        const hasBrands = config.customBrands.length > 0;
+        const hasGH = config.ghToken && config.ghRepo;
         const hasAI = config.apiKey.length > 10;
-        document.getElementById('tag-local').className = hasBrands ? 'cap-tag active' : 'cap-tag';
+        document.getElementById('tag-gh').className = hasGH ? 'cap-tag active' : 'cap-tag';
         document.getElementById('tag-ai').className = hasAI ? 'cap-tag active' : 'cap-tag';
     }
 
-    // --- 算法核心：三段式规则清理 ---
+    // --- GitHub 云同步逻辑 ---
+    async function syncCloud(mode) {
+        if(!config.ghToken || !config.ghRepo) return alert("请先配置 GitHub Token 和 仓库路径");
+        const btn = mode === 'download' ? document.getElementById('btnDownload') : document.getElementById('btnUpload');
+        const originalText = btn.innerText;
+        btn.innerHTML = `<div class="spinner"></div> 处理中...`;
+
+        const url = `https://api.github.com/repos/${config.ghRepo}/contents/${config.ghPath}`;
+        const headers = { 'Authorization': `token ${config.ghToken}`, 'Content-Type': 'application/json' };
+
+        try {
+            if(mode === 'download') {
+                const res = await fetch(url, { headers });
+                if(!res.ok) throw new Error("文件不存在或权限错误");
+                const data = await res.json();
+                ghFileSha = data.sha; // 记录 SHA 供以后上传使用
+                const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+                document.getElementById('customBrands').value = content.brands.join(', ');
+                alert("✅ 词库已从云端同步至本地");
+            } else {
+                // 上传前先获取最新的 SHA (GitHub 强制要求)
+                const getRes = await fetch(url, { headers });
+                if(getRes.ok) { const d = await getRes.json(); ghFileSha = d.sha; }
+
+                const brandsArr = document.getElementById('customBrands').value.split(/[,，]/).map(s => s.trim()).filter(s => s);
+                const fileBody = {
+                    message: "Update brands library via CleanListing Pro",
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify({ brands: brandsArr, updated: new Date().toISOString() })))),
+                    sha: ghFileSha
+                };
+                const putRes = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(fileBody) });
+                if(!putRes.ok) throw new Error("同步失败");
+                alert("✅ 词库已成功推送至 GitHub 仓库");
+            }
+        } catch(e) {
+            alert("❌ 操作失败: " + e.message);
+        } finally {
+            btn.innerText = originalText;
+        }
+    }
+
+    // --- 核心清洗算法 ---
     function advancedRuleClean(text) {
         if (!text) return "";
         let brands = config.customBrands.split(/[,，]/).map(s => s.trim()).filter(s => s.length > 1);
         if (brands.length === 0) return text;
-
         let processed = text;
         const protectMap = new Map();
-
-        // 1. 保护 HTML 标签 (防止清理破坏结构)
-        processed = processed.replace(/<[^>]+>/g, (match) => {
-            const id = `##TAG${Math.random().toString(36).substr(2, 7)}##`;
-            protectMap.set(id, match);
-            return id;
+        processed = processed.replace(/<[^>]+>/g, (m) => {
+            const id = `##T${Math.random().toString(36).substr(2, 5)}##`;
+            protectMap.set(id, m); return id;
         });
-
-        // 2. 保护兼容性短语 (Compatible for Apple)
-        const compatPrefixes = ["compatible\\s+with", "for", "fits", "replacement\\s+for", "suited\\s+for"];
-        const compatRegex = new RegExp(`(${compatPrefixes.join('|')})\\s+(${brands.join('|')})`, 'gi');
-        processed = processed.replace(compatRegex, (match) => {
-            const id = `##COMP${Math.random().toString(36).substr(2, 7)}##`;
-            protectMap.set(id, match);
-            return id;
+        const compatRegex = new RegExp(`(compatible\\s+with|for|fits|replacement\\s+for)\\s+(${brands.join('|')})`, 'gi');
+        processed = processed.replace(compatRegex, (m) => {
+            const id = `##C${Math.random().toString(36).substr(2, 5)}##`;
+            protectMap.set(id, m); return id;
         });
-
-        // 3. 执行品牌词清理
         const brandRegex = new RegExp(`\\b(${brands.join('|')})\\b`, 'gi');
-        processed = processed.replace(brandRegex, "");
-
-        // 4. 还原所有保护内容
-        protectMap.forEach((val, id) => {
-            processed = processed.replace(id, val);
-        });
-
+        processed = processed.replace(brandRegex, "").replace(id, v => protectMap.get(id));
+        protectMap.forEach((v, id) => processed = processed.replace(id, v));
         return processed.replace(/\s+/g, ' ').trim();
     }
 
-    // --- AI 核心：标准 API 请求适配器 ---
-    async function callAiApi(content) {
-        const providerConfigs = {
-            deepseek: { url: 'https://api.deepseek.com/v1/chat/completions' },
-            openrouter: { url: 'https://openrouter.ai/api/v1/chat/completions' },
-            openai: { url: 'https://api.openai.com/v1/chat/completions' }
-        };
-
-        const targetUrl = providerConfigs[config.apiProvider].url;
-        const systemPrompt = "你是一个亚马逊 Listing 合规专家。请清洗文案中的违规品牌词，但务必保留兼容性描述（如 for XXX）。直接输出清洗后的文本，保留原有 HTML 标签，不要多余解释。";
-
-        try {
-            const response = await fetch(targetUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${config.apiKey}`,
-                    'HTTP-Referer': 'https://github.com/ShawnHo/AmazonTools', // OpenRouter 必要
-                },
-                body: JSON.stringify({
-                    model: config.apiModel,
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: `请清洗以下文案：\n\n${content}` }
-                    ],
-                    temperature: 0.3
-                })
-            });
-
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message || "API 报错");
-            return data.choices[0].message.content;
-        } catch (err) {
-            console.error(err);
-            throw err;
-        }
-    }
-
-    // --- 界面交互 ---
+    // --- AI 逻辑 ---
     async function execClean(mode) {
         const input = document.getElementById('textInput').value.trim();
         const outBox = document.getElementById('textOutput');
         if (!input || isProcessing) return;
-
-        if (mode === 'rule') {
-            outBox.innerText = advancedRuleClean(input);
-        } else {
+        if (mode === 'rule') { outBox.innerText = advancedRuleClean(input); } 
+        else {
             setAiLoading(true);
             try {
-                const result = await callAiApi(input);
-                outBox.innerHTML = `<div class="ai-badge">${config.apiModel}</div>${result}`;
-            } catch (e) {
-                outBox.innerHTML = `<span style="color:var(--apple-red)">❌ 错误: ${e.message}</span>`;
-            } finally {
-                setAiLoading(false);
-            }
+                const url = config.apiProvider === 'deepseek' ? 'https://api.deepseek.com/v1/chat/completions' : 
+                            config.apiProvider === 'openrouter' ? 'https://openrouter.ai/api/v1/chat/completions' : 'https://api.openai.com/v1/chat/completions';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                    body: JSON.stringify({
+                        model: config.apiModel,
+                        messages: [{role:"system", content:"亚马逊Listing清理专家，剔除违规品牌词但保留兼容性描述。直接输出结果。"}, {role:"user", content:input}]
+                    })
+                });
+                const data = await response.json();
+                outBox.innerHTML = `<div class="ai-badge">${config.apiModel}</div>${data.choices[0].message.content}`;
+            } catch (e) { outBox.innerHTML = `❌ 错误: ${e.message}`; }
+            finally { setAiLoading(false); }
         }
     }
 
-    function setAiLoading(loading) {
-        isProcessing = loading;
-        const btn = document.getElementById('btnAiExec');
-        const text = document.getElementById('aiBtnText');
-        btn.disabled = loading;
-        text.innerHTML = loading ? `<div class="spinner"></div> 正在思考...` : `🤖 AI 深度清理`;
+    function setAiLoading(l) {
+        isProcessing = l;
+        document.getElementById('btnAiExec').disabled = l;
+        document.getElementById('aiBtnText').innerHTML = l ? `<div class="spinner"></div> 思考中...` : `🤖 AI 深度清理`;
     }
 
-    // --- Excel 处理保持原有高效结构 ---
-    function handleExcel(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
+    // --- Excel 基础功能 ---
+    function handleExcel(f) {
+        const r = new FileReader();
+        r.onload = (e) => {
             const wb = XLSX.read(e.target.result, {type: 'binary'});
             rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            renderTable();
+            const keys = Object.keys(rawData[0]);
+            document.getElementById('tHead').innerHTML = keys.map(k => `<th>${k}</th>`).join('');
+            document.getElementById('tBody').innerHTML = rawData.slice(0, 10).map(row => `<tr>${keys.map(k => `<td>${String(row[k]).substring(0,30)}</td>`).join('')}</tr>`).join('');
+            document.getElementById('btnTableExec').disabled = false;
         };
-        reader.readAsBinaryString(file);
-    }
-
-    function renderTable() {
-        if(!rawData.length) return;
-        const keys = Object.keys(rawData[0]);
-        document.getElementById('tHead').innerHTML = keys.map(k => `<th>${k}</th>`).join('');
-        document.getElementById('tBody').innerHTML = rawData.slice(0, 15).map(row => 
-            `<tr>${keys.map(k => `<td style="padding:10px; border-bottom:1px solid #eee;">${String(row[k] || '').substring(0, 40)}...</td>`).join('')}</tr>`
-        ).join('');
-        document.getElementById('btnTableExec').disabled = false;
-        document.getElementById('batchCount').innerText = `(解析成功: ${rawData.length} 行)`;
+        r.readAsBinaryString(f);
     }
 
     function execTableClean() {
         rawData = rawData.map(row => {
-            const newRow = {...row};
-            for(let k in newRow) if(typeof newRow[k] === 'string') newRow[k] = advancedRuleClean(newRow[k]);
-            return newRow;
+            const nr = {...row};
+            for(let k in nr) if(typeof nr[k] === 'string') nr[k] = advancedRuleClean(nr[k]);
+            return nr;
         });
         document.getElementById('btnExport').disabled = false;
-        alert("批量规则清洗已完成！(AI 批量因成本较高需单独开发流水线)");
+        alert("批量清洗完成！");
     }
 
     function exportRes() {
         const ws = XLSX.utils.json_to_sheet(rawData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Cleaned");
-        XLSX.writeFile(wb, `Cleaned_Listing_${new Date().toLocaleDateString()}.xlsx`);
+        XLSX.writeFile(wb, `Cleaned_${new Date().getTime()}.xlsx`);
     }
 
     function openModal() { document.getElementById('modal').style.display = 'flex'; }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    function clearAll() { document.getElementById('textInput').value = ""; document.getElementById('textOutput').innerHTML = "等待指令..."; }
+    function clearAll() { document.getElementById('textInput').value = ""; document.getElementById('textOutput').innerHTML = ""; }
     function toggleProvider() {
         const p = document.getElementById('apiProvider').value;
-        const modelInput = document.getElementById('apiModel');
-        if(p === 'deepseek') modelInput.value = 'deepseek-chat';
-        if(p === 'openai') modelInput.value = 'gpt-4o-mini';
-        if(p === 'openrouter') modelInput.value = 'google/gemini-2.0-flash-001';
+        document.getElementById('apiModel').value = p === 'deepseek' ? 'deepseek-chat' : p === 'openai' ? 'gpt-4o-mini' : 'google/gemini-2.0-flash-001';
     }
 </script>
 </body>
