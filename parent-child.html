@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>亚马逊 SKU 父体就地生成工具</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://www.apple.com/wss/fonts?families=SF+Pro,v3">
+    <style>
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-blue: #0066cc;
+            --apple-red: #ff3b30;
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--apple-bg);
+            font-family: "SF Pro SC", "SF Pro Display", "PingFang SC", sans-serif;
+            color: #1d1d1f;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        nav {
+            width: 100%; height: 44px;
+            background: rgba(251, 251, 253, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            position: fixed; top: 0; z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .container { max-width: 850px; margin: 120px auto; padding: 0 20px; text-align: center; }
+        h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 12px; }
+        p.subtitle { font-size: 19px; color: #86868b; margin-bottom: 40px; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.04);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .upload-zone {
+            border: 2px dashed #d2d2d7;
+            border-radius: 16px;
+            padding: 60px 20px;
+            cursor: pointer;
+            transition: all 0.3s var(--ease);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .upload-zone:hover { border-color: var(--apple-blue); background: rgba(255,255,255,0.8); }
+
+        .btn-group { margin-top: 30px; display: none; gap: 15px; justify-content: center; }
+        .apple-btn {
+            background: var(--apple-blue);
+            color: white; padding: 12px 32px;
+            border-radius: 980px; font-size: 17px;
+            border: none; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .apple-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .apple-btn.warning { background: var(--apple-red); }
+
+        #status { margin-top: 25px; font-size: 14px; line-height: 1.6; color: #1d1d1f; }
+        .error-log { color: var(--apple-red); text-align: left; background: #fff; padding: 15px; border-radius: 12px; margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<nav> 亚马逊运营助手</nav>
+
+<div class="container">
+    <h1>父体 SKU 就地生成</h1>
+    <p class="subtitle">支持断行校验与批量 Sheet 处理</p>
+    
+    <div class="glass-card">
+        <div class="upload-zone" onclick="document.getElementById('fileIn').click()">
+            <p id="fileNameDisplay" style="font-size: 17px; color: #424245;">选择或拖拽 .xlsx 表格</p>
+            <input type="file" id="fileIn" accept=".xlsx, .xls" style="display:none">
+        </div>
+        
+        <div id="status">等待上传文件...</div>
+        <div id="errorLog" class="error-log"></div>
+
+        <div class="btn-group" id="btnGroup">
+            <button class="apple-btn" onclick="handleLogic()">开始批量处理所有 Sheet</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let workbookData = null;
+    let originalFileName = "";
+
+    document.getElementById('fileIn').onchange = function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        originalFileName = file.name;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const data = new Uint8Array(ev.target.result);
+            workbookData = XLSX.read(data, {type: 'array'});
+            document.getElementById('fileNameDisplay').innerText = "已加载: " + originalFileName;
+            document.getElementById('btnGroup').style.display = "flex";
+            document.getElementById('status').innerText = `已识别到 ${workbookData.SheetNames.length} 个工作表(Sheet)。`;
+            checkFragmentation(); // 预检查断行
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    // 逻辑 1: 断行校验 (Fragmentation Check)
+    function checkFragmentation() {
+        let fragmentedSPUs = [];
+        const logBox = document.getElementById('errorLog');
+        logBox.style.display = "none";
+        logBox.innerHTML = "<strong>注意：检测到以下 SPU 存在断行（行不连续）：</strong><br>";
+
+        workbookData.SheetNames.forEach(name => {
+            const rows = XLSX.utils.sheet_to_json(workbookData.Sheets[name], { header: 1 });
+            if (rows.length < 2) return;
+            
+            let spuIdx = rows[0].findIndex(c => String(c).trim().toUpperCase() === "SPU");
+            if (spuIdx === -1) return;
+
+            let spuLastSeenRow = {}; // 记录上次出现的行号
+            let seenSpus = new Set();
+            
+            for (let i = 1; i < rows.length; i++) {
+                let spu = String(rows[i][spuIdx] || "").trim();
+                if (!spu) continue;
+
+                if (seenSpus.has(spu)) {
+                    // 如果这次出现的行号和上次差值 > 1，说明断行了
+                    if (i - spuLastSeenRow[spu] > 1) {
+                        if (!fragmentedSPUs.includes(spu)) fragmentedSPUs.push(spu);
+                    }
+                }
+                seenSpus.add(spu);
+                spuLastSeenRow[spu] = i;
+            }
+        });
+
+        if (fragmentedSPUs.length > 0) {
+            logBox.style.display = "block";
+            logBox.innerHTML += fragmentedSPUs.join(", ") + "<br>建议手动调整表格顺序，否则同一个 SPU 会生成多个父体行。";
+        }
+    }
+
+    // 逻辑 2: 批量处理所有 Sheet 并导出
+    function handleLogic() {
+        const newWB = XLSX.utils.book_new();
+
+        workbookData.SheetNames.forEach(name => {
+            const sheet = workbookData.Sheets[name];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            if (rows.length < 2) {
+                XLSX.utils.book_append_sheet(newWB, sheet, name);
+                return;
+            }
+
+            const header = rows[0];
+            let skuIdx = header.findIndex(c => String(c).trim().toUpperCase() === "SKU");
+            let spuIdx = header.findIndex(c => String(c).trim().toUpperCase() === "SPU");
+
+            if (skuIdx === -1 || spuIdx === -1) {
+                XLSX.utils.book_append_sheet(newWB, sheet, name);
+                return;
+            }
+
+            const newRows = [header];
+            const spuInserted = new Set(); 
+            let lastProcessedSpu = null; // 用于处理连续组
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const spuValue = String(row[spuIdx] || "").trim();
+
+                // 核心改动：只有当前行 SPU 与上一行不同，且这个 SPU 没被处理过时，才插父行
+                // 如果发生了“断行”，由于 Set 机制，它在第二次断行处也会插父行（这是安全的，防止漏掉）
+                if (spuValue && spuValue !== lastProcessedSpu) {
+                    if (!spuInserted.has(spuValue)) {
+                        const parentRow = new Array(header.length).fill("");
+                        parentRow[skuIdx] = spuValue;
+                        newRows.push(parentRow);
+                        spuInserted.add(spuValue);
+                    }
+                }
+                newRows.push(row);
+                lastProcessedSpu = spuValue;
+            }
+
+            const newSheet = XLSX.utils.aoa_to_sheet(newRows);
+            XLSX.utils.book_append_sheet(newWB, newSheet, name);
+        });
+
+        XLSX.writeFile(newWB, "Processed_" + originalFileName);
+        document.getElementById('status').innerText = "✅ 所有 Sheet 处理完成，已自动下载。";
+    }
+</script>
+</body>
+</html>
