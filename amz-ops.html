@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Ops - 样式增强版</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <style>
+        :root {
+            --apple-blue: #0066cc;
+            --apple-bg: #f5f5f7;
+            --apple-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body { margin: 0; background-color: var(--apple-bg); font-family: -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+        nav { position: fixed; top: 0; width: 100%; height: 44px; background: rgba(251, 252, 253, 0.8); backdrop-filter: saturate(180%) blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.1); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .container { max-width: 800px; margin: 100px auto; padding: 0 20px; }
+        .upload-section { background: #fff; border-radius: 20px; padding: 40px; text-align: center; border: 2px dashed #d2d2d7; cursor: pointer; transition: 0.3s; }
+        .upload-section:hover { border-color: var(--apple-blue); background: #fafafa; }
+        .action-group { margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn { padding: 18px; border-radius: 12px; border: none; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .btn-primary { background: var(--apple-blue); color: #fff; grid-column: span 2; }
+        .btn-secondary { background: #fff; color: #1d1d1f; border: 1px solid #d2d2d7; }
+        .btn:disabled { background: #e8e8ed; color: #a1a1a6; cursor: not-allowed; }
+        #status { margin-top: 20px; text-align: center; font-size: 13px; color: #0066cc; }
+    </style>
+</head>
+<body>
+
+<nav><div class="logo">Amazon Ops - 自动标黄版</div></nav>
+
+<div class="container">
+    <div class="upload-section" id="drop-zone">
+        <h2>导入 Excel 表格</h2>
+        <p>支持自动识别父子体并填充黄色背景</p>
+        <input type="file" id="file-input" accept=".xlsx, .xls" hidden>
+    </div>
+
+    <div id="status">等待导入...</div>
+
+    <div class="action-group">
+        <button class="btn btn-secondary" id="process-parent" disabled>1. 筛选有销量父体 (并标黄)</button>
+        <button class="btn btn-secondary" id="process-oversize" disabled>2. 清理超规产品</button>
+        <button class="btn btn-primary" id="export-btn" disabled>3. 导出带颜色表格</button>
+    </div>
+</div>
+
+<script>
+    let processedData = []; // 存储带样式的数据对象
+    let header = [];
+    let currentFileName = "";
+
+    const colToIdx = (name) => {
+        let n = 0;
+        for(let i=0; i<name.length; i++) n = n*26 + name.charCodeAt(i)-64;
+        return n - 1;
+    };
+
+    const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        currentFileName = file.name.replace(/\.[^/.]+$/, "");
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const ws = workbook.Sheets[workbook.SheetNames[0]];
+            // 读取为二维数组
+            const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+            header = raw[0];
+            // 将纯数据转为带样式的对象格式
+            processedData = raw.slice(1).map(row => row.map(cell => ({ v: cell, s: {} })));
+            document.getElementById('status').innerText = "读取成功，准备处理";
+            document.querySelectorAll('.btn').forEach(b => b.disabled = false);
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    // --- 功能 1：筛选父体并填充黄色 ---
+    document.getElementById('process-parent').onclick = () => {
+        const idxB = colToIdx('B');
+        const idxC = colToIdx('C');
+        const idxBX = colToIdx('BX');
+        
+        const groups = {};
+        processedData.forEach(row => {
+            const spu = row[idxC]?.v || "Empty";
+            if (!groups[spu]) groups[spu] = [];
+            groups[spu].push(row);
+        });
+
+        let result = [];
+        Object.keys(groups).forEach(spu => {
+            const children = groups[spu];
+            // 判定是否有销量 (BX列非空非0)
+            const hasSales = children.some(r => r[idxBX]?.v !== "" && r[idxBX]?.v != 0);
+
+            // 创建父体行对象
+            let parentRow = header.map(() => ({ v: "", s: {} }));
+            parentRow[idxB].v = spu;
+
+            if (hasSales) {
+                const yellowStyle = { fill: { fgColor: { rgb: "FFFF00" } } };
+                // 父行标黄
+                parentRow.forEach(cell => cell.s = yellowStyle);
+                // 所有子行标黄
+                children.forEach(childRow => {
+                    childRow.forEach(cell => cell.s = yellowStyle);
+                });
+            }
+
+            result.push(parentRow);
+            result = result.concat(children);
+        });
+
+        processedData = result;
+        document.getElementById('status').innerText = "已识别父子体，销量项已标记黄色背景";
+    };
+
+    // --- 功能 2：超规清理 ---
+    document.getElementById('process-oversize').onclick = () => {
+        const idxM = colToIdx('M'), idxP = colToIdx('P'), idxAR = colToIdx('AR'), idxCC = colToIdx('CC'), idxDH = colToIdx('DH');
+
+        for (let i = processedData.length - 1; i >= 0; i--) {
+            let row = processedData[i];
+            // P列逻辑
+            if (!row[idxP].v || row[idxP].v == 0) row[idxP].v = row[idxM].v;
+            // 过滤
+            if (parseFloat(row[idxP].v) > 2000 || parseFloat(row[idxAR].v) > 200 || parseFloat(row[idxCC].v) > 200) {
+                processedData.splice(i, 1); continue;
+            }
+            // DH判空
+            if (row[idxDH].v === undefined || row[idxDH].v === null || row[idxDH].v.toString().trim() === "") {
+                processedData.splice(i, 1);
+            }
+        }
+        document.getElementById('status').innerText = "超规产品清理完成";
+    };
+
+    // --- 功能 3：带颜色导出 ---
+    document.getElementById('export-btn').onclick = () => {
+        const wb = XLSX.utils.book_new();
+        // 将带样式的对象数组转回 Sheet
+        const ws = XLSX.utils.aoa_to_sheet([header, ...processedData.map(row => row.map(c => c))]);
+        
+        // 重新注入样式数据（SheetJS aoa_to_sheet 有时会丢失对象属性）
+        const finalData = [header.map(h => ({v: h, s: {}})), ...processedData];
+        const range = { s: {c:0, r:0}, e: {c:header.length-1, r:finalData.length-1} };
+        const sheet = { '!ref': XLSX.utils.encode_range(range) };
+        
+        finalData.forEach((row, rIdx) => {
+            row.forEach((cell, cIdx) => {
+                const ref = XLSX.utils.encode_col(cIdx) + (rIdx + 1);
+                sheet[ref] = cell;
+            });
+        });
+
+        XLSX.utils.book_append_sheet(wb, sheet, "Result");
+        XLSX.writeFile(wb, `${currentFileName}_处理完成.xlsx`);
+        document.getElementById('status').innerText = "导出成功！请检查表格颜色";
+    };
+</script>
+</body>
+</html>
