@@ -14,7 +14,6 @@
             --radius-main: 22px;
         }
 
-        /* 强制全局字体统一，包括输入控件 */
         body, input, textarea, select, button {
             font-family: 'Inter', -apple-system, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -26,7 +25,6 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- 导航栏 --- */
         .nav {
             height: 52px; background: rgba(251, 251, 253, 0.8);
             backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -39,7 +37,6 @@
         .status-off { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
         .status-on { background: rgba(52, 199, 89, 0.1); color: #34c759; }
 
-        /* --- 主布局 --- */
         .main-content {
             flex: 1; display: grid; grid-template-columns: 1.1fr 0.9fr;
             gap: 24px; padding: 20px 24px; max-width: 1600px; margin: 0 auto;
@@ -48,7 +45,6 @@
 
         .workspace { display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 0; }
 
-        /* Prompt 区域 */
         .prompt-container { background: #fff; border-radius: var(--radius-main); padding: 20px; flex-shrink: 0; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
         .prompt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .input-group { display: flex; flex-direction: column; gap: 4px; }
@@ -60,14 +56,16 @@
         }
         .apple-input:focus { border-color: var(--apple-blue); background: #fff; }
 
-        .toolbar { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .toolbar { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; align-items: center; }
         .btn { padding: 8px 16px; border-radius: 18px; font-size: 12px; font-weight: 500; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
         .btn-primary { background: var(--apple-blue); color: #fff; }
         .btn-secondary { background: #e8e8ed; color: #1d1d1f; }
         .btn-danger { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
         .btn-export { background: #34c759; color: #fff; margin-left: auto; }
 
-        /* 表格区域 */
+        /* 总用时统计样式 */
+        #totalTimer { font-size: 11px; color: var(--apple-gray); font-weight: 600; padding: 0 10px; }
+
         .table-section {
             flex: 1; background: #fff; border-radius: var(--radius-main);
             overflow: hidden; display: flex; flex-direction: column;
@@ -76,11 +74,15 @@
         .table-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
         th { background: #fafafa; padding: 12px; text-align: left; position: sticky; top: 0; z-index: 5; border-bottom: 1px solid #eee; color: var(--apple-gray); }
-        td { padding: 12px; border-bottom: 1px solid #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        td { padding: 12px; border-bottom: 1px solid #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
         tr:hover { background: #fbfbff; cursor: pointer; }
         tr.selected { background: rgba(0, 113, 227, 0.05); }
 
-        /* 右侧预览面板适配高度 */
+        .time-tag { 
+            font-size: 9px; color: #0071e3; background: rgba(0, 113, 227, 0.1); 
+            padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block;
+        }
+
         .preview-panel {
             background: #fff; border-radius: var(--radius-main); padding: 24px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.04); display: flex; flex-direction: column; 
@@ -91,7 +93,6 @@
         .listing-label { font-size: 11px; font-weight: 700; color: var(--apple-gray); margin-bottom: 8px; text-transform: uppercase; border-left: 3px solid var(--apple-blue); padding-left: 8px; }
         .listing-val { font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; background: #f9f9fb; padding: 14px; border-radius: 12px; border: 1px solid #f0f0f2; }
 
-        /* 弹窗 */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal { background: #fff; width: 420px; border-radius: 24px; padding: 32px; position: relative; }
         .modal-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #d2d2d7; margin-top: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 13px; outline: none; }
@@ -124,6 +125,7 @@
                 <button class="btn btn-secondary" onclick="downloadTemplate()">📥 模板下载</button>
                 <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📤 上传 Excel</button>
                 <button id="runBtn" class="btn btn-primary" onclick="handleRun()">🚀 开始优化</button>
+                <span id="totalTimer"></span>
                 <button class="btn btn-danger" onclick="clearData()">🧹 清除数据</button>
                 <button id="exportBtn" class="btn btn-export" style="display:none" onclick="exportExcel()">💾 导出结果</button>
                 <input type="file" id="fileInput" hidden accept=".xlsx" onchange="handleFile(this.files[0])">
@@ -136,8 +138,8 @@
                     <thead>
                         <tr>
                             <th style="width: 60px; text-align: center;">序号</th>
-                            <th style="width: 40%;">原始标题</th>
-                            <th style="width: 40%;">实时优化预览</th>
+                            <th style="width: 35%;">原始标题</th>
+                            <th style="width: 45%;">实时优化预览</th>
                             <th style="width: 15%;">处理状态</th>
                         </tr>
                     </thead>
@@ -248,7 +250,10 @@
             <tr onclick="showFullPreview(${i})" id="row-${i}">
                 <td style="text-align:center; color:var(--apple-gray); font-size:11px; font-weight:700;">${i+1}</td>
                 <td>${row.title || '-'}</td>
-                <td id="opt-title-${i}">${row.opt_title || '-'}</td>
+                <td>
+                    <div id="opt-title-${i}">${row.opt_title || '-'}</div>
+                    <div id="time-cost-${i}"></div>
+                </td>
                 <td id="status-${i}"><span class="status-tag tag-waiting">等待任务</span></td>
             </tr>
         `).join('');
@@ -260,61 +265,100 @@
         document.getElementById('previewBody').innerHTML = `<div style="text-align:center; color:#c1c1c6; margin-top:150px;">数据已清除</div>`;
         document.getElementById('exportBtn').style.display = 'none';
         document.getElementById('fileInput').value = '';
+        document.getElementById('totalTimer').innerText = '';
     }
 
+    // --- 核心优化：并发调度与计时逻辑 ---
     async function handleRun() {
         if(!config.key) return toggleModal(true);
         const btn = document.getElementById('runBtn');
-        btn.disabled = true; btn.innerText = "批量处理中...";
+        const timerSpan = document.getElementById('totalTimer');
+        btn.disabled = true;
+        
+        const globalStartTime = Date.now();
+        // 实时总计时器
+        const globalInterval = setInterval(() => {
+            const elapsed = ((Date.now() - globalStartTime) / 1000).toFixed(1);
+            timerSpan.innerText = `⏳ 累计已用时: ${elapsed}s`;
+        }, 100);
 
-        const targetCols = ["title", "search terms", "bullet point 1", "bullet point 2", "bullet point 3", "bullet point 4", "bullet point 5", "description"];
+        const CONCURRENCY_LIMIT = 10; // 同时处理 10 行
+        let activeTasks = 0;
+        let currentIndex = 0;
 
-        for(let i=0; i<tableData.length; i++) {
-            document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag" style="background:#e0f2ff; color:#0071e3;">优化中...</span>`;
-            
-            const tasks = targetCols.map(col => {
-                const cellValue = tableData[i][col];
-                const baseTitle = tableData[i]['title'] || "";
-                
-                let userExtra = "";
-                if(col === 'title') userExtra = document.getElementById('p_title').value;
-                else if(col === 'search terms') userExtra = document.getElementById('p_st').value;
-                else if(col === 'description') userExtra = document.getElementById('p_desc').value;
-                else userExtra = document.getElementById('p_bp').value;
-
-                let finalPrompt = "";
-                const baseRule = SYSTEM_BASE_PROMPTS[col === 'title' ? 'title' : (col === 'search terms' ? 'st' : (col === 'description' ? 'desc' : 'bp'))];
-                
-                // 针对 Bullet Point 的空值做极限制约
-                if(col.includes('bullet point')) {
-                    const bpIndex = col.match(/\d/)[0];
-                    if(!cellValue) {
-                        finalPrompt = `Based on Title [${baseTitle}], CREATE ONLY ONE SINGLE Bullet Point for point NO.${bpIndex}. Do NOT generate all five points. Only output the text for this one point. Requirement: ${baseRule}. Extra: ${userExtra}`;
-                    } else {
-                        finalPrompt = `Optimize this specific Bullet Point: [${cellValue}]. Reference Title: [${baseTitle}]. Only output the optimized text for this specific point. Requirement: ${baseRule}. Extra: ${userExtra}`;
+        return new Promise((resolve) => {
+            const next = async () => {
+                if (currentIndex >= tableData.length) {
+                    if (activeTasks === 0) {
+                        clearInterval(globalInterval);
+                        const finalTime = ((Date.now() - globalStartTime) / 1000).toFixed(1);
+                        timerSpan.innerText = `✅ 全部完成！总耗时: ${finalTime}s`;
+                        btn.disabled = false;
+                        document.getElementById('exportBtn').style.display = 'block';
+                        resolve();
                     }
-                } else {
-                    if(!cellValue) {
-                        finalPrompt = `Based on Title [${baseTitle}], CREATE the ${col}. Requirement: ${baseRule}. Extra: ${userExtra}`;
-                    } else {
-                        finalPrompt = `Optimize the following ${col}: [${cellValue}]. Reference Title: [${baseTitle}]. Requirement: ${baseRule}. Extra: ${userExtra}`;
-                    }
+                    return;
                 }
 
-                // 强制全英输出约束
-                finalPrompt += "\n\nCRITICAL: Strictly NO Chinese responses!!! All output must be in English.";
+                const i = currentIndex++;
+                activeTasks++;
+                processSingleRow(i).finally(() => {
+                    activeTasks--;
+                    next();
+                });
 
-                return callAI(finalPrompt).then(res => {
-                    tableData[i]['opt_'+col] = res;
-                    if(col === 'title') document.getElementById(`opt-title-${i}`).innerText = res;
-                }).catch(err => console.error(err));
+                if (activeTasks < CONCURRENCY_LIMIT) next();
+            };
+            next();
+        });
+    }
+
+    async function processSingleRow(i) {
+        const rowStartTime = Date.now();
+        document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag" style="background:#e0f2ff; color:#0071e3;">优化中...</span>`;
+        
+        const targetCols = ["title", "search terms", "bullet point 1", "bullet point 2", "bullet point 3", "bullet point 4", "bullet point 5", "description"];
+        
+        // 这一行内的所有字段并行请求
+        const tasks = targetCols.map(col => {
+            const cellValue = tableData[i][col];
+            const baseTitle = tableData[i]['title'] || "";
+            let userExtra = "";
+            if(col === 'title') userExtra = document.getElementById('p_title').value;
+            else if(col === 'search terms') userExtra = document.getElementById('p_st').value;
+            else if(col === 'description') userExtra = document.getElementById('p_desc').value;
+            else userExtra = document.getElementById('p_bp').value;
+
+            const baseRule = SYSTEM_BASE_PROMPTS[col === 'title' ? 'title' : (col === 'search terms' ? 'st' : (col === 'description' ? 'desc' : 'bp'))];
+            let finalPrompt = "";
+            
+            if(col.includes('bullet point')) {
+                const bpIndex = col.match(/\d/)[0];
+                finalPrompt = !cellValue ? 
+                    `Based on Title [${baseTitle}], CREATE ONLY ONE SINGLE Bullet Point for point NO.${bpIndex}. Requirement: ${baseRule}. Extra: ${userExtra}` :
+                    `Optimize this specific Bullet Point: [${cellValue}]. Reference Title: [${baseTitle}]. Requirement: ${baseRule}. Extra: ${userExtra}`;
+            } else {
+                finalPrompt = !cellValue ? 
+                    `Based on Title [${baseTitle}], CREATE the ${col}. Requirement: ${baseRule}. Extra: ${userExtra}` :
+                    `Optimize the following ${col}: [${cellValue}]. Reference Title: [${baseTitle}]. Requirement: ${baseRule}. Extra: ${userExtra}`;
+            }
+            finalPrompt += "\n\nCRITICAL: Strictly NO Chinese responses!!! All output must be in English.";
+
+            return callAI(finalPrompt).then(res => {
+                tableData[i]['opt_'+col] = res;
+                if(col === 'title') document.getElementById(`opt-title-${i}`).innerText = res;
             });
+        });
 
+        try {
             await Promise.all(tasks);
+            const costSec = ((Date.now() - rowStartTime) / 1000).toFixed(1);
+            tableData[i].cost_time = costSec;
+            document.getElementById(`time-cost-${i}`).innerHTML = `<span class="time-tag">⏱️ 耗时 ${costSec}s</span>`;
             document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag tag-done">已完成</span>`;
+        } catch (e) {
+            document.getElementById(`status-${i}`).innerHTML = `<span class="status-tag" style="background:#fff2f0; color:#ff4d4f;">失败</span>`;
         }
-        btn.disabled = false; btn.innerText = "🚀 开始优化";
-        document.getElementById('exportBtn').style.display = 'block';
     }
 
     async function callAI(prompt) {
@@ -325,7 +369,6 @@
             "Doubao": "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
         };
         const url = urlMap[config.vendor] || urlMap["OpenAI"];
-
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.key}` },
@@ -345,6 +388,7 @@
         const r = tableData[i];
         const box = document.getElementById('previewBody');
         box.innerHTML = `
+            <div style="margin-bottom:20px;">${r.cost_time ? `<span class="time-tag">该条优化耗时：${r.cost_time} 秒</span>` : ''}</div>
             <div class="listing-item"><div class="listing-label">Optimized Title</div><div class="listing-val">${r.opt_title || '-'}</div></div>
             <div class="listing-item"><div class="listing-label">Search Terms</div><div class="listing-val">${r['opt_search terms'] || '-'}</div></div>
             <div class="listing-item">
@@ -368,6 +412,5 @@
         XLSX.writeFile(wb, `Listing_Batch_${new Date().getTime()}.xlsx`);
     }
 </script>
-
 </body>
 </html>
